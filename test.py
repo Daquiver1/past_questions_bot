@@ -1,6 +1,9 @@
 # TODO: MAKE YOUR CODE OOP FORMAT
 # TODO: CHANGE THE REFERENCES TO XPATH
 # TODO: COMMENT YOUR CODE
+# TODO: INCLUDE THE FILES IN THE NEXT PAGES
+# TODO: ADD ERROR HANDLING
+# TODO: MODUALRIZE YOUR CODE, THE BS4 AND SELENIUM
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -27,9 +30,8 @@ pwd.send_keys(password)
 login.send_keys(user_name)
 search = driver.find_element_by_name("keywords")
 search_b = driver.find_element_by_name("search")
-search.send_keys(name)
+search.send_keys(f'"{name}"') # Double Quotes give accurate queries
 search_b.click()
 
-
 time.sleep(50)
-#driver.close()f
+#driver.close()
