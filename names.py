@@ -43,8 +43,10 @@ def get_link(link):
 	pasco1 = soup.find_all("a", class_ = "titleField")
 	links = {}
 	for i in range(len(pasco1)):
-	    links[i] = pasco1[i]["href"]
+	    links[i] = "https://balme.ug.edu.gh" + pasco1[i]["href"]
 
-	print(links)
-	
+	return links
 
+#get_link("https://balme.ug.edu.gh/past.exampapers/index.php?keywords=%22ugbs+104%22+&search=search")
+name = "yaw 1234"
+print(name.upper())
