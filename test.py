@@ -10,7 +10,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
-from names import pasco_displayed
+from names import pasco_displayed, get_link
 
 with open("credentials.txt", "r") as cred:
 	user_name = cred.readline()
@@ -35,13 +35,11 @@ search_b = driver.find_element_by_name("search")
 search.send_keys(f'"{name}"') # Double Quotes give accurate queries
 search_b.click()
 pasco_displayed(driver.current_url)
+get_link(driver.current_url)
 
 
 
-choice = input("Please enter your choice: ")
-if choice == 1:
-	pass
-
+print(links)
 # TODO: Link the pdf chosen to the one clicked
 
 

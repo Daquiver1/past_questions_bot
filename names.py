@@ -8,7 +8,7 @@ def pasco_displayed(link):
 	A function to retrieve the names, year and semester of 
 	past questions displayed.
 
-	inputs: A website address
+	inputs: A website address.
 	output: A print out of the name, year and semester of
 			past question.
 	"""
@@ -27,4 +27,24 @@ def pasco_displayed(link):
 	    print(year1.get_text())
 	    print(sem1.get_text())
 	    print()
+
+def get_link(link):
+	""""
+	A function to retrieve the links of all the past questions displayed.
+
+	inputs: The website address.
+	output: A dictionary containing the index and the past question link.
+	"""
+
+	url = link
+	page = requests.get(url)
+
+	soup = BeautifulSoup(page.content, "lxml")
+	pasco1 = soup.find_all("a", class_ = "titleField")
+	links = {}
+	for i in range(len(pasco1)):
+	    links[i] = pasco1[i]["href"]
+
+	print(links)
+	
 
