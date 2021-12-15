@@ -36,6 +36,12 @@ search.send_keys(f'"{name}"') # Double Quotes give accurate queries
 search_b.click()
 pasco_displayed(driver.current_url)
 
+
+
+choice = input("Please enter your choice: ")
+if choice == 1:
+	pass
+
 # TODO: Link the pdf chosen to the one clicked
 
 

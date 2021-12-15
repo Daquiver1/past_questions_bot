@@ -27,3 +27,4 @@ def pasco_displayed(link):
 	    print(year1.get_text())
 	    print(sem1.get_text())
 	    print()
+
