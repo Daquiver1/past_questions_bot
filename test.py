@@ -1,18 +1,16 @@
 # TODO: MAKE YOUR CODE OOP FORMAT
-# TODO: CHANGE THE REFERENCES TO XPATH
 # TODO: COMMENT YOUR CODE
 # TODO: INCLUDE THE FILES IN THE NEXT PAGES
 # TODO: ADD ERROR HANDLING
 # TODO: MODUALRIZE YOUR CODE, THE BS4 AND SELENIUM
 # TODO: TRACK THE EFFICIENCY AND MAKE YOUR CODE MORE EFFICIENT.
+# TODO: USE THE UPDATED VERSION OF SELENIUM
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 from names import pasco_displayed
-from bs4 import BeautifulSoup
-import requests
 
 with open("credentials.txt", "r") as cred:
 	user_name = cred.readline()
@@ -31,14 +29,16 @@ driver.get(url)
 login = driver.find_element_by_name("memberID")
 pwd = driver.find_element_by_name("memberPassWord")
 pwd.send_keys(password)
-login.send_keys(user_name)
+login.send_keys(user_name) # The newline is interpreted as enter
 search = driver.find_element_by_name("keywords")
 search_b = driver.find_element_by_name("search")
 search.send_keys(f'"{name}"') # Double Quotes give accurate queries
 search_b.click()
 pasco_displayed(driver.current_url)
 
+# TODO: Link the pdf chosen to the one clicked
+
 
 
 time.sleep(50)
-#driver.close()
+#driver.quit()

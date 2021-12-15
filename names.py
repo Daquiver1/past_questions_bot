@@ -1,3 +1,5 @@
+# TODO: CHANGE THE VARIABLE NAMES
+
 from bs4 import BeautifulSoup
 import requests
 
@@ -25,8 +27,3 @@ def pasco_displayed(link):
 	    print(year1.get_text())
 	    print(sem1.get_text())
 	    print()
-
-
-
-#url = "https://balme.ug.edu.gh/past.exampapers/index.php?keywords=%22ugbs+104%22+&search=search"
-#pasco_displayed(url)
