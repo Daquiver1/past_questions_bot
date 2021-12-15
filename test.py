@@ -4,11 +4,15 @@
 # TODO: INCLUDE THE FILES IN THE NEXT PAGES
 # TODO: ADD ERROR HANDLING
 # TODO: MODUALRIZE YOUR CODE, THE BS4 AND SELENIUM
+# TODO: TRACK THE EFFICIENCY AND MAKE YOUR CODE MORE EFFICIENT.
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+from names import pasco_displayed
+from bs4 import BeautifulSoup
+import requests
 
 with open("credentials.txt", "r") as cred:
 	user_name = cred.readline()
@@ -32,6 +36,9 @@ search = driver.find_element_by_name("keywords")
 search_b = driver.find_element_by_name("search")
 search.send_keys(f'"{name}"') # Double Quotes give accurate queries
 search_b.click()
+pasco_displayed(driver.current_url)
+
+
 
 time.sleep(50)
 #driver.close()
