@@ -2,7 +2,7 @@
 
 from bs4 import BeautifulSoup
 import requests
-
+ 
 def pasco_displayed(link):
 	""" 
 	A function to retrieve the names, year and semester of 
@@ -46,7 +46,3 @@ def get_link(link):
 	    links[i] = "https://balme.ug.edu.gh" + pasco1[i]["href"]
 
 	return links
-
-#get_link("https://balme.ug.edu.gh/past.exampapers/index.php?keywords=%22ugbs+104%22+&search=search")
-name = "yaw 1234"
-print(name.upper())
