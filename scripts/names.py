@@ -2,6 +2,7 @@
 
 from bs4 import BeautifulSoup
 import requests
+from urllib.error import HTTPError
  
 def pasco_displayed(link):
 	""" 
@@ -14,7 +15,11 @@ def pasco_displayed(link):
 	"""
 
 	url = link
-	page = requests.get(url)
+	try:
+		page = requests.get(url)
+	except HTTPError:
+		raise HTTPError("The server is down. Try again later")
+
 
 	soup = BeautifulSoup(page.content, 'lxml')
 	pasco = soup.find_all("div", class_="item biblioRecord")
@@ -37,12 +42,15 @@ def get_link(link):
 	"""
 
 	url = link
-	page = requests.get(url)
+	try:
+		page = requests.get(url)
+	except HTTPError:
+		raise HTTPError("The server is down, Try again later.")
 
 	soup = BeautifulSoup(page.content, "lxml")
 	pasco1 = soup.find_all("a", class_ = "titleField")
 	links = {}
-	for i in range(len(pasco1)):
-	    links[i] = "https://balme.ug.edu.gh" + pasco1[i]["href"]
+	for i in range(1, len(pasco1) + 1): 	# Starts from 1 not 0, 
+	    links[i] = "https://balme.ug.edu.gh" + pasco1[i-1]["href"]
 
 	return links
