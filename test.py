@@ -1,6 +1,6 @@
 # TODO: INCLUDE THE FILES IN THE NEXT PAGES (later though)
 # TODO: ADD AN ALL PAST QUESTIONS FEATURE(later though)
-
+ 
 # An error handling for the following
 # Network issue(time out)
 # updated site, so change
@@ -19,13 +19,13 @@ PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewe
 	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
 s = Service(ChromeDriverManager().install())
 options = webdriver.ChromeOptions()
-options.headless = True	
+#options.headless = True	
 options.add_experimental_option('prefs', PROFILE)
 driver = webdriver.Chrome(service=s, options = options)
 print("We have began")
-print()
 
-def name_of_pasco():
+
+def name_of_pasco(pasco_name):
 	"""
 	A function to ask user for name of past_question.
 	It takes in the course name and course code.
@@ -33,8 +33,6 @@ def name_of_pasco():
 
 	Output: String type.
 	"""
-
-	pasco_name = input("Please enter the course name(eg. DCIT, UGBS, UGRC) : ")
 	if not pasco_name.isalpha():		 # Think of changing it to regex, due to the space issue(1)
 		print("The name must be only letters.( MATH, STAT..etc)")
 		name_of_pasco()
@@ -54,14 +52,14 @@ def name_of_pasco():
 	pasco = pasco_name + " " + pasco_code 	# The site's search won't work if it isn't spaced.
 	return pasco
 
-def search_for_pasco():
+def search_for_pasco(pasco_name):
 	"""
 	A function to search for past question.
 	It takes in the concatenated course name and course code.
 
 	"""
 
-	pasco = name_of_pasco()
+	pasco = name_of_pasco(pasco_name)
 	with open("credentials.txt", "r") as cred: # Retrieve credentials
 		user_name = cred.readline()
 		password = cred.readline()
@@ -133,8 +131,11 @@ def download_pasco(links):
 	time.sleep(5)
 	print("Done Downloading")
 
-search_for_pasco()
-links = display_pascos()
-download_pasco(links)
-driver.quit()
+
+if __name__ == '__main__':
+	name = input("Please enter the course name(eg. DCIT, UGBS, UGRC) : ")
+	search_for_pasco(name)
+	links = display_pascos()
+	download_pasco(links)
+	driver.quit()
 
