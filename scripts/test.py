@@ -1,7 +1,7 @@
 # TODO: INCLUDE THE FILES IN THE NEXT PAGES (later though)
-# TODO: ADD ERROR HANDLING
 # TODO: ADD AN ALL PAST QUESTIONS FEATURE(later though)
 
+# An error handling for the following
 # Network issue(time out)
 # updated site, so change
 
@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-import time, sys
+import time
 from names import pasco_displayed, get_link
 
 PATH = "C:\\Users\\Anita Agyepong\\Documents\\Daquiver's Quivers\\Python\\past_questions_bot\\past_questions"
@@ -19,9 +19,11 @@ PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewe
 	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
 s = Service(ChromeDriverManager().install())
 options = webdriver.ChromeOptions()
-	
+options.headless = True	
 options.add_experimental_option('prefs', PROFILE)
 driver = webdriver.Chrome(service=s, options = options)
+print("We have began")
+print()
 
 def name_of_pasco():
 	"""
@@ -91,7 +93,7 @@ def display_pascos():
 	links = get_link(driver.current_url)	# Links of all past questions available
 	if len(links) == 0:
 		print("Unfortunately there are no past questions available")
-		sys.exit()
+		driver.quit()
 
 	return links
 
@@ -127,8 +129,12 @@ def download_pasco(links):
 	wait = WebDriverWait(driver, 10)
 	wait.until(EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe")))
 	wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
+	print("Downloading file, wait a min")
+	time.sleep(5)
+	print("Done Downloading")
 
 search_for_pasco()
 links = display_pascos()
 download_pasco(links)
+driver.quit()
 
