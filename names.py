@@ -23,18 +23,19 @@ def pasco_displayed(link):
 
 	soup = BeautifulSoup(page.content, 'lxml')
 	pasco = soup.find_all("div", class_="item biblioRecord")
+	temp = []
 
 	for i in pasco:
 	    pasco1 = i.find("a", class_ = "titleField")
 	    year1 = i.find("div", class_ = "customField isbnField")
 	    sem1 = i.find("div", class_ = "customField collationField")
-	    print(pasco1.get_text())
-	    print(year1.get_text())
-	    print(sem1.get_text())
-	    print()
+	    temp.append(pasco1.get_text() + "\n" + year1.get_text() + "\n" + sem1.get_text())
+
+	return temp
+
 
 def get_link(link):
-	""""
+	"""
 	A function to retrieve the links of all the past questions displayed.
 
 	inputs: The website address.
@@ -54,3 +55,5 @@ def get_link(link):
 	    links[i] = "https://balme.ug.edu.gh" + pasco1[i-1]["href"]
 
 	return links
+
+pasco_displayed("https://balme.ug.edu.gh/past.exampapers/index.php?keywords=%22ugbs+104%22&search=search")

@@ -11,17 +11,22 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-import time
+import time, re
 from names import pasco_displayed, get_link
 
 PATH = "C:\\Users\\Anita Agyepong\\Documents\\Daquiver's Quivers\\Python\\past_questions_bot\\past_questions"
 PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
 	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
+URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
 s = Service(ChromeDriverManager().install())
 options = webdriver.ChromeOptions()
 #options.headless = True	
 options.add_experimental_option('prefs', PROFILE)
 driver = webdriver.Chrome(service=s, options = options)
+with open("credentials.txt", "r") as cred: # Retrieve credentials
+	user_name = cred.readline()
+	password = cred.readline()
+
 print("We have began")
 
 
@@ -33,21 +38,26 @@ def name_of_pasco(pasco_name):
 
 	Output: String type.
 	"""
-	if not pasco_name.isalpha():		 # Think of changing it to regex, due to the space issue(1)
-		print("The name must be only letters.( MATH, STAT..etc)")
-		name_of_pasco()
-	elif len(pasco_name) != 4:			# Legon course names have 4 characters.
-		print("It must have 4 characters.")
-		name_of_pasco()
+	if len(pasco_name.split()) == 1:		# numbers and text combined(no space)
+		temp = re.compile("([a-zA-Z]+)([0-9]+)")
+		res = temp.match(pasco_name).groups()
+	else:
+		res = pasco_name.split()
 
-	pasco_code = input("Please enter the course code(eg. 212, 134, 201) : ")
-	if not pasco_code.isnumeric():
-		print("It must be only numbers. (224, 402..etc)")
-		name_of_pasco() 
+	pasco_name = res[0]
+	pasco_code = res[-1]
 
-	if len(pasco_code) != 3: 		# Legon course codes have 3 characters.
-		print("It must have 3 characters.")
-		name_of_pasco()			
+	while not pasco_name.isalpha():		 # Think of changing it to regex, due to the space issue(1)
+		return "The name must be only letters.( MATH, STAT..etc)"
+
+	while len(pasco_name) != 4:			# Legon course names have 4 characters.
+		return "It must have 4 characters."
+
+	while not pasco_code.isnumeric():
+		return "It must be only numbers. (224, 402..etc)"
+
+	while len(pasco_code) != 3: 		# Legon course codes have 3 characters.
+		return "It must have 3 characters."			
 
 	pasco = pasco_name + " " + pasco_code 	# The site's search won't work if it isn't spaced.
 	return pasco
@@ -58,14 +68,8 @@ def search_for_pasco(pasco_name):
 	It takes in the concatenated course name and course code.
 
 	"""
-
 	pasco = name_of_pasco(pasco_name)
-	with open("credentials.txt", "r") as cred: # Retrieve credentials
-		user_name = cred.readline()
-		password = cred.readline()
-
-	url = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
-	driver.get(url)
+	driver.get(URL)
 	login = driver.find_element(By.NAME, "memberID")
 	pwd = driver.find_element(By.NAME, "memberPassWord")
 	pwd.send_keys(password)
@@ -84,10 +88,13 @@ def display_pascos():
 
 	Output: Dictionary type
 	"""
-
 	
 	print("These are the past questions available")
-	pasco_displayed(driver.current_url)		# Display past questions available
+	disp = pasco_displayed(driver.current_url)		# Display past questions available
+	return disp
+
+def link_of_pasco():
+
 	links = get_link(driver.current_url)	# Links of all past questions available
 	if len(links) == 0:
 		print("Unfortunately there are no past questions available")
@@ -95,7 +102,8 @@ def display_pascos():
 
 	return links
 
-def download_pasco(links):
+
+def download_pasco(links, choice):
 	"""
 	A function to download past questions.
 	It takes in the link of the past questions available.
@@ -106,7 +114,7 @@ def download_pasco(links):
 	Output: A pdf?
 	"""
 
-	choice = ""
+	#choice = ""
 	while not choice.isnumeric():
 		choice = input(f"""
 		Please type the number of the one you want to download(Should be a number)
@@ -133,9 +141,9 @@ def download_pasco(links):
 
 
 if __name__ == '__main__':
-	name = input("Please enter the course name(eg. DCIT, UGBS, UGRC) : ")
+	name = input("Please enter the course name : ")
 	search_for_pasco(name)
-	links = display_pascos()
-	download_pasco(links)
+	links = link_of_pasco()
+	#download_pasco(links)
 	driver.quit()
 
