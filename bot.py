@@ -1,4 +1,4 @@
-import telegram.ext
+import telegram.ext, os
 from telegram.ext import CallbackQueryHandler
 from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
@@ -15,6 +15,12 @@ def start(update, context):
 		Type the name of the past question you want.
 		""")
 
+def newest(path):
+    files = os.listdir(path)
+    paths = [os.path.join(path, basename) for basename in files]
+    
+    return max(paths, key=os.path.getctime)
+
 def help(update, context):
 	update.message.reply_text("""
 	The following commands are available:
@@ -23,6 +29,7 @@ def help(update, context):
 	/help -> This Message
 	/contact -> Contact Owner
 	""")
+	
 def get_chat_id(update, context):
     chat_id = -1
 
@@ -53,7 +60,7 @@ def button(update, context):
 	site = link_of_pasco()
 	download_pasco(site, choice.data)
 	#file = PATH + "\\" + 
-	file = "C:\\Users\\Anita Agyepong\\Documents\\Daquiver's Quivers\\Python\\past_questions_bot\\past_questions\\law.pdf"
+	file = newest(PATH)
 	context.bot.sendDocument(chat_id=get_chat_id(update, context), document=open(file, 'rb'))
 
 

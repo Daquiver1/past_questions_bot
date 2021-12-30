@@ -1,16 +1,12 @@
-import re
+import os
 
-name = input("Please enter your name: ")
+PATH = "C:\\Users\\Anita Agyepong\\Documents\\Daquiver's Quivers\\Python\\past_questions_bot\\past_questions"
 
-#print(res)
-if len(name.split()) == 1:
-	temp = re.compile("([a-zA-Z]+)([0-9]+)")
-	res = temp.match(name).groups()
-else:
-	res = name.split()
+def newest(path):
+    files = os.listdir(path)
+    paths = [os.path.join(path, basename) for basename in files]
+    
+    return max(paths, key=os.path.getctime)
 
-
-print(res[0])
-print(res[1])
-
-print(str(1+2) + "yaw")
+newest(PATH)
+print(newest(PATH))
