@@ -2,8 +2,9 @@ import telegram.ext
 from telegram.ext import CallbackQueryHandler
 from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-with open("credentials\\token.txt", "r") as token:
-	TOKEN = token.read()
+#with open("credentials\\token.txt", "r") as token:
+#	TOKEN = token.read()
+TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
 
 def start(update, context):
 	update.message.reply_text(f"""
