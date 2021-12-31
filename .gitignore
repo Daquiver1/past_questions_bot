@@ -1,4 +1,4 @@
-*.txt
 *.log
 __pycache__/
 past_questions/
+credentials/
