@@ -34,7 +34,7 @@ def respond():
 
 	return 'ok'
 
-@app.route('/setwebhook', methods=['GET', 'POST'])
+@app.route('/set_webhook', methods=['GET', 'POST'])
 def set_webhook():
     s = bot.setWebhook('{URL}{HOOK}'.format(URL=URL, HOOK=TOKEN))
     if s:
@@ -44,7 +44,7 @@ def set_webhook():
 
 @app.route('/')
 def index():
-    return "This is the home page."
+    return "This is the home page. Testing 12"
 
 if __name__ == '__main__':
     # note the threaded arg which allow
