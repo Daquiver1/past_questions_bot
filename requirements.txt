@@ -41,7 +41,6 @@ pytz-deprecation-shim==0.1.0.post0
 requests==2.26.0
 rfc3986==1.5.0
 scipy==1.7.3
-==4.1.0
 six==1.16.0
 sniffio==1.2.0
 sortedcontainers==2.4.0
