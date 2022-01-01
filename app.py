@@ -28,8 +28,8 @@ def respond():
 	print("got text message :", text)
 
 	# here we call our super AI
-	response = get_response(text)
-	#response = handle_message(text)
+	#response = get_response(text)
+	response = contact(text, update, context)
 	# now just send the message back
 	# notice how we specify the chat and the msg we reply to
 	bot.sendMessage(chat_id=chat_id, text=response, reply_to_message_id=msg_id)
@@ -46,7 +46,7 @@ def set_webhook():
 
 @app.route('/')
 def index():
-    return "This is the home page. Testing mike 2"
+    return "This is the home page. am tayad mike 2"
 
 if __name__ == '__main__':
     # note the threaded arg which allow

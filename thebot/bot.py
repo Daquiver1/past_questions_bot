@@ -85,14 +85,14 @@ def donate(update, context):
 # 	return pasco
 
 
-def contact(update, context):
+def contact(yaw,update, context):
 	# update.message.reply_text(f"""
 	# 	You can contact me through the following
 	# 	Gmail: Cabrokwa11@gmail.com
 	# 	Telegram: @Daquiver
 	# 	Github: https://github.com/Daquiver1
 	# 	""")
-    return "This is a little piggy bank"
+    return f"{yaw} This is a little piggy bank"
 
 # def button(update, context):
 # 	choice = update.callback_query
