@@ -5,7 +5,7 @@ click==8.0.3
 cryptography==36.0.1
 Flask==2.0.2
 gunicorn==20.1.0
-idna==2.101
+idna==2.10
 Jinja2==3.0.2
 MarkupSafe==2.0.1
 pycparser==2.21
