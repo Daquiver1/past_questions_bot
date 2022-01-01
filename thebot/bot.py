@@ -86,12 +86,13 @@ def donate(update, context):
 
 
 def contact(update, context):
-	update.message.reply_text(f"""
-		You can contact me through the following
-		Gmail: Cabrokwa11@gmail.com
-		Telegram: @Daquiver
-		Github: https://github.com/Daquiver1
-		""")
+	# update.message.reply_text(f"""
+	# 	You can contact me through the following
+	# 	Gmail: Cabrokwa11@gmail.com
+	# 	Telegram: @Daquiver
+	# 	Github: https://github.com/Daquiver1
+	# 	""")
+    return "This is a little piggy bank"
 
 # def button(update, context):
 # 	choice = update.callback_query
@@ -132,13 +133,13 @@ def contact(update, context):
 # 	context.bot.send_message(chat_id=get_chat_id(update, context), text='What would you like to download?', reply_markup=reply_markup)
 
 
-updater = telegram.ext.Updater(TOKEN, use_context=True)
-disp = updater.dispatcher
-disp.add_handler(telegram.ext.CommandHandler("start", start))
-disp.add_handler(telegram.ext.CommandHandler("help", help))
-disp.add_handler(telegram.ext.CommandHandler("donate", donate))
-#disp.add_handler(CallbackQueryHandler(button))
-disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
+# updater = telegram.ext.Updater(TOKEN, use_context=True)
+# disp = updater.dispatcher
+# disp.add_handler(telegram.ext.CommandHandler("start", start))
+# disp.add_handler(telegram.ext.CommandHandler("help", help))
+# disp.add_handler(telegram.ext.CommandHandler("donate", donate))
+# #disp.add_handler(CallbackQueryHandler(button))
+# disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
 #disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
 
 # updater.start_polling()
