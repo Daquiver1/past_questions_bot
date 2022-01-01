@@ -46,7 +46,7 @@ def set_webhook():
 
 @app.route('/')
 def index():
-    return "This is the home page. Testing 12"
+    return "This is the home page. Testing mike 2"
 
 if __name__ == '__main__':
     # note the threaded arg which allow
