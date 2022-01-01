@@ -1,7 +1,8 @@
 import telegram.ext
 from telegram.ext import CallbackQueryHandler
-from test import *
+#from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+
 #with open("credentials\\token.txt", "r") as token:
 #	TOKEN = token.read()
 TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
@@ -151,4 +152,4 @@ def get_response(msg):
     could be a very basic simple response like "معلش"
     or a complex LSTM network that generate appropriate answer
     """
-    return "MY name is slim shady"
+    return "MY name is Christian Abrokwa"

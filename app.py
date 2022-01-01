@@ -2,9 +2,11 @@
 from flask import Flask, request
 import telegram
 from thebot.bot import get_response
-TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
-URL = "https://past-questions-bot.herokuapp.com/"
+from thebot.credentials import bot_token, URL
+
+global TOKEN
 global bot 
+TOKEN = bot_token
 bot = telegram.Bot(token = TOKEN)
 
 # Start the flask app
