@@ -3,7 +3,7 @@ from flask import Flask, request
 import telegram
 from thebot.bot import get_response
 TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
-URL = "https://git.heroku.com/past-questions-bot.git"
+URL = "https://past-questions-bot.herokuapp.com/"
 gloabl bot 
 bot = telegram.Bot(token = TOKEN)
 
