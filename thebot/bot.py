@@ -152,4 +152,4 @@ def get_response(msg):
     could be a very basic simple response like "معلش"
     or a complex LSTM network that generate appropriate answer
     """
-    return "MY name is Christian Abrokwa"
+    return "MY name is Daquiver"
