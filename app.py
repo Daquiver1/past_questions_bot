@@ -3,6 +3,7 @@ from flask import Flask, request
 import telegram
 from thebot.bot import get_response
 TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
+URL = "https://git.heroku.com/past-questions-bot.git"
 gloabl bot 
 bot = telegram.Bot(token = TOKEN)
 
@@ -25,26 +26,13 @@ def respond():
     print("got text message :", text)
 
 	# here we call our super AI
-    #response = get_response(text)
+    response = get_response(text)
     #response = handle_message(text)
 	# now just send the message back
     # notice how we specify the chat and the msg we reply to
     bot.sendMessage(chat_id=chat_id, text=response, reply_to_message_id=msg_id)
 
 	return 'ok'
-
-@app.route('/setwebhook', methods=['GET', 'POST'])
-def set_webhook():
-    s = bot.setWebhook('{URL}{HOOK}'.format(URL=URL, HOOK=TOKEN))
-    if s:
-        return "webhook setup ok"
-    else:
-        return "webhook setup failed"
-
-
-@app.route('/')
-def index():
-    return '.'
 
 @app.route('/setwebhook', methods=['GET', 'POST'])
 def set_webhook():
