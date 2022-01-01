@@ -3,34 +3,35 @@ from telegram.ext import CallbackQueryHandler
 #from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
-#with open("credentials\\token.txt", "r") as token:
-#	TOKEN = token.read()
+with open("cred\\token.txt", "r") as token:
+	TOKEN = token.read()
+
 TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
 
-# def start(update, context):
-# 	update.message.reply_text(f"""
-# 		Hello {update.message.from_user.username}
-# 		Welcome to Daquiver's Past Question bot
-# 		This bot is simple. 
-# 		Type the name of the past question you want and you are good to go. 
-# 		Use this format (eg. ugbs 104, dcit 103)
-# 		""")
+def start(update, context):
+	update.message.reply_text(f"""
+		Hello {update.message.from_user.username}
+		Welcome to Daquiver's Past Question bot
+		This bot is simple. 
+		Type the name of the past question you want and you are good to go. 
+		Use this format (eg. ugbs 104, dcit 103)
+		""")
 
-# def help(update, context):
-# 	update.message.reply_text("""
-# 	The following commands are available:
+def help(update, context):
+	update.message.reply_text("""
+	The following commands are available:
 
-# 	/start -> Welcome Message
-# 	/help -> This Message
-# 	/contact -> Contact Owner
-# 	/donate -> Buy me a drink.
-# 	""")
+	/start -> Welcome Message
+	/help -> This Message
+	/contact -> Contact Owner
+	/donate -> Buy me a drink.
+	""")
 
-# def donate(update, context):
-# 	update.message.reply_text(f"""
-# 		Telegram api has no support for mobile money or other popular payments, so you'll have to do it the old way. 
-# 		The number is 0547642843
-# 		""")
+def donate(update, context):
+	update.message.reply_text(f"""
+		Telegram api has no support for mobile money or other popular payments, so you'll have to do it the old way. 
+		The number is 0547642843
+		""")
 
 # def get_chat_id(update, context):
 #     chat_id = -1
@@ -87,13 +88,13 @@ TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
 # 	return pasco
 
 
-# def contact(update, context):
-# 	update.message.reply_text(f"""
-# 		You can contact me through the following
-# 		Gmail: Cabrokwa11@gmail.com
-# 		Telegram: @Daquiver
-# 		Github: https://github.com/Daquiver1
-# 		""")
+def contact(update, context):
+	update.message.reply_text(f"""
+		You can contact me through the following
+		Gmail: Cabrokwa11@gmail.com
+		Telegram: @Daquiver
+		Github: https://github.com/Daquiver1
+		""")
 
 # def button(update, context):
 # 	choice = update.callback_query
@@ -134,14 +135,14 @@ TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
 # 	context.bot.send_message(chat_id=get_chat_id(update, context), text='What would you like to download?', reply_markup=reply_markup)
 
 
-# updater = telegram.ext.Updater(TOKEN, use_context=True)
-# disp = updater.dispatcher
-# disp.add_handler(telegram.ext.CommandHandler("start", start))
-# disp.add_handler(telegram.ext.CommandHandler("help", help))
-# disp.add_handler(telegram.ext.CommandHandler("donate", donate))
-# disp.add_handler(CallbackQueryHandler(button))
-# disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
-# disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
+updater = telegram.ext.Updater(TOKEN, use_context=True)
+disp = updater.dispatcher
+disp.add_handler(telegram.ext.CommandHandler("start", start))
+disp.add_handler(telegram.ext.CommandHandler("help", help))
+disp.add_handler(telegram.ext.CommandHandler("donate", donate))
+#disp.add_handler(CallbackQueryHandler(button))
+disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
+#disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
 
 # updater.start_polling()
 # updater.idle()
@@ -152,4 +153,4 @@ def get_response(msg):
     could be a very basic simple response like "معلش"
     or a complex LSTM network that generate appropriate answer
     """
-    return "MY name is Daquiver"
+    return contact(update, context)
