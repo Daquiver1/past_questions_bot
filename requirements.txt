@@ -2,3 +2,4 @@ python-telegram-bot
 beautifulsoup4
 selenium
 requests
+lxml
