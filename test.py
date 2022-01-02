@@ -43,11 +43,11 @@ pwd.send_keys(password)
 login.send_keys(user_name) 			# The newline is interpreted as enter
 print("We have began")
 
-# def newest(path):
-#     files = os.listdir(path)
-#     paths = [os.path.join(path, basename) for basename in files]
+def newest(path):
+    files = os.listdir(path)
+    paths = [os.path.join(path, basename) for basename in files]
     
-#     return max(paths, key=os.path.getctime)
+    return max(paths, key=os.path.getctime)
 
 def search_for_pasco(cleaned_pasco_name):
 	"""
@@ -103,31 +103,31 @@ def link_of_pasco():
 	return links
 
 
-# def download_pasco(links, choice):
-# 	"""
-# 	A function to download past questions.
-# 	It takes in the link of the past questions available.
-# 	User selects a past question.
-# 	Downloads the past question.
+def download_pasco(links, choice):
+	"""
+	A function to download past questions.
+	It takes in the link of the past questions available.
+	User selects a past question.
+	Downloads the past question.
 
-# 	Input: Dictionary type.
-# 	Output: A pdf?
-# 	"""
+	Input: Dictionary type.
+	Output: A pdf?
+	"""
 
-# 	for i, v in links.items():
-# 		if int(choice) == i:
-# 			driver.get(v)					 # Move to the url of the selected option
+	for i, v in links.items():
+		if int(choice) == i:
+			driver.get(v)					 # Move to the url of the selected option
 
-# 	file = driver.find_element(By.CLASS_NAME, "openPopUp")
-# 	driver.execute_script("arguments[0].click();", file) 
-# 	wait = WebDriverWait(driver, 10)
-# 	wait.until(EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe")))
-# 	wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
-# 	driver.back()
-# 	print("Downloading file, wait a min")
-# 	file = newest(PATH)
-# 	time.sleep(5)
-# 	return file
+	file = driver.find_element(By.CLASS_NAME, "openPopUp")
+	driver.execute_script("arguments[0].click();", file) 
+	wait = WebDriverWait(driver, 10)
+	wait.until(EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe")))
+	wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
+	driver.back()
+	print("Downloading file, wait a min")
+	file = newest(PATH)
+	time.sleep(5)
+	return file
 
 
 

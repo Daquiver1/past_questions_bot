@@ -94,45 +94,43 @@ def contact(update, context):
 		""")
 
 
-# def button(update, context):
-# 	choice = update.callback_query
-# 	choice.answer()
-# 	site = link_of_pasco()
-# 	choice.edit_message_text(text=f"Selected option: {choice.data}")
-# 	choice.edit_message_text("Downloading past question, gimme a sec")
-# 	try:
-# 		file = download_pasco(site, choice.data)
-# 		choice.edit_message_text("Uploading past question, gimme a sec")
-# 		context.bot.sendDocument(chat_id=get_chat_id(update, context), document=open(file, 'rb'))
-# 	except OSError:
-# 		choice.edit_message_text("Yikes, we encountered an error. Try again. If error persists view the help command and contact me.")
+def button(update, context):
+	choice = update.callback_query
+	choice.answer()
+	site = link_of_pasco()
+	choice.edit_message_text(text=f"Selected option: {choice.data}")
+	choice.edit_message_text("Downloading past question, gimme a sec")
+	try:
+		file = download_pasco(site, choice.data)
+		choice.edit_message_text("Uploading past question, gimme a sec")
+		context.bot.sendDocument(chat_id=get_chat_id(update, context), document=open(file, 'rb'))
+	except OSError:
+		choice.edit_message_text("Yikes, we encountered an error. Try again. If error persists view the help command and contact me.")
 
 
 def handle_message(update, context):
-	name = update.message.text
-	update.message.reply_text(name)
-	# options = []
-	# update.message.reply_text(f"You said {update.message.text}")
-	# name12 = clean_name(update.message.text)
-	# if name12 == None:
-	# 	update.message.reply_text("Please enter a valid past question name (eg. ugbs 104, dict 202)")
-	# 	return None
+	options = []
+	update.message.reply_text(f"You said {update.message.text}")
+	name12 = clean_name(update.message.text)
+	if name12 == None:
+		update.message.reply_text("Please enter a valid past question name (eg. ugbs 104, dict 202)")
+		return None
 
-	# update.message.reply_text(f"Checking for {name12} past questions")
-	# time.sleep(1)
-	# search_for_pasco(name12)
-	# lists = display_pascos()
-	# if len(lists) == 0:
-	# 	update.message.reply_text(f"Unfortunately, there are no past questions available for {name12}")
-	# 	return None
+	update.message.reply_text(f"Checking for {name12} past questions")
+	time.sleep(1)
+	search_for_pasco(name12)
+	lists = display_pascos()
+	if len(lists) == 0:
+		update.message.reply_text(f"Unfortunately, there are no past questions available for {name12}")
+		return None
 
-	# update.message.reply_text("Yaay!!, we got some.")
-	# for i in range(len(lists) - 1):
-	# 	update.message.reply_text(str(i+1) + " " + lists[i])
-	# 	options.append(InlineKeyboardButton(text=str(i+1), callback_data=str(i+1)))
+	update.message.reply_text("Yaay!!, we got some.")
+	for i in range(len(lists) - 1):
+		update.message.reply_text(str(i+1) + " " + lists[i])
+		options.append(InlineKeyboardButton(text=str(i+1), callback_data=str(i+1)))
 
-	# reply_markup = InlineKeyboardMarkup([options])
-	# context.bot.send_message(chat_id=get_chat_id(update, context), text='What would you like to download?', reply_markup=reply_markup)
+	reply_markup = InlineKeyboardMarkup([options])
+	context.bot.send_message(chat_id=get_chat_id(update, context), text='What would you like to download?', reply_markup=reply_markup)
 
 
 updater = telegram.ext.Updater(TOKEN, use_context=True)
