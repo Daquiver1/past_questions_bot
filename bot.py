@@ -2,7 +2,7 @@ import telegram.ext, os
 from telegram.ext import CallbackQueryHandler
 #from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-PORT = int(os.environ.get("PORT", 5000))
+PORT = int(os.environ.get("PORT", "8443"))
 
 TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
 
@@ -144,7 +144,8 @@ disp.add_handler(telegram.ext.CommandHandler("contact", contact))
 
 #updater.start_polling()
 updater.start_webhook(listen="0.0.0.0",
-						port = int(PORT),
-						url_path=TOKEN)
-updater.bot.setWebhook("https://past-questions-bot.herokuapp.com/" + TOKEN)
+						port = PORT,
+						url_path=TOKEN,
+						webhook_url= "https://past-questions-bot.herokuapp.com/" + TOKEN)
+#updater.bot.setWebhook()
 updater.idle()
