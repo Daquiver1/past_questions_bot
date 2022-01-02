@@ -138,9 +138,9 @@ disp = updater.dispatcher
 disp.add_handler(telegram.ext.CommandHandler("start", start))
 disp.add_handler(telegram.ext.CommandHandler("help", help))
 disp.add_handler(telegram.ext.CommandHandler("donate", donate))
-disp.add_handler(CallbackQueryHandler(button))
+#disp.add_handler(CallbackQueryHandler(button))
 disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
-disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
+#disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
 
 #updater.start_polling()
 updater.start_webhook(listen="0.0.0.0",
