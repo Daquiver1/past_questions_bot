@@ -1,4 +1,1 @@
 python-telegram-bot
-requests
-selenium
-beautifulsoup4

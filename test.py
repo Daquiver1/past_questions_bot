@@ -1,9 +1,15 @@
 # TODO: INCLUDE THE FILES IN THE NEXT PAGES (later though)
 # TODO: ADD AN ALL PAST QUESTIONS FEATURE(later though)
+import numpy as np
 
 def rename(txt):
-	return f"your name is {txt}"
+	x = np.arange(0,100)
+	a = np.array([1, 2, 3, 4])
+	a = list(a)
+	nii = str(a[1])
+	return f"your name is {txt} and also {nii}"
 
+rename("nii")
 # from selenium import webdriver
 # from selenium.webdriver.chrome.service import Service
 # from webdriver_manager.chrome import ChromeDriverManager
