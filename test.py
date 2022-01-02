@@ -18,7 +18,7 @@ PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewe
 URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
 s = Service(ChromeDriverManager().install())
 options = webdriver.ChromeOptions()
-#options.headless = True	
+options.headless = True	
 options.add_experimental_option('prefs', PROFILE)
 driver = webdriver.Chrome(service=s, options = options)
 with open("cred\\credentials.txt", "r") as cred: # Retrieve credentials

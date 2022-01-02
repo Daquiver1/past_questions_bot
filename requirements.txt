@@ -1,2 +1,7 @@
 python-telegram-bot
 requests
+selenium
+time
+os
+re
+beautifulsoup4
