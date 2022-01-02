@@ -1,6 +1,6 @@
 import telegram.ext, os
 from telegram.ext import CallbackQueryHandler
-from test import rename
+from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 PORT = int(os.environ.get("PORT", "8443"))
 
@@ -109,7 +109,7 @@ def contact(update, context):
 
 
 def handle_message(update, context):
-	name = rename(update.message.text)
+	name = update.message.text
 	update.message.reply_text(name)
 	# options = []
 	# update.message.reply_text(f"You said {update.message.text}")

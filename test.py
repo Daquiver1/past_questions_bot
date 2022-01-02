@@ -1,37 +1,30 @@
 # TODO: INCLUDE THE FILES IN THE NEXT PAGES (later though)
 # TODO: ADD AN ALL PAST QUESTIONS FEATURE(later though)
-import numpy as np
 
-def rename(txt):
-	x = np.arange(0,100)
-	a = np.array([1, 2, 3, 4])
-	a = list(a)
-	nii = str(a[1])
-	return f"your name is {txt} and also {nii}"
-
-rename("nii")
-# from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
-# from webdriver_manager.chrome import ChromeDriverManager
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support import expected_conditions as EC
-# from bs4 import BeautifulSoup
-# import requests
-# import time, re, os
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+import requests
+import time, re, os
 
 # PATH = "C:\\Users\\Anita Agyepong\\Documents\\Daquiver's Quivers\\Python\\past_questions_bot\\past_questions"
-# PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
+PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],}
 # 	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
-# URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
-# s = Service(ChromeDriverManager().install())
-# options = webdriver.ChromeOptions()
-# options.headless = True	
-# options.add_experimental_option('prefs', PROFILE)
-# driver = webdriver.Chrome(service=s, options = options)
+URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
+s = Service(ChromeDriverManager().install())
+options = webdriver.ChromeOptions()
+options.headless = True	
+options.add_experimental_option('prefs', PROFILE)
+driver = webdriver.Chrome(service=s, options = options)
 # with open("cred\\credentials.txt", "r") as cred: # Retrieve credentials
 # 	user_name = cred.readline()
 # 	password = cred.readline()
+user_name = "10829272"
+password = "greenarrow14"
 
 # driver.get(URL)
 # login = driver.find_element(By.NAME, "memberID")

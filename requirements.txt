@@ -1,2 +1,5 @@
 python-telegram-bot
-numpy
+beautifulsoup4
+selenium
+webdriver-manager
+requests
