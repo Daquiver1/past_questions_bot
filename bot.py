@@ -146,5 +146,5 @@ disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_m
 updater.start_webhook(listen="0.0.0.0",
 						port = int(PORT),
 						url_path=TOKEN)
-updater.bot.setWebhook("" + TOKEN)
-#updater.idle()
+updater.bot.setWebhook("https://past-questions-bot.herokuapp.com/" + TOKEN)
+updater.idle()
