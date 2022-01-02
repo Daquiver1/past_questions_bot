@@ -1,7 +1,8 @@
-import telegram.ext
+import telegram.ext, os
 from telegram.ext import CallbackQueryHandler
 #from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+PORT = int(os.environ.get("PORT", 5000))
 
 TOKEN = "5092060662:AAGbACVVEUlo67Up4Xyh7v3dMjf61MOMisI"
 
@@ -26,24 +27,23 @@ def help(update, context):
 
 def donate(update, context):
 	update.message.reply_text(f"""
-		Telegram api has no support for mobile money or other popular payments, so you'll have to do it the old way. 
-		The number is 0547642843
+		Number: 0547642843
 		""")
 
-# def get_chat_id(update, context):
-#     chat_id = -1
+def get_chat_id(update, context):
+    chat_id = -1
 
-#     if update.message is not None:
-#         # text message
-#         chat_id = update.message.chat.id
-#     elif update.callback_query is not None:
-#         # callback message
-#         chat_id = update.callback_query.message.chat.id
-#     elif update.poll is not None:
-#         # answer in Poll
-#         chat_id = context.bot_data[update.poll.id]
+    if update.message is not None:
+        # text message
+        chat_id = update.message.chat.id
+    elif update.callback_query is not None:
+        # callback message
+        chat_id = update.callback_query.message.chat.id
+    elif update.poll is not None:
+        # answer in Poll
+        chat_id = context.bot_data[update.poll.id]
 
-#     return chat_id
+    return chat_id
 
 # def clean_name(pasco_name):
 # 	"""
@@ -85,14 +85,14 @@ def donate(update, context):
 # 	return pasco
 
 
-def contact(yaw,update, context):
-	# update.message.reply_text(f"""
-	# 	You can contact me through the following
-	# 	Gmail: Cabrokwa11@gmail.com
-	# 	Telegram: @Daquiver
-	# 	Github: https://github.com/Daquiver1
-	# 	""")
-    return f"{yaw} This is a little piggy bank"
+def contact(update, context):
+	update.message.reply_text(f"""
+		You can contact me through the following
+		Gmail: Cabrokwa11@gmail.com
+		Telegram: @Daquiver
+		Github: https://github.com/Daquiver1
+		""")
+
 
 # def button(update, context):
 # 	choice = update.callback_query
@@ -105,7 +105,7 @@ def contact(yaw,update, context):
 # 		choice.edit_message_text("Uploading past question, gimme a sec")
 # 		context.bot.sendDocument(chat_id=get_chat_id(update, context), document=open(file, 'rb'))
 # 	except OSError:
-# 		choice.edit_message_text("Yikes, we encountered an error. Try again. If it persists view the help command and contact me.")
+# 		choice.edit_message_text("Yikes, we encountered an error. Try again. If error persists view the help command and contact me.")
 
 
 # def handle_message(update, context):
@@ -133,22 +133,18 @@ def contact(yaw,update, context):
 # 	context.bot.send_message(chat_id=get_chat_id(update, context), text='What would you like to download?', reply_markup=reply_markup)
 
 
-# updater = telegram.ext.Updater(TOKEN, use_context=True)
-# disp = updater.dispatcher
-# disp.add_handler(telegram.ext.CommandHandler("start", start))
-# disp.add_handler(telegram.ext.CommandHandler("help", help))
-# disp.add_handler(telegram.ext.CommandHandler("donate", donate))
-# #disp.add_handler(CallbackQueryHandler(button))
-# disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
-#disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
+updater = telegram.ext.Updater(TOKEN, use_context=True)
+disp = updater.dispatcher
+disp.add_handler(telegram.ext.CommandHandler("start", start))
+disp.add_handler(telegram.ext.CommandHandler("help", help))
+disp.add_handler(telegram.ext.CommandHandler("donate", donate))
+disp.add_handler(CallbackQueryHandler(button))
+disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
+disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
 
-# updater.start_polling()
-# updater.idle()
-
-def get_response(msg):
-    """
-    you can place your mastermind AI here
-    could be a very basic simple response like "معلش"
-    or a complex LSTM network that generate appropriate answer
-    """
-    return contact(update, context)
+#updater.start_polling()
+updater.start_webhook(listen="0.0.0.0",
+						port = int(PORT),
+						url_path=TOKEN)
+updater.bot.setWebhook("" + TOKEN)
+#updater.idle()

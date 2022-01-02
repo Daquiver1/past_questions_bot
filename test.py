@@ -21,7 +21,7 @@ options = webdriver.ChromeOptions()
 #options.headless = True	
 options.add_experimental_option('prefs', PROFILE)
 driver = webdriver.Chrome(service=s, options = options)
-with open("credentials\\credentials.txt", "r") as cred: # Retrieve credentials
+with open("cred\\credentials.txt", "r") as cred: # Retrieve credentials
 	user_name = cred.readline()
 	password = cred.readline()
 
