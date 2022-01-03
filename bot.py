@@ -102,10 +102,10 @@ def button(update, context):
 	site = link_of_pasco()
 	choice.edit_message_text(text=f"Selected option: {choice.data}")
 	choice.edit_message_text("Downloading past question, gimme a sec")
-	files = os.listdir(PATH)
-	print(files)
 	try:
 		file = download_pasco(site, choice.data)
+		files = os.listdir(PATH)
+		print(files)
 		choice.edit_message_text("Uploading past question, gimme a sec")
 		context.bot.sendDocument(chat_id=get_chat_id(update, context), document=open(file, 'rb'))
 	except OSError:
