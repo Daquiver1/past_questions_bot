@@ -3,7 +3,7 @@ from telegram.ext import CallbackQueryHandler
 from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 PORT = int(os.environ.get("PORT", "8443"))
-PATH = "past_questions/"
+PATH = "/tmp"
 
 
 TOKEN = "5092060662:AAExdA2CkQ_ZMy_1dRKQnyItok8G47zvOuo"
