@@ -1,7 +1,3 @@
-# TODO: INCLUDE THE FILES IN THE NEXT PAGES (later though)
-# TODO: ADD AN ALL PAST QUESTIONS FEATURE(later though)
-
-
 from selenium import webdriver
 import os
 from selenium.webdriver.support.ui import WebDriverWait
