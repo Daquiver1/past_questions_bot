@@ -94,6 +94,14 @@ def contact(update, context):
 		Github: https://github.com/Daquiver1
 		""")
 
+def about(update,context):
+	update.message.reply_text(f"""
+		Okay so this is a simple bot, it basically scrapes the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returns the past question.
+		It can only download past questions on the ug site. If it isn't available then legon haven't uploaded it to their site.
+		I built it because students find it difficult to access the site(you need to register) and get past questions, so this is a simplified version. Also I knew building this 
+		will challenge me and make me a better developer(it did.) So yeah. 
+		""")
+
 
 def button(update, context):
 	choice = update.callback_query
@@ -139,6 +147,7 @@ updater = telegram.ext.Updater(TOKEN, use_context=True)
 disp = updater.dispatcher
 disp.add_handler(telegram.ext.CommandHandler("start", start))
 disp.add_handler(telegram.ext.CommandHandler("help", help))
+disp.add_handler(telegram.ext.CommandHandler("about", about))
 disp.add_handler(telegram.ext.CommandHandler("donate", donate))
 disp.add_handler(CallbackQueryHandler(button))
 disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
