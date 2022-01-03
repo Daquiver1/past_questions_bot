@@ -22,10 +22,10 @@ You can find the bot @legon_pasco_bot or https://t.me/legon_pasco_bot.
 ![image3](images/3.jpg)
 ![image4](images/4.jpg)
 
-# TODOS
+## TODOS
 
-- [] Include files in the next page.
-- [] Add an all feature which will download all the available past questions specified.
+- [ ] Include files in the next page.
+- [ ] Add an all feature which will download all the available past questions specified.
 
 ## Contribution
 Your contriubtions and suggestions are heartily welcome!
