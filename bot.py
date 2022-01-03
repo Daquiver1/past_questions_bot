@@ -110,8 +110,8 @@ def button(update, context):
 
 def handle_message(update, context):
 	options = []
-	update.message.reply_text(f"You said {update.message.text}")
 	name12 = clean_name(update.message.text)
+	update.message.reply_text(f"You said {name12}")
 	if name12 == None:
 		update.message.reply_text("Please enter a valid past question name (eg. ugbs 104, dict 202)")
 		return None
@@ -142,11 +142,11 @@ disp.add_handler(CallbackQueryHandler(button))
 disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
 disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
 
-#updater.start_polling()
-#"""
+updater.start_polling()
+"""
 updater.start_webhook(listen="0.0.0.0",
 						port = PORT,
 						url_path=TOKEN,
 						webhook_url= "https://past-questions-bot.herokuapp.com/" + TOKEN)
-#"""
+"""
 updater.idle()

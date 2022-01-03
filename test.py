@@ -1,8 +1,8 @@
 # TODO: INCLUDE THE FILES IN THE NEXT PAGES (later though)
 # TODO: ADD AN ALL PAST QUESTIONS FEATURE(later though)
+# from selenium.webdriver.chrome.service import Service
+# from webdriver_manager.chrome import ChromeDriverManager
 
-#from selenium.webdriver.chrome.service import Service
-#from webdriver_manager.chrome import ChromeDriverManager
 
 from selenium import webdriver
 import os
@@ -18,17 +18,21 @@ chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
+PATH = "past_questions/"
+PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
+	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
+chrome_options.add_experimental_option('prefs', PROFILE)
 driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
 
 
 # PATH = "C:\\Users\\Anita Agyepong\\Documents\\Daquiver's Quivers\\Python\\past_questions_bot\\past_questions"
-#PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],}
+# PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
 # 	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
-#s = Service(ChromeDriverManager().install())
-#options = webdriver.ChromeOptions()
-#options.headless = True	
-#options.add_experimental_option('prefs', PROFILE)
-#driver = webdriver.Chrome(service=s, options = options)
+# s = Service(ChromeDriverManager().install())
+# options = webdriver.ChromeOptions()
+# options.headless = True	
+# options.add_experimental_option('prefs', PROFILE)
+# driver = webdriver.Chrome(service=s, options = options)
 # with open("cred\\credentials.txt", "r") as cred: # Retrieve credentials
 # 	user_name = cred.readline()
 # 	password = cred.readline()
@@ -45,9 +49,13 @@ print("We have began")
 
 def newest(path):
     files = os.listdir(path)
-    paths = [os.path.join(path, basename) for basename in files]
+    print(files)
+    paths = [os.path.join(path, basename) for basename in files] 
+    print(paths)
+    print(max(paths, key=os.path.getctime))
     
     return max(paths, key=os.path.getctime)
+    
 
 def search_for_pasco(cleaned_pasco_name):
 	"""
@@ -125,21 +133,20 @@ def download_pasco(links, choice):
 	wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
 	driver.back()
 	print("Downloading file, wait a min")
-	file = newest(PATH)
 	time.sleep(5)
+	file = newest(PATH)
 	return file
 
 
 
-# if __name__ == '__main__':
-# 	name = input("Please enter the course name : ")
-# 	search_for_pasco(name)
-# 	yaw = display_pascos()
-# 	nii = link_of_pasco()
-# 	boat = input("Number please: ")
-# 	download_pasco(nii, boat)
-# 	print(len(yaw))
-# 	#links = link_of_pasco()
-# 	#download_pasco(links)
-# 	#driver.quit()
+if __name__ == '__main__':
+	name = input("Please enter the course name : ")
+	search_for_pasco(name)
+	yaw = display_pascos()
+	nii = link_of_pasco()
+	boat = input("Number please: ")
+	download_pasco(nii, boat)
+	#links = link_of_pasco()
+	#download_pasco(links)
+	#driver.quit()
 
