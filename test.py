@@ -19,9 +19,8 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 PATH = "past_questions/"
-PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
-chrome_options.add_experimental_option('prefs', PROFILE)
+chrome_options.add_argument("download.default_directory=past_questions/")
+
 driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
 
 
@@ -53,7 +52,7 @@ def newest(path):
     paths = [os.path.join(path, basename) for basename in files] 
     print(paths)
     print(max(paths, key=os.path.getctime))
-    
+
     return max(paths, key=os.path.getctime)
     
 

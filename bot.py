@@ -4,7 +4,7 @@ from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 PORT = int(os.environ.get("PORT", "8443"))
 
-TOKEN = "5092060662:AAFtQ7j7m4kD2Q-pwy_U-_iceEJpERTLkos"
+TOKEN = "5092060662:AAExdA2CkQ_ZMy_1dRKQnyItok8G47zvOuo"
 
 def start(update, context):
 	update.message.reply_text(f"""
@@ -142,11 +142,11 @@ disp.add_handler(CallbackQueryHandler(button))
 disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
 disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
 
-updater.start_polling()
-"""
+#updater.start_polling()
+#"""
 updater.start_webhook(listen="0.0.0.0",
 						port = PORT,
 						url_path=TOKEN,
 						webhook_url= "https://past-questions-bot.herokuapp.com/" + TOKEN)
-"""
+#"""
 updater.idle()
