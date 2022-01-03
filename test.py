@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import requests
 import time, re
 
-# Used when polling. 
+# Used when polling.  
 
 # from selenium.webdriver.chrome.service import Service
 # from webdriver_manager.chrome import ChromeDriverManager
