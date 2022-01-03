@@ -122,6 +122,7 @@ def handle_message(update, context):
 	search_for_pasco(name12)
 	lists = display_pascos()
 	if len(lists) == 0:
+		print(lists)
 		update.message.reply_text(f"Unfortunately, there are no past questions available for {name12}")
 		return None
 
