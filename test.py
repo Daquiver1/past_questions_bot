@@ -37,8 +37,8 @@ chrome_options.add_experimental_option('prefs', PROFILE)
 driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
 
 URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
-USER_NAME = os.environ.get(USER_NAME)
-PASSWORD = os.environ.get(PASSWORD)
+USER_NAME = os.environ.get("USER_NAME")
+PASSWORD = os.environ.get("PASSWORD")
 print(USER_NAME)
 print(PASSWORD)
 

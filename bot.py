@@ -5,7 +5,7 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 PORT = int(os.environ.get("PORT", "8443"))
 
 
-TOKEN = "5092060662:AAExdA2CkQ_ZMy_1dRKQnyItok8G47zvOuo"
+TOKEN = os.environ.get("TOKEN")
 
 def start(update, context):
 	update.message.reply_text(f"""
