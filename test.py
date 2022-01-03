@@ -47,8 +47,9 @@ login.send_keys(user_name) 			# The newline is interpreted as enter
 print("We have began")
 
 def newest(path):
+
     files = os.listdir(path)
-    paths = [os.path.join(path, basename) for basename in files] 
+    paths = [os.path.join(path, basename) for basename in files if basename.endswith(".pdf")] 
 
     return max(paths, key=os.path.getctime)
     

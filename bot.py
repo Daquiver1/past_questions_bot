@@ -3,7 +3,6 @@ from telegram.ext import CallbackQueryHandler
 from test import *
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 PORT = int(os.environ.get("PORT", "8443"))
-PATH = "/tmp"
 
 
 TOKEN = "5092060662:AAExdA2CkQ_ZMy_1dRKQnyItok8G47zvOuo"
@@ -104,8 +103,6 @@ def button(update, context):
 	choice.edit_message_text("Downloading past question, gimme a sec")
 	try:
 		file = download_pasco(site, choice.data)
-		files = os.listdir(PATH)
-		print(files)
 		choice.edit_message_text("Uploading past question, gimme a sec")
 		context.bot.sendDocument(chat_id=get_chat_id(update, context), document=open(file, 'rb'))
 	except OSError:
@@ -114,12 +111,12 @@ def button(update, context):
 
 def handle_message(update, context):
 	options = []
+	update.message.reply_text(f"You said {name12}")
 	name12 = clean_name(update.message.text)
 	if name12 == None:
 		update.message.reply_text("Please enter a valid past question name (eg. ugbs 104, dict 202)")
 		return None
 
-	update.message.reply_text(f"You said {name12}")
 	update.message.reply_text(f"Checking for {name12} past questions")
 	time.sleep(1)
 	search_for_pasco(name12)
