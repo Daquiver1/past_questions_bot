@@ -76,19 +76,19 @@ def get_chat_id(update, context):
 	A function that returns the chat id of the user
 	"""
 
-    chat_id = -1
+	chat_id = -1
 
-    if update.message is not None:
-        # text message
-        chat_id = update.message.chat.id
-    elif update.callback_query is not None:
-        # callback message
-        chat_id = update.callback_query.message.chat.id
-    elif update.poll is not None:
-        # answer in Poll
-        chat_id = context.bot_data[update.poll.id]
+	if update.message is not None:
+	    # text message
+	    chat_id = update.message.chat.id
+	elif update.callback_query is not None:
+	    # callback message
+	    chat_id = update.callback_query.message.chat.id
+	elif update.poll is not None:
+	    # answer in Poll
+	    chat_id = context.bot_data[update.poll.id]
 
-    return chat_id
+	return chat_id
 
 def clean_name(pasco_name):
 	"""
