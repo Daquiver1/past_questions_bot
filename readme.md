@@ -30,3 +30,4 @@ You can find the bot on https://t.me/legon_pasco_bot.
 
 ## Contribution
 Your contriubtions and suggestions are heartily welcome!
+You can clone, create a new branch then send a pull request. 
