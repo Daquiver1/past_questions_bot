@@ -111,7 +111,7 @@ def button(update, context):
 
 def handle_message(update, context):
 	options = []
-	update.message.reply_text(f"You said {name12}")
+	update.message.reply_text(f"You said {update.message.text}")
 	name12 = clean_name(update.message.text)
 	if name12 == None:
 		update.message.reply_text("Please enter a valid past question name (eg. ugbs 104, dict 202)")
