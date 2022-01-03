@@ -19,22 +19,23 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 PATH = "/tmp"
-#chrome_options.add_argument("download.default_directory=/tmp")
 
 
 
-# PATH = "C:\\Users\\Anita Agyepong\\Documents\\Daquiver's Quivers\\Python\\past_questions_bot\\past_questions"
+#PATH = "C:\\Users\\Anita Agyepong\\Documents\\Daquiver's Quivers\\Python\\past_questions_bot\\past_questions"
 PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
  	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
-# s = Service(ChromeDriverManager().install())
-# options = webdriver.ChromeOptions()
-# options.headless = True	
+#s = Service(ChromeDriverManager().install())
+#options = webdriver.ChromeOptions()
+#options.headless = True	
 chrome_options.add_experimental_option('prefs', PROFILE)
-# driver = webdriver.Chrome(service=s, options = options)
+#driver = webdriver.Chrome(service=s, options = options)
 # with open("cred\\credentials.txt", "r") as cred: # Retrieve credentials
 # 	user_name = cred.readline()
 # 	password = cred.readline()
+
 driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
+
 URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
 user_name = "10829272"
 password = "greenarrow14"
@@ -42,8 +43,10 @@ password = "greenarrow14"
 driver.get(URL)
 login = driver.find_element(By.NAME, "memberID")
 pwd = driver.find_element(By.NAME, "memberPassWord")
+button = driver.find_element(By.NAME, "logMeIn")
 pwd.send_keys(password)
 login.send_keys(user_name) 			# The newline is interpreted as enter
+button.click()
 print("We have began")
 
 def newest(path):

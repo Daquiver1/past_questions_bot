@@ -11,6 +11,7 @@ def start(update, context):
 	update.message.reply_text(f"""
 		Hello {update.message.from_user.username}
 		Welcome to Daquiver's Past Question bot
+		Please check out the /about section before you begin.
 		This bot is simple. 
 		Type the name of the past question you want and you are good to go. 
 		Use this format (eg. ugbs 104, dcit 103)
@@ -24,6 +25,7 @@ def help(update, context):
 	/help -> This Message
 	/contact -> Contact Owner
 	/donate -> Buy me a drink.
+	/about -> Why was this bot built?
 	""")
 
 def donate(update, context):
@@ -96,10 +98,11 @@ def contact(update, context):
 
 def about(update,context):
 	update.message.reply_text(f"""
-		Okay so this is a simple bot, it basically scrapes the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returns the past question.
-		It can only download past questions on the ug site. If it isn't available then legon haven't uploaded it to their site.
-		I built it because students find it difficult to access the site(you need to register) and get past questions, so this is a simplified version. Also I knew building this 
-		will challenge me and make me a better developer(it did.) So yeah. 
+		Okay so this is a simple bot nothing fancy or anything, it basically scrapes the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php)
+		and returns the past question.
+		It can only download past questions on the ug site. If the past question isn't available then legon haven't uploaded it to their site.
+		I built it because students find it difficult to access the site(you need to register) and also most don't know about the site(weird, I know), 
+		so this is a simplified version. Also I knew building this will challenge me and make me a better developer(it did.) So yeah. 
 		""")
 
 
@@ -135,7 +138,9 @@ def handle_message(update, context):
 		return None
 
 	update.message.reply_text("Yaay!!, we got some.")
-	for i in range(len(lists) - 1):
+	print(lists)
+
+	for i in range(len(lists)):
 		update.message.reply_text(str(i+1) + " " + lists[i])
 		options.append(InlineKeyboardButton(text=str(i+1), callback_data=str(i+1)))
 
