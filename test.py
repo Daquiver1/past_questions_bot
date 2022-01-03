@@ -18,7 +18,7 @@ chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
-#PATH = "/tmp"
+PATH = "/tmp"
 #chrome_options.add_argument("download.default_directory=/tmp")
 
 
