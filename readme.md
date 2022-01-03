@@ -8,7 +8,7 @@ This python bot crawls the University of Ghana past questions page, searches for
 
 ## Access
 
-You can find on the bot @legon_pasco_bot or https://t.me/legon_pasco_bot.
+You can find the bot @legon_pasco_bot or https://t.me/legon_pasco_bot.
 
 ## Getting Started
 
@@ -17,6 +17,10 @@ You can find on the bot @legon_pasco_bot or https://t.me/legon_pasco_bot.
 * If you are going with webhooks, you'll need to get a url from your server.
 
 ## Bot Preview
+![image1](images/1.jpg)
+![image2](images/2.jpg)
+![image3](images/3.jpg)
+![image4](images/4.jpg)
 
 # TODOS
 
