@@ -19,7 +19,7 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 PATH = "/tmp"
-chrome_options.add_argument("download.default_directory=past_questions/")
+chrome_options.add_argument("download.default_directory=/tmp")
 
 driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
 
