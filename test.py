@@ -37,15 +37,17 @@ chrome_options.add_experimental_option('prefs', PROFILE)
 driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
 
 URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
-user_name = "10829272"
-password = "greenarrow14"
+USER_NAME = os.environ.get(USER_NAME)
+PASSWORD = os.environ.get(PASSWORD)
+print(USER_NAME)
+print(PASSWORD)
 
 driver.get(URL)
 login = driver.find_element(By.NAME, "memberID")
 pwd = driver.find_element(By.NAME, "memberPassWord")
 button = driver.find_element(By.NAME, "logMeIn")
-pwd.send_keys(password)
-login.send_keys(user_name) 			# The newline is interpreted as enter
+pwd.send_keys(PASSWORD)
+login.send_keys(USER_NAME) 			# The newline is interpreted as enter
 button.click()
 print("We have began")
 
@@ -135,7 +137,7 @@ def download_pasco(links, choice):
 	wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
 	driver.back()
 	print("Downloading file, wait a min")
-	time.sleep(5)
+	time.sleep(2)
 	file = newest(PATH)
 	return file
 
