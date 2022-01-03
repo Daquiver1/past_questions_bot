@@ -3,7 +3,7 @@
 Unofficial telegram bot for Legon
 This python bot crawls the University of Ghana past questions page, searches for a past question and returns the specified past question based on the users choice. It uses python-telegram-bot, selenium, beautifulSoup4, requests, lxml.
 ```python
-	pip install python-telegram-bot beautifulsoup4 selenium requests lxml
+pip install python-telegram-bot beautifulsoup4 selenium requests lxml
 ```
 
 ## Access
