@@ -176,7 +176,7 @@ def handle_message(update, context):
 		options.append(InlineKeyboardButton(text=str(i+1), callback_data=str(i+1)))
 
 	reply_markup = InlineKeyboardMarkup([options])
-	context.bot.send_message(chat_id=get_chat_id(update, context), text='What one do you want to download?', reply_markup=reply_markup)
+	context.bot.send_message(chat_id=get_chat_id(update, context), text='Which one do you want to download?', reply_markup=reply_markup)
 
 def main(): 
 	updater = telegram.ext.Updater(TOKEN, use_context=True)
