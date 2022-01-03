@@ -18,23 +18,23 @@ chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
-PATH = "/tmp"
-chrome_options.add_argument("download.default_directory=/tmp")
+#PATH = "/tmp"
+#chrome_options.add_argument("download.default_directory=/tmp")
 
-driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
 
 
 # PATH = "C:\\Users\\Anita Agyepong\\Documents\\Daquiver's Quivers\\Python\\past_questions_bot\\past_questions"
-# PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-# 	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
+PROFILE = {"plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
+ 	               "download.default_directory": PATH, "download.extensions_to_open": ""}	# Open externally not with chrome's pdf viewer
 # s = Service(ChromeDriverManager().install())
 # options = webdriver.ChromeOptions()
 # options.headless = True	
-# options.add_experimental_option('prefs', PROFILE)
+options.add_experimental_option('prefs', PROFILE)
 # driver = webdriver.Chrome(service=s, options = options)
 # with open("cred\\credentials.txt", "r") as cred: # Retrieve credentials
 # 	user_name = cred.readline()
 # 	password = cred.readline()
+driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
 URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
 user_name = "10829272"
 password = "greenarrow14"
