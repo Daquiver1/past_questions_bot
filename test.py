@@ -48,10 +48,7 @@ print("We have began")
 
 def newest(path):
     files = os.listdir(path)
-    print(files)
     paths = [os.path.join(path, basename) for basename in files] 
-    print(paths)
-    print(max(paths, key=os.path.getctime))
 
     return max(paths, key=os.path.getctime)
     
