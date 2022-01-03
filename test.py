@@ -52,7 +52,9 @@ print("We have began")
 def newest(path):
 
     files = os.listdir(path)
+    print(files)
     paths = [os.path.join(path, basename) for basename in files if basename.endswith(".pdf")] 
+    print(paths)
 
     return max(paths, key=os.path.getctime)
     
