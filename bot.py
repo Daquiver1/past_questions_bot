@@ -144,7 +144,7 @@ def button(update, context):
 		choice.edit_message_text("Uploading past question, gimme a sec")
 		context.bot.sendDocument(chat_id=get_chat_id(update, context), document=open(file, 'rb'))
 	except:
-		choice.edit_message_text("Yikes, we encountered an error. Try again.\n If error persists view the help command and contact me.")
+		choice.edit_message_text("Yikes, we encountered an error. Try again.\n If error persists contact @Daquiver")
 
 
 def handle_message(update, context):
