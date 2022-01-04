@@ -6,7 +6,7 @@ This python bot crawls the University of Ghana past questions page, searches for
 pip install python-telegram-bot beautifulsoup4 selenium requests lxml
 ```
 
-## Access
+## Access 
 
 You can find the bot on https://t.me/legon_pasco_bot.
 
