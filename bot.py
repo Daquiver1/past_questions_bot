@@ -155,8 +155,8 @@ def handle_message(update, context):
 	"""
 
 	options = []
-	update.message.reply_text(f"You said {update.message.text}")
-	update.message.reply_text("Sorry for any inconvenience caused. We are currently under maintenance. Contact @Daquiver for more information.")
+	#update.message.reply_text(f"You said {update.message.text}")
+	update.message.reply_text("Hey. The bot is currently under maintentance. I'm working on fixing a bug. Sorry for any inconvenience caused. Contact @Daquiver for more information.")
 	# new_text = clean_name(update.message.text)
 	# if new_text == None:
 	# 	update.message.reply_text("Please enter a valid past question name (eg. ugbs 104, dict 202)")
