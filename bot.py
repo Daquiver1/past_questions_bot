@@ -156,37 +156,38 @@ def handle_message(update, context):
 
 	options = []
 	update.message.reply_text(f"You said {update.message.text}")
-	new_text = clean_name(update.message.text)
-	if new_text == None:
-		update.message.reply_text("Please enter a valid past question name (eg. ugbs 104, dict 202)")
-		return None
+	update.message.reply_text("Sorry for any inconvenience caused. We are currently under maintenance. Contact @Daquiver for more information.")
+	# new_text = clean_name(update.message.text)
+	# if new_text == None:
+	# 	update.message.reply_text("Please enter a valid past question name (eg. ugbs 104, dict 202)")
+	# 	return None
 
-	update.message.reply_text(f"Checking for {new_text} past questions")
-	time.sleep(1)
-	search_for_pasco(new_text)
-	lists = display_pascos()
-	if len(lists) == 0:				# Check if there are past questions available for users text.
-		update.message.reply_text(f"Unfortunately, there are no past questions available for {new_text}")
-		return None
+	# update.message.reply_text(f"Checking for {new_text} past questions")
+	# time.sleep(1)
+	# search_for_pasco(new_text)
+	# lists = display_pascos()
+	# if len(lists) == 0:				# Check if there are past questions available for users text.
+	# 	update.message.reply_text(f"Unfortunately, there are no past questions available for {new_text}")
+	# 	return None
 
-	update.message.reply_text("Yaay! we got some.")
+	# update.message.reply_text("Yaay! we got some.")
 
-	for i in range(len(lists)):
-		update.message.reply_text(str(i+1) + " " + lists[i])	# display available past questions.
-		options.append(InlineKeyboardButton(text=str(i+1), callback_data=str(i+1)))
+	# for i in range(len(lists)):
+	# 	update.message.reply_text(str(i+1) + " " + lists[i])	# display available past questions.
+	# 	options.append(InlineKeyboardButton(text=str(i+1), callback_data=str(i+1)))
 
-	reply_markup = InlineKeyboardMarkup([options])
-	context.bot.send_message(chat_id=get_chat_id(update, context), text='Which one do you want to download?', reply_markup=reply_markup)
+	# reply_markup = InlineKeyboardMarkup([options])
+	# context.bot.send_message(chat_id=get_chat_id(update, context), text='Which one do you want to download?', reply_markup=reply_markup)
 
 def main(): 
 	updater = telegram.ext.Updater(TOKEN, use_context=True)
 	disp = updater.dispatcher
 	disp.add_handler(telegram.ext.CommandHandler("start", start))
-	disp.add_handler(telegram.ext.CommandHandler("help", help))
-	disp.add_handler(telegram.ext.CommandHandler("about", about))
-	disp.add_handler(telegram.ext.CommandHandler("donate", donate))
-	disp.add_handler(CallbackQueryHandler(button))
-	disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
+	# disp.add_handler(telegram.ext.CommandHandler("help", help))
+	# disp.add_handler(telegram.ext.CommandHandler("about", about))
+	# disp.add_handler(telegram.ext.CommandHandler("donate", donate))
+	# disp.add_handler(CallbackQueryHandler(button))
+	# disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
 	disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
 
 	# for polling
