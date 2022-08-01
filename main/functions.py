@@ -1,13 +1,16 @@
-from selenium import webdriver
 import os
-from selenium.webdriver.support.ui import WebDriverWait
+import time
+from typing import Any, Dict, List
+
+import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from bs4 import BeautifulSoup
-import requests
-import time
+from selenium.webdriver.support.ui import WebDriverWait
 
 # Used when polling.
+
 
 # from selenium.webdriver.chrome.service import Service
 # from webdriver_manager.chrome import ChromeDriverManager
@@ -50,7 +53,7 @@ login_button.click()
 print("Logged in succesfully")
 
 
-def get_past_question_path(path):
+def get_past_question_path(path: str) -> str:
     """
     A function that returns the path of the downloaded file.
     It checks the past questions directory and returns the most recent one.
@@ -64,7 +67,7 @@ def get_past_question_path(path):
     return max(pdfs, key=os.path.getctime)
 
 
-def search_for_past_question(cleaned_pasco_name):
+def search_for_past_question(cleaned_pasco_name: str) -> None:
     """
     A function to search for past question.
     It takes in the concatenated course name and course code.
@@ -79,7 +82,7 @@ def search_for_past_question(cleaned_pasco_name):
     search_button.click()
 
 
-def get_list_of_past_question():
+def get_list_of_past_question() -> List[str]:
     """
     A function to retrieve the names, year and semester of
     past questions displayed.
@@ -92,7 +95,9 @@ def get_list_of_past_question():
 
     past_question_page = requests.get(driver.current_url)
     past_question_content = BeautifulSoup(past_question_page.content, "lxml")
-    past_question_list = past_question_content.find_all("div", class_="item biblioRecord")
+    past_question_list = past_question_content.find_all(
+        "div", class_="item biblioRecord"
+    )
 
     if past_question_list:
         for past_question in past_question_list:
@@ -114,7 +119,7 @@ def get_list_of_past_question():
     return filtered_past_question_list
 
 
-def get_links_of_past_question():
+def get_links_of_past_question() -> Dict[int, Any]:
     """
     A function to retrieve the links of all the past questions displayed.
 
@@ -124,7 +129,8 @@ def get_links_of_past_question():
 
     past_question_page = requests.get(driver.current_url)
     past_question_content = BeautifulSoup(past_question_page.content, "lxml")
-    past_question_list = past_question_content.find_all("a", class_="titleField")
+    past_question_list = past_question_content.find_all(
+        "a", class_="titleField")
 
     for past_question_index in range(
         1, len(past_question_list) + 1
@@ -137,7 +143,7 @@ def get_links_of_past_question():
     return past_question_links
 
 
-def get_past_question(past_question_links, choice):
+def get_past_question(past_question_links: Dict[int, Any], choice: int) -> str:
     """
     A function to download past questions.
     It takes in the links of the past questions and the users choice.
@@ -154,7 +160,8 @@ def get_past_question(past_question_links, choice):
         "arguments[0].click();", file
     )  # screen displayed is a frame, so adapts to a frame.
     wait = WebDriverWait(driver, 10)
-    wait.until(EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe")))
+    wait.until(EC.frame_to_be_available_and_switch_to_it(
+        (By.CLASS_NAME, "cboxIframe")))
     wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
     driver.back()
     time.sleep(2)  # wait for file to be downloaded before moving on.

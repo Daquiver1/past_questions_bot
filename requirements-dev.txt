@@ -1,6 +1,5 @@
 -r requirements.txt
-black
-flake8
-mypy
-isort
-pre-commit
+autopep8==1.6.0
+black==22.6.0
+isort==5.10.1
+pre-commit==2.19.0

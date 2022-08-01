@@ -6,7 +6,7 @@ This python bot crawls the University of Ghana past questions page, searches for
 pip install python-telegram-bot beautifulsoup4 selenium requests lxml
 ```
 
-## Access 
+## Access
 
 You can find the bot on https://t.me/legon_pasco_bot.
 
@@ -27,7 +27,8 @@ You can find the bot on https://t.me/legon_pasco_bot.
 - [ ] Include files in the next page.
 - [ ] Add an all feature which will download all the available past questions specified.
 - [ ] Let the options be displayed in one message instead of a plethora of messages.
+- [ ] Add test cases.
 
 ## Contribution
 Your contriubtions and suggestions are heartily welcome!
-You can clone, create a new branch then send a pull request. 
+You can clone, create a new branch then send a pull request.

@@ -1,25 +1,28 @@
-import telegram.ext, os
-from telegram.ext import CallbackQueryHandler
-from functions import *
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+import os
 import re
+from typing import Any, List, Match, Union
 
+import telegram.ext
+from functions import *
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackQueryHandler
+from typing_extensions import reveal_type
 
 PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ.get("TOKEN")
 
 
-def start(update, context):
+def start(update: Any, context: Any) -> None:
     """
     Start command
     """
 
     update.message.reply_text(
         f"""
-		Hello {update.message.from_user.username}
-		Welcome to Daquiver's Past Questions bot
-		This bot is simple. 
-		Type the name of the past question, select the one you want and it'll be sent to you. 
+	Hello {update.message.from_user.username}
+	Welcome to Daquiver's Past Questions bot
+		This bot is simple.
+		Type the name of the past question, select the one you want and it'll be sent to you.
 		Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )
 		Check out the /about section for more info.
 
@@ -27,7 +30,7 @@ def start(update, context):
     )
 
 
-def help(update, context):
+def help(update: Any, context: Any) -> None:
     """
     Help command
     """
@@ -45,7 +48,7 @@ def help(update, context):
     )
 
 
-def donate(update, context):
+def donate(update: Any, context: Any) -> None:
     """
     Donate command
     """
@@ -60,7 +63,7 @@ def donate(update, context):
     )
 
 
-def contact(update, context):
+def contact(update: Any, context: Any) -> None:
     """
     Contact command
     """
@@ -77,26 +80,26 @@ def contact(update, context):
     )
 
 
-def about(update, context):
+def about(update: Any, context: Any) -> None:
     """
     About command
     """
 
     update.message.reply_text(
         f"""
-		Hey I'm Christian, Christian Abrokwa. A student of the University of Ghana. During the day I'm a software engineer and in the nights I'm a superhero. Somewhere in between, I'm a student. 
+		Hey I'm Christian, Christian Abrokwa. A student of the University of Ghana. During the day I'm a software engineer and in the nights I'm a superhero. Somewhere in between, I'm a student.
 		So why did I build this?
 
 		I noticed there was a bottleneck with the current system of getting a past question. It took a student about a week to get access to a past question.
 		So, I built and developed this system which allows University of Ghana students to download past questions under 30 seconds.
 		It works by scraping the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returning files matching the users criteria.
-		It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question. 
+		It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question.
 		This bot was built on Janurary 4th, 2022.
 		"""
     )
 
 
-def get_chat_id(update, context):
+def get_chat_id(update: Any, context: Any) -> Any:
     """
     A function that returns the chat id of the user
     """
@@ -116,7 +119,7 @@ def get_chat_id(update, context):
     return chat_id
 
 
-def validate_user_input(past_question_name):
+def validate_user_input(past_question_name: str) -> Union[Match[str], Any]:
     """
     A function that returns the cleaned name of user's text.
     Returns None if user doesn't satisfy a criteria.
@@ -129,9 +132,10 @@ def validate_user_input(past_question_name):
     ):  # if it's numbers and text combined(no space)
         temp = re.compile("([a-zA-Z]+)([0-9]+)")
         result = temp.match(past_question_name)
-        if result == None:
+        if result:
+            result = result.groups()
+        else:
             return result
-        result = result.groups()
     else:
         result = past_question_name.split()
 
@@ -155,7 +159,7 @@ def validate_user_input(past_question_name):
     )  # The site's search won't work if it isn't spaced.
 
 
-def button(update, context):
+def button(update: Any, context: Any) -> None:
     """
     Callback function, takes the user's choice and returns a past question assigned to their choice.
     """
@@ -177,14 +181,14 @@ def button(update, context):
         )
 
 
-def handle_message(update, context):
+def handle_message(update: Any, context: Any) -> None:
     """
     A function to handle user messages.
     Takes the text and returns options of the avaliable of the text.
     Assuming it matched the criteria specified in clean_name()
     """
 
-    options = []
+    options: List[Any] = []
     update.message.reply_text(f"You said {update.message.text}.")
     cleaned_user_input = validate_user_input(update.message.text)
     if cleaned_user_input == None:
@@ -212,7 +216,8 @@ def handle_message(update, context):
 
     for past_question_index in range(len(past_question_list)):
         update.message.reply_text(
-            str(past_question_index + 1) + " " + past_question_list[past_question_index]
+            str(past_question_index + 1) + " " +
+            past_question_list[past_question_index]
         )  # display available past questions.
         options.append(
             InlineKeyboardButton(
@@ -229,7 +234,7 @@ def handle_message(update, context):
     )
 
 
-def main():
+def main() -> None:
     updater = telegram.ext.Updater(TOKEN, use_context=True)
     disp = updater.dispatcher
     disp.add_handler(telegram.ext.CommandHandler("start", start))
