@@ -1,13 +1,16 @@
+import logging
 import os
 import re
 from typing import Any, List, Match, Union
 
 import telegram.ext
-from functions import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler
 from typing_extensions import reveal_type
 
+from functions import *
+
+logging.basicConfig(level=logging.DEBUG)
 PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ.get("TOKEN")
 
@@ -179,6 +182,7 @@ def button(update: Any, context: Any) -> None:
         choice.edit_message_text(
             "Oh no, we encountered an error. Try again.\n If error persists contact @Daquiver"
         )
+        logging.error("Failed to download past question", exc_info=True)
 
 
 def handle_message(update: Any, context: Any) -> None:
@@ -197,9 +201,12 @@ def handle_message(update: Any, context: Any) -> None:
         )
         return None
 
+    logging.info(
+        f"{update.message.from_user.username} is searching for {cleaned_user_input}.")
     update.message.reply_text(
         f"Searching database for {cleaned_user_input} past questions."
     )
+
     search_for_past_question(cleaned_user_input)
     past_question_list = get_list_of_past_question()
     if (
