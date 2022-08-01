@@ -36,7 +36,7 @@ try:
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
-    PATH = "/files"
+    PATH = "../../files"
     PROFILE = {
         "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
         "download.default_directory": PATH,
@@ -70,7 +70,7 @@ def get_latest_past_question_path(path: str) -> str:
     A function that returns the path of the downloaded file.
     It checks the past questions directory and returns the most recent one.
     """
-
+    print(os.getcwd())
     files = os.listdir(path)
     pdfs = [
         os.path.join(path, basename) for basename in files if basename.endswith(".pdf")
