@@ -6,15 +6,15 @@ from typing import Any, Dict, List
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
+
+# Polling Selenium setup
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Used when polling.
-
-
-# from selenium.webdriver.chrome.service import Service
-# from webdriver_manager.chrome import ChromeDriverManager
 # PATH = "path to folder"
 # s = Service(ChromeDriverManager().install())
 # options = webdriver.ChromeOptions()
@@ -27,9 +27,9 @@ USER_NAME = os.environ.get("USER_NAME")
 PASSWORD = os.environ.get("PASSWORD")
 
 # Logging setup
-logging.basicConfig(level=logging.debug)
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s: %(message)s")
 
-# Selenium Setup
+# Deployed Selenium Setup
 try:
     chrome_options = webdriver.ChromeOptions()
     chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")

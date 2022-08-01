@@ -9,7 +9,7 @@ from telegram.ext import CallbackQueryHandler
 
 from functions import *
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s: %(message)s")
 PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ.get("TOKEN")
 
@@ -21,12 +21,13 @@ def start(update: Any, context: Any) -> None:
 
     update.message.reply_text(
         f"""
-		Hello {update.message.from_user.username}
-		Welcome to Daquiver's Past Questions bot
-		This bot is simple.
-		Type the name of the past question, select the one you want and it'll be sent to you.
-		Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )
-		Check out the /about section for more info.
+	Hello {update.message.from_user.username}
+	Welcome to Daquiver's Past Questions bot
+
+	This bot is simple.
+	Type the name of the past question, select the one you want and it'll be sent to you.
+	Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )
+	Check out the /about section for more info.
 
 		"""
     )
@@ -56,13 +57,7 @@ def donate(update: Any, context: Any) -> None:
     """
 
     update.message.reply_text(
-        f"""
-		Name: Christian Abrokwa
-		Number: 0547642843
-		Thank you for selecting this option. You are doing the Lord's work.
-		This will go a long way in motiviating me to contribute to making the Legon experience smoother.
-		"""
-    )
+        "Thanks for donating. Details below.\nName: Christian Abrokwa\nNumber: 0547642843")
 
 
 def contact(update: Any, context: Any) -> None:
@@ -74,9 +69,13 @@ def contact(update: Any, context: Any) -> None:
         f"""
 		You can contact me vai the following
 		Gmail: Cabrokwa11@gmail.com
+
 		Telegram: @Daquiver
+
 		Github: https://github.com/Daquiver1
+
 		Twitter: https://www.twitter.com/daquiver1
+
 		LinkedIn: https://www.linkedin.com/in/daquiver
 		"""
     )
@@ -89,14 +88,16 @@ def about(update: Any, context: Any) -> None:
 
     update.message.reply_text(
         f"""
-		Hey I'm Christian, Christian Abrokwa. A student of the University of Ghana. During the day I'm a software engineer and in the nights I'm a superhero. Somewhere in between, I'm a student.
-		So why did I build this?
+		Hey I'm Christian, Christian Abrokwa. A student of the University of Ghana. During the day I'm a software engineer and in the nights I'm a superhero. Somewhere in between, I'm a student.\nSo why did I build this?
 
 		I noticed there was a bottleneck with the current system of getting a past question. It took a student about a week to get access to a past question.
 		So, I built and developed this system which allows University of Ghana students to download past questions under 30 seconds.
-		It works by scraping the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returning files matching the users criteria.
-		It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question.
-		This bot was built on Janurary 4th, 2022.
+
+        It works by scraping the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returning files matching the users criteria.
+
+        It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question.
+
+        * This bot was built on Janurary 4th, 2022.
 		"""
     )
 
@@ -267,4 +268,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    print("Running bot")
     main()
