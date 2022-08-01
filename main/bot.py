@@ -6,7 +6,6 @@ from typing import Any, List, Match, Union
 import telegram.ext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler
-from typing_extensions import reveal_type
 
 from functions import *
 
