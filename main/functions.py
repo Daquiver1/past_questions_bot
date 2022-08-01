@@ -70,7 +70,6 @@ def get_latest_past_question_path(path: str) -> str:
     A function that returns the path of the downloaded file.
     It checks the past questions directory and returns the most recent one.
     """
-    logging.info(os.getcwd())
     files = os.listdir(path)
     pdfs = [
         os.path.join(path, basename) for basename in files if basename.endswith(".pdf")
