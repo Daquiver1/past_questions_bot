@@ -1,204 +1,271 @@
-import telegram.ext, os
+import logging
+import os
+import re
+from typing import Any, List, Match, Union
+
+import telegram.ext
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler
-from test import *
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+from typing_extensions import reveal_type
+
+from functions import *
+
+logging.basicConfig(level=logging.DEBUG)
 PORT = int(os.environ.get("PORT", "8443"))
-
-
 TOKEN = os.environ.get("TOKEN")
 
-def start(update, context):
-	"""
-	Start command
-	"""
 
-	update.message.reply_text(f"""
+def start(update: Any, context: Any) -> None:
+    """
+    Start command
+    """
+
+    update.message.reply_text(
+        f"""
 		Hello {update.message.from_user.username}
-		Welcome to Daquiver's Past Question bot
-		Please check out the /about section before you begin.
-		This bot is simple. 
-		Type the name of the past question you want and you are good to go. 
-		Use this format (eg. ugbs 104, dcit 103)
-		""")
+		Welcome to Daquiver's Past Questions bot
+		This bot is simple.
+		Type the name of the past question, select the one you want and it'll be sent to you.
+		Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )
+		Check out the /about section for more info.
 
-def help(update, context):
-	"""
-	Help command
-	"""
+		"""
+    )
 
-	update.message.reply_text("""
+
+def help(update: Any, context: Any) -> None:
+    """
+    Help command
+    """
+
+    update.message.reply_text(
+        """
 	The following commands are available:
 
-	/start -> Welcome Message
-	/help -> This Message
-	/contact -> Contact Owner
 	/donate -> Buy me a drink.
-	/about -> Why was this bot built?
-	""")
-
-def donate(update, context):
+	/start -> Welcome Message.
+	/help -> This Message.
+	/contact -> My contact details.
+	/about -> Why did I build this?
 	"""
-	Donate command
-	"""
+    )
 
-	update.message.reply_text(f"""
+
+def donate(update: Any, context: Any) -> None:
+    """
+    Donate command
+    """
+
+    update.message.reply_text(
+        f"""
+		Name: Christian Abrokwa
 		Number: 0547642843
-		""")
+		Thank you for selecting this option. You are doing the Lord's work.
+		This will go a long way in motiviating me to contribute to making the Legon experience smoother.
+		"""
+    )
 
-def contact(update, context):
-	"""
-	Contact command
-	"""
 
-	update.message.reply_text(f"""
-		You can contact me through the following
+def contact(update: Any, context: Any) -> None:
+    """
+    Contact command
+    """
+
+    update.message.reply_text(
+        f"""
+		You can contact me vai the following
 		Gmail: Cabrokwa11@gmail.com
 		Telegram: @Daquiver
 		Github: https://github.com/Daquiver1
-		""")
-
-def about(update,context):
-	"""
-	About command
-	"""
-
-	update.message.reply_text(f"""
-		Okay so this is a simple bot nothing fancy or anything, it basically scrapes the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php)
-		and returns the past question.
-		It can only download past questions on the ug site. If the past question isn't available then legon haven't uploaded it to their site.
-		I built it because students find it difficult to access the site(you need to register) and also most don't know about the site(weird, I know), 
-		so this is a simplified version. Also I knew building this will challenge me and make me a better developer(it did.) So yeah. 
-		""")
+		Twitter: https://www.twitter.com/daquiver1
+		LinkedIn: https://www.linkedin.com/in/daquiver
+		"""
+    )
 
 
-def get_chat_id(update, context):
-	"""
-	A function that returns the chat id of the user
-	"""
+def about(update: Any, context: Any) -> None:
+    """
+    About command
+    """
 
-	chat_id = -1
+    update.message.reply_text(
+        f"""
+		Hey I'm Christian, Christian Abrokwa. A student of the University of Ghana. During the day I'm a software engineer and in the nights I'm a superhero. Somewhere in between, I'm a student.
+		So why did I build this?
 
-	if update.message is not None:
-	    # text message
-	    chat_id = update.message.chat.id
-	elif update.callback_query is not None:
-	    # callback message
-	    chat_id = update.callback_query.message.chat.id
-	elif update.poll is not None:
-	    # answer in Poll
-	    chat_id = context.bot_data[update.poll.id]
-
-	return chat_id
-
-def clean_name(pasco_name):
-	"""
-	A function that returns the cleaned name of user's text.
-	Returns None if user doesn't satisfy a criteria.
-
-	Output: String type.
-	"""
-
-	if len(pasco_name.split()) == 1:		# if it's numbers and text combined(no space)
-		temp = re.compile("([a-zA-Z]+)([0-9]+)")
-		res = temp.match(pasco_name)
-		if res == None:
-			return res
-		res = res.groups()
-	else:
-		res = pasco_name.split()
-
-	pasco_name = res[0]			# Course name
-	pasco_code = res[-1]		# Course code
-
-	if pasco_name.isalpha() == False:
-		res = None
-		return res
-
-	if len(pasco_name) != 4:	# Legon course names have 4 characters.
-		res = None
-		return res 
-
-	if pasco_code.isnumeric() == False:
-		res = None
-		return res
-
-	if len(pasco_code) != 3:	# Legon course codes have 3 characters.
-		res = None
-		return res			
-
-	pasco = pasco_name + " " + pasco_code 	# The site's search won't work if it isn't spaced.
-	return pasco
+		I noticed there was a bottleneck with the current system of getting a past question. It took a student about a week to get access to a past question.
+		So, I built and developed this system which allows University of Ghana students to download past questions under 30 seconds.
+		It works by scraping the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returning files matching the users criteria.
+		It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question.
+		This bot was built on Janurary 4th, 2022.
+		"""
+    )
 
 
-def button(update, context):
-	"""
-	Callback function, takes the user's choice and returns a past question assigned to their choice.
-	"""
-	choice = update.callback_query
-	choice.answer()			# callback queries have to be answered. (don't fully understand why)
-	site = link_of_pasco()
-	choice.edit_message_text(text=f"Selected option: {choice.data}")
-	choice.edit_message_text("Downloading past question, gimme a sec")
-	try:
-		file = download_pasco(site, choice.data)
-		choice.edit_message_text("Uploading past question, gimme a sec")
-		context.bot.sendDocument(chat_id=get_chat_id(update, context), document=open(file, 'rb'))
-	except:
-		choice.edit_message_text("Yikes, we encountered an error. Try again.\n If error persists contact @Daquiver")
+def get_chat_id(update: Any, context: Any) -> Any:
+    """
+    A function that returns the chat id of the user
+    """
+
+    chat_id = -1
+
+    if update.message is not None:
+        # text message
+        chat_id = update.message.chat.id
+    elif update.callback_query is not None:
+        # callback message
+        chat_id = update.callback_query.message.chat.id
+    elif update.poll is not None:
+        # answer in Poll
+        chat_id = context.bot_data[update.poll.id]
+
+    return chat_id
 
 
-def handle_message(update, context):
-	"""
-	A function to handle user messages. 
-	Takes the text and returns options of the avaliable of the text. 
-	Assuming it matched the criteria specified in clean_name()
-	"""
+def validate_user_input(past_question_name: str) -> Union[Match[str], Any]:
+    """
+    A function that returns the cleaned name of user's text.
+    Returns None if user doesn't satisfy a criteria.
 
-	options = []
-	#update.message.reply_text(f"You said {update.message.text}")
-	update.message.reply_text("Hey. The bot is currently under maintentance. I'm working on fixing a bug. Sorry for any inconvenience caused. Contact @Daquiver for more information.")
-	# new_text = clean_name(update.message.text)
-	# if new_text == None:
-	# 	update.message.reply_text("Please enter a valid past question name (eg. ugbs 104, dict 202)")
-	# 	return None
+    Output: String type.
+    """
 
-	# update.message.reply_text(f"Checking for {new_text} past questions")
-	# time.sleep(1)
-	# search_for_pasco(new_text)
-	# lists = display_pascos()
-	# if len(lists) == 0:				# Check if there are past questions available for users text.
-	# 	update.message.reply_text(f"Unfortunately, there are no past questions available for {new_text}")
-	# 	return None
+    if (
+        len(past_question_name.split()) == 1
+    ):  # if it's numbers and text combined(no space)
+        temp = re.compile("([a-zA-Z]+)([0-9]+)")
+        result = temp.match(past_question_name)
+        if result:
+            result = result.groups()
+        else:
+            return result
+    else:
+        result = past_question_name.split()
 
-	# update.message.reply_text("Yaay! we got some.")
+    course_name = result[0]  # Course name
+    course_code = result[-1]  # Course code
 
-	# for i in range(len(lists)):
-	# 	update.message.reply_text(str(i+1) + " " + lists[i])	# display available past questions.
-	# 	options.append(InlineKeyboardButton(text=str(i+1), callback_data=str(i+1)))
+    if course_name.isalpha() == False:
+        return None
 
-	# reply_markup = InlineKeyboardMarkup([options])
-	# context.bot.send_message(chat_id=get_chat_id(update, context), text='Which one do you want to download?', reply_markup=reply_markup)
+    if len(course_name) != 4:  # Legon course names have 4 characters.
+        return None
 
-def main(): 
-	updater = telegram.ext.Updater(TOKEN, use_context=True)
-	disp = updater.dispatcher
-	disp.add_handler(telegram.ext.CommandHandler("start", start))
-	# disp.add_handler(telegram.ext.CommandHandler("help", help))
-	# disp.add_handler(telegram.ext.CommandHandler("about", about))
-	# disp.add_handler(telegram.ext.CommandHandler("donate", donate))
-	# disp.add_handler(CallbackQueryHandler(button))
-	# disp.add_handler(telegram.ext.CommandHandler("contact", contact)) 
-	disp.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message))
+    if course_code.isnumeric() == False:
+        return None
 
-	# for polling
-	#updater.start_polling()
-	#"""
-	updater.start_webhook(listen="0.0.0.0",
-							port = PORT,
-							url_path=TOKEN,
-							webhook_url= "https://past-questions-bot.herokuapp.com/" + TOKEN)
-	#"""
-	updater.idle()
+    if len(course_code) != 3:  # Legon course codes have 3 characters.
+        return None
 
-if __name__ == '__main__':
-	main()
+    return (
+        course_name + " " + course_code
+    )  # The site's search won't work if it isn't spaced.
+
+
+def button(update: Any, context: Any) -> None:
+    """
+    Callback function, takes the user's choice and returns a past question assigned to their choice.
+    """
+    choice = update.callback_query
+    choice.answer()  # callback queries have to be answered. (don't fully understand why)
+    past_question_links = get_links_of_past_question()
+
+    choice.edit_message_text(text=f"You selected {choice.data}")
+    choice.edit_message_text("Downloading past question...")
+    try:
+        file = get_past_question(past_question_links, choice.data)
+        choice.edit_message_text("Uploading past question...")
+        context.bot.sendDocument(
+            chat_id=get_chat_id(update, context), document=open(file, "rb")
+        )
+    except:
+        choice.edit_message_text(
+            "Oh no, we encountered an error. Try again.\n If error persists contact @Daquiver"
+        )
+        logging.error("Failed to download past question", exc_info=True)
+
+
+def handle_message(update: Any, context: Any) -> None:
+    """
+    A function to handle user messages.
+    Takes the text and returns options of the avaliable of the text.
+    Assuming it matched the criteria specified in clean_name()
+    """
+
+    options: List[Any] = []
+    update.message.reply_text(f"You said {update.message.text}.")
+    cleaned_user_input = validate_user_input(update.message.text)
+    if cleaned_user_input == None:
+        update.message.reply_text(
+            "Please enter a valid past question name (eg. dcit 103, math 122, ugrc 110)."
+        )
+        return None
+
+    logging.info(
+        f"{update.message.from_user.username} is searching for {cleaned_user_input}.")
+    update.message.reply_text(
+        f"Searching database for {cleaned_user_input} past questions."
+    )
+
+    search_for_past_question(cleaned_user_input)
+    past_question_list = get_list_of_past_question()
+    if (
+        len(past_question_list) == 0
+    ):  # Check if there are past questions available for users text.
+        update.message.reply_text(
+            f"Unfortunately, there are no {cleaned_user_input} past questions."
+        )
+        return None
+
+    update.message.reply_text(
+        f"We found {len(past_question_list)} {cleaned_user_input} past questions."
+    )
+
+    for past_question_index in range(len(past_question_list)):
+        update.message.reply_text(
+            str(past_question_index + 1) + " " +
+            past_question_list[past_question_index]
+        )  # display available past questions.
+        options.append(
+            InlineKeyboardButton(
+                text=str(past_question_index + 1),
+                callback_data=str(past_question_index + 1),
+            )
+        )
+
+    reply_markup = InlineKeyboardMarkup([options])
+    context.bot.send_message(
+        chat_id=get_chat_id(update, context),
+        text="Which one do you want to download?",
+        reply_markup=reply_markup,
+    )
+
+
+def main() -> None:
+    updater = telegram.ext.Updater(TOKEN, use_context=True)
+    disp = updater.dispatcher
+    disp.add_handler(telegram.ext.CommandHandler("start", start))
+    disp.add_handler(telegram.ext.CommandHandler("help", help))
+    disp.add_handler(telegram.ext.CommandHandler("about", about))
+    disp.add_handler(telegram.ext.CommandHandler("donate", donate))
+    disp.add_handler(CallbackQueryHandler(button))
+    disp.add_handler(telegram.ext.CommandHandler("contact", contact))
+    disp.add_handler(
+        telegram.ext.MessageHandler(telegram.ext.Filters.text, handle_message)
+    )
+
+    # for polling
+    # updater.start_polling()
+    # """
+    updater.start_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TOKEN,
+        webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
+    )
+    # """
+    updater.idle()
+
+
+if __name__ == "__main__":
+    main()
