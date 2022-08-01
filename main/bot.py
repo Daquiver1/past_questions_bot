@@ -22,8 +22,8 @@ def start(update: Any, context: Any) -> None:
 
     update.message.reply_text(
         f"""
-	Hello {update.message.from_user.username}
-	Welcome to Daquiver's Past Questions bot
+		Hello {update.message.from_user.username}
+		Welcome to Daquiver's Past Questions bot
 		This bot is simple.
 		Type the name of the past question, select the one you want and it'll be sent to you.
 		Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )
