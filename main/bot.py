@@ -174,7 +174,10 @@ def button(update: Any, context: Any) -> None:
     choice.edit_message_text("Downloading past question...")
     try:
         file = get_past_question(past_question_links, choice.data)
-        logging.info(f"Sending {file} to {update.message.from_user.username}")
+        logging.info("Christian")
+        logging.info(update)
+        logging.info(
+            f"Sending {file} to {update.from_user.username}.")
         choice.edit_message_text("Uploading past question...")
         context.bot.sendDocument(
             chat_id=get_chat_id(update, context), document=open(file, "rb")
