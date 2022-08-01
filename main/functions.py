@@ -36,7 +36,7 @@ try:
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
-    PATH = "../tmp"
+    PATH = "/files"
     PROFILE = {
         "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
         "download.default_directory": PATH,
@@ -76,7 +76,7 @@ def get_latest_past_question_path(path: str) -> str:
         os.path.join(path, basename) for basename in files if basename.endswith(".pdf")
     ]
 
-    logging.info("The latest file is {pdfs}")
+    logging.info(f"The latest file is {pdfs}")
     return max(pdfs, key=os.path.getctime)
 
 

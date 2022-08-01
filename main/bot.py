@@ -93,11 +93,11 @@ def about(update: Any, context: Any) -> None:
 		I noticed there was a bottleneck with the current system of getting a past question. It took a student about a week to get access to a past question.
 		So, I built and developed this system which allows University of Ghana students to download past questions under 30 seconds.
 
-        It works by scraping the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returning files matching the users criteria.
+    It works by scraping the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returning files matching the users criteria.
 
-        It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question.
+    It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question.
 
-        * This bot was built on Janurary 4th, 2022.
+    * This bot was built on Janurary 4th, 2022.
 		"""
     )
 
