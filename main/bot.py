@@ -125,7 +125,7 @@ def get_chat_id(update: Any, context: Any) -> Any:
 def validate_user_input(past_question_name: str) -> Union[Match[str], Any]:
     """
     A function that returns the cleaned name of user's text.
-    Returns None if user doesn't satisfy a criteria.
+    Returns None if user input doesn't satisfy a criteria.
 
     Output: String type.
     """
@@ -157,9 +157,11 @@ def validate_user_input(past_question_name: str) -> Union[Match[str], Any]:
     if len(course_code) != 3:  # Legon course codes have 3 characters.
         return None
 
-    return (
-        course_name + " " + course_code
-    )  # The site's search won't work if it isn't spaced.
+    cleaned_user_input = (course_name + " " + course_code)
+    logging.info(
+        f"User input has been changed from {past_question_name} to {cleaned_user_input}")
+    # The site's search won't work if it isn't spaced.
+    return cleaned_user_input
 
 
 def button(update: Any, context: Any) -> None:
@@ -169,6 +171,10 @@ def button(update: Any, context: Any) -> None:
     choice = update.callback_query
     choice.answer()  # callback queries have to be answered. (don't fully understand why)
     past_question_links = get_links_of_past_question()
+    if len(past_question_list) == 0:
+        update.message.reply_text(
+            "Unexpected error. Please try again. If error persists contact @Daquiver.")
+        return None
 
     choice.edit_message_text(text=f"You selected {choice.data}")
     choice.edit_message_text("Downloading past question...")
@@ -180,10 +186,10 @@ def button(update: Any, context: Any) -> None:
             chat_id=get_chat_id(update, context), document=open(file, "rb")
         )
     except:
-        choice.edit_message_text(
-            "Oh no, we encountered an error. Try again.\n If error persists contact @Daquiver"
-        )
         logging.error("Failed to download past question", exc_info=True)
+        choice.edit_message_text(
+            "Unexpected error. Try again.\n If error persists contact @Daquiver."
+        )
 
 
 def handle_message(update: Any, context: Any) -> None:
@@ -193,7 +199,6 @@ def handle_message(update: Any, context: Any) -> None:
     Assuming it matched the criteria specified in clean_name()
     """
 
-    options: List[Any] = []
     update.message.reply_text(f"You said {update.message.text}.")
     cleaned_user_input = validate_user_input(update.message.text)
     if cleaned_user_input == None:
@@ -208,7 +213,11 @@ def handle_message(update: Any, context: Any) -> None:
         f"Searching database for {cleaned_user_input} past questions."
     )
 
-    search_for_past_question(cleaned_user_input)
+    if search_for_past_question(cleaned_user_input) == 1:
+        update.message.reply_text(
+            f"Error searching for {cleaned_user_input}. Try again.")
+        return None
+
     past_question_list = get_list_of_past_question()
     if (
         len(past_question_list) == 0
@@ -269,5 +278,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    print("Running bot")
     main()
