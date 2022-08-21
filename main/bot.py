@@ -199,6 +199,7 @@ def handle_message(update: Any, context: Any) -> None:
     Assuming it matched the criteria specified in clean_name()
     """
 
+    options = []
     update.message.reply_text(f"You said {update.message.text}.")
     cleaned_user_input = validate_user_input(update.message.text)
     if cleaned_user_input == None:
