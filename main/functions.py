@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+
 # Used when polling.
 # from webdriver_manager.chrome import ChromeDriverManager
 # PATH = "path to folder"
@@ -21,11 +22,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 # options = webdriver.ChromeOptions()
 # options.headless = True
 # driver = webdriver.Chrome(service=s, options = options)
-
 # Constants
 URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
 USER_NAME = os.environ.get("USER_NAME")
 PASSWORD = os.environ.get("PASSWORD")
+
 
 # Logging setup
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s: %(message)s")

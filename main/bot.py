@@ -266,14 +266,13 @@ def main() -> None:
 
     # for polling
     # updater.start_polling()
-    # """
+
     updater.start_webhook(
         listen="0.0.0.0",
         port=PORT,
         url_path=TOKEN,
         webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
     )
-    # """
     updater.idle()
 
 
