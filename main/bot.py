@@ -171,7 +171,7 @@ def button(update: Any, context: Any) -> None:
     choice = update.callback_query
     choice.answer()  # callback queries have to be answered. (don't fully understand why)
     past_question_links = get_links_of_past_question()
-    if len(past_question_list) == 0:
+    if len(past_question_links) == 0:
         update.message.reply_text(
             "Unexpected error. Please try again. If error persists contact @Daquiver.")
         return None
