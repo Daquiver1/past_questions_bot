@@ -14,7 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from bot import chat_id, username
+from bot import chat_id
 
 # Used when polling.
 # from webdriver_manager.chrome import ChromeDriverManager
@@ -203,7 +203,7 @@ def get_past_question(past_question_links: Dict[int, Any], choice: int) -> List[
     number_of_files = 1
 
     curr_dir = os.getcwd()
-    new_dir = os.getcwd()+f"files\{str(chat_id)}_{str(username)}"
+    new_dir = os.getcwd()+f"files\{str(chat_id)}"
     if not os.path.exists(new_dir):
         os.mkdir(new_dir)
     os.chdir(new_dir)

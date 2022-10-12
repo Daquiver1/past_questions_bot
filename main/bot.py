@@ -122,15 +122,6 @@ def get_chat_id(update: Update, context: Any) -> int:
     return chat_id
 
 
-def get_username(update: Update, context: Any) -> Union[str, None]:
-    """
-    A function that returns the username of a user.
-    """
-    global username
-    username = update.message.from_user.username
-    return username
-
-
 def validate_user_input(past_question_name: str) -> Union[Match[str], Any]:
     """
     A function that returns the cleaned name of user's text.
