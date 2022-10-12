@@ -185,7 +185,7 @@ def button(update: Update, context: Any) -> None:
         context.bot.sendDocument(
             chat_id=get_chat_id(update, context), document=open(file, "rb")
         )
-        choice.edit_mesage_text(f"Your chat id is {chat_id}")
+        choice.edit_mesage_text(f"Your download chat id is {chat_id}")
     except:
         logging.error("Failed to download past question", exc_info=True)
         choice.edit_message_text(
@@ -202,7 +202,7 @@ def handle_message(update: Update, context: Any) -> None:
     global chat_id
     chat_id = get_chat_id(update, context)
     update.message.reply_text(f"Your chat id is {get_chat_id(update,context)}")
-    update.message_reply_text(f"This is your chat_id {chat_id}")
+    update.message.reply_text(f"This is your global chat_id {chat_id}")
     options = []
     update.message.reply_text(f"You said {update.message.text}.")
     cleaned_user_input = validate_user_input(update.message.text)
@@ -255,6 +255,8 @@ def handle_message(update: Update, context: Any) -> None:
         text="Which one do you want to download?",
         reply_markup=reply_markup,
     )
+    context.bot.send_message(
+        f"Your chat id for callback is {get_chat_id(update,context)}")
 
 
 def main() -> None:
