@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+from bot import get_chat_id
 
 # Used when polling.
 # from webdriver_manager.chrome import ChromeDriverManager
@@ -195,6 +196,11 @@ def get_past_question(past_question_links: Dict[int, Any], choice: int) -> str:
     Returns the path of the downloaded past question.
 
     """
+    # chat_id = get_chat_id()
+    # dir = os.getcwd()+f"files\{str(chat_id)}"
+    # if not os.path.exists(dir):
+    #     os.mkdir(dir)
+    # os.chdir(dir)
 
     for index, past_question_link in past_question_links.items():
         if int(choice) == index:
@@ -212,12 +218,17 @@ def get_past_question(past_question_links: Dict[int, Any], choice: int) -> str:
     wait.until(EC.frame_to_be_available_and_switch_to_it(
         (By.CLASS_NAME, "cboxIframe")))
     wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
+
     logging.info("Downloading file...")
     driver.back()
-    # wait for file to be downloaded before moving on. latency fix
+    # TODO: wait for file to be downloaded before moving on. latency fix
     time.sleep(2)
     past_question_file = get_latest_past_question_path(PATH)
     return past_question_file
+
+
+def get_all_past_questions(past_question_links: Dict[int, Any]) -> str:
+    pass
 
 
 if __name__ == "__main__":

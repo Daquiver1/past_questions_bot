@@ -4,8 +4,8 @@ import re
 from typing import Any, List, Match, Union
 
 import telegram.ext
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackQueryHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CallbackQueryHandler, ContextTypes
 
 from functions import *
 
@@ -14,7 +14,7 @@ PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ.get("TOKEN")
 
 
-def start(update: Any, context: Any) -> None:
+def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Start command
     """
@@ -33,7 +33,7 @@ def start(update: Any, context: Any) -> None:
     )
 
 
-def help(update: Any, context: Any) -> None:
+def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Help command
     """
@@ -51,7 +51,7 @@ def help(update: Any, context: Any) -> None:
     )
 
 
-def donate(update: Any, context: Any) -> None:
+def donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Donate command
     """
@@ -60,7 +60,7 @@ def donate(update: Any, context: Any) -> None:
         "Thanks for donating. Details below.\nName: Christian Abrokwa\nNumber: 0547642843")
 
 
-def contact(update: Any, context: Any) -> None:
+def contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Contact command
     """
@@ -81,7 +81,7 @@ def contact(update: Any, context: Any) -> None:
     )
 
 
-def about(update: Any, context: Any) -> None:
+def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     About command
     """
@@ -102,7 +102,7 @@ def about(update: Any, context: Any) -> None:
     )
 
 
-def get_chat_id(update: Any, context: Any) -> Any:
+def get_chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     A function that returns the chat id of the user
     """
@@ -164,7 +164,7 @@ def validate_user_input(past_question_name: str) -> Union[Match[str], Any]:
     return cleaned_user_input
 
 
-def button(update: Any, context: Any) -> None:
+def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Callback function, takes the user's choice and returns a past question assigned to their choice.
     """
@@ -185,6 +185,7 @@ def button(update: Any, context: Any) -> None:
         context.bot.sendDocument(
             chat_id=get_chat_id(update, context), document=open(file, "rb")
         )
+        choice.edit_mesage_text(f"Your chat id is {chat_id}")
     except:
         logging.error("Failed to download past question", exc_info=True)
         choice.edit_message_text(
@@ -192,13 +193,16 @@ def button(update: Any, context: Any) -> None:
         )
 
 
-def handle_message(update: Any, context: Any) -> None:
+def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     A function to handle user messages.
     Takes the text and returns options of the avaliable of the text.
     Assuming it matched the criteria specified in clean_name()
     """
-
+    global chat_id
+    chat_id = get_chat_id(update, context)
+    update.message.reply_text(f"Your chat id is {get_chat_id(update,context)}")
+    update.message_reply_text(f"This is your chat_id {chat_id}")
     options = []
     update.message.reply_text(f"You said {update.message.text}.")
     cleaned_user_input = validate_user_input(update.message.text)
@@ -243,6 +247,7 @@ def handle_message(update: Any, context: Any) -> None:
                 callback_data=str(past_question_index + 1),
             )
         )
+    options.append(InlineKeyboardButton(text="All", callback_data=str(-1)))
 
     reply_markup = InlineKeyboardMarkup([options])
     context.bot.send_message(
