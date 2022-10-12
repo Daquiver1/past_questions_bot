@@ -122,6 +122,15 @@ def get_chat_id(update: Update, context: Any) -> int:
     return chat_id
 
 
+def get_username(update: Update, context: Any) -> Union[str, None]:
+    """
+    A function that returns the username of a user.
+    """
+    global username
+    username = update.message.from_user.username
+    return username
+
+
 def validate_user_input(past_question_name: str) -> Union[Match[str], Any]:
     """
     A function that returns the cleaned name of user's text.
@@ -176,21 +185,26 @@ def button(update: Update, context: Any) -> None:
             "Unexpected error. Please try again. If error persists contact @Daquiver.")
         return None
 
+    update.send_message_text(f"You selected {choice.data}_update")
+    update.send_message_text(f"Downloading past question(s)_update")
     choice.edit_message_text(text=f"You selected {choice.data}")
     choice.edit_message_text("Downloading past question...")
     try:
         file = get_past_question(past_question_links, choice.data)
         choice.edit_message_text("Uploading past question...")
-        logging.info(f"Sending {file} to user.")
-        context.bot.sendDocument(
-            chat_id=get_chat_id(update, context), document=open(file, "rb")
-        )
-        choice.edit_mesage_text(f"Your download chat id is {chat_id}")
+        update.send_message_text(f"Uploading past question(s)_update")
+
+        for i in file:
+            context.bot.sendDocument(
+                chat_id=get_chat_id(update, context), document=open(i, "rb")
+            )
     except:
         logging.error("Failed to download past question", exc_info=True)
         choice.edit_message_text(
             "Unexpected error. Try again.\n If error persists contact @Daquiver."
         )
+        update.send_message_text(
+            f"Unexpected error. Try again.\n If error persists contact @Daquiver.")
 
 
 def handle_message(update: Update, context: Any) -> None:
@@ -201,8 +215,6 @@ def handle_message(update: Update, context: Any) -> None:
     """
     global chat_id
     chat_id = get_chat_id(update, context)
-    update.message.reply_text(f"Your chat id is {get_chat_id(update,context)}")
-    update.message.reply_text(f"This is your global chat_id {chat_id}")
     options = []
     update.message.reply_text(f"You said {update.message.text}.")
     cleaned_user_input = validate_user_input(update.message.text)
@@ -238,7 +250,7 @@ def handle_message(update: Update, context: Any) -> None:
 
     for past_question_index in range(len(past_question_list)):
         update.message.reply_text(
-            str(past_question_index + 1) + " " +
+            str(past_question_index + 1) + ") " +
             past_question_list[past_question_index]
         )  # display available past questions.
         options.append(
@@ -255,8 +267,6 @@ def handle_message(update: Update, context: Any) -> None:
         text="Which one do you want to download?",
         reply_markup=reply_markup,
     )
-    context.bot.send_message(
-        f"Your chat id for callback is {get_chat_id(update,context)}")
 
 
 def main() -> None:

@@ -14,6 +14,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+from bot import chat_id, username
+
 # Used when polling.
 # from webdriver_manager.chrome import ChromeDriverManager
 # PATH = "path to folder"
@@ -68,20 +70,24 @@ except:
     sys.exit("Error logging in.")
 
 
-def get_latest_past_question_path(path: str) -> str:
+def get_past_question_path(path: str, number_of_files: int = 1) -> List[Any]:
     """
     A function that returns the path of the downloaded file.
     It checks the past questions directory and returns the most recent one.
     """
     logging.info("Checking path for latest file.")
-    files = os.listdir(path)
+    file_path = os.listdir(path)
     pdfs = [
-        os.path.join(path, basename) for basename in files if basename.endswith(".pdf")
+        os.path.join(path, basename) for basename in file_path if basename.endswith(".pdf")
     ]
 
-    latest_file = max(pdfs, key=os.path.getctime)
+    pdfs = sorted(pdfs, key=os.path.getctime)
     logging.info("Retrieved latest file successfully.")
-    return latest_file
+    files = []
+    for i in range(number_of_files):
+        files.append(number_of_files[i])
+
+    return files
 
 
 def search_for_past_question(cleaned_pasco_name: str) -> int:
@@ -187,25 +193,40 @@ def get_links_of_past_question() -> Dict[int, Any]:
         return past_question_links
 
 
-def get_past_question(past_question_links: Dict[int, Any], choice: int) -> str:
+def get_past_question(past_question_links: Dict[int, Any], choice: int) -> List[str]:
     """
     A function to download past questions.
     It takes in the links of the past questions and the users choice.
     Returns the path of the downloaded past question.
 
     """
-    # chat_id = get_chat_id()
-    # dir = os.getcwd()+f"files\{str(chat_id)}"
-    # if not os.path.exists(dir):
-    #     os.mkdir(dir)
-    # os.chdir(dir)
+    number_of_files = 1
+
+    curr_dir = os.getcwd()
+    new_dir = os.getcwd()+f"files\{str(chat_id)}_{str(username)}"
+    if not os.path.exists(new_dir):
+        os.mkdir(new_dir)
+    os.chdir(new_dir)
+
+    if int(choice) == -1:
+        number_of_files = len(past_question_link.values())
+        for i in range(past_question_link.values()):
+            driver.get(i)
+            download_past_question()
 
     for index, past_question_link in past_question_links.items():
         if int(choice) == index:
             driver.get(past_question_link)  # Move to the url of users choice.
             logging.info(f"Moved to {past_question_link} successfully.")
+            download_past_question()
             break
 
+    past_question_file = get_past_question_path(PATH, number_of_files)
+    os.chdir(curr_dir)
+    return past_question_file
+
+
+def download_past_question():
     logging.info(
         f"Downloading past question: The current_url is {driver.current_url}")
     file = driver.find_element(By.CLASS_NAME, "openPopUp")
@@ -219,14 +240,7 @@ def get_past_question(past_question_links: Dict[int, Any], choice: int) -> str:
 
     logging.info("Downloading file...")
     driver.back()
-    # TODO: wait for file to be downloaded before moving on. latency fix
     time.sleep(2)
-    past_question_file = get_latest_past_question_path(PATH)
-    return past_question_file
-
-
-def get_all_past_questions(past_question_links: Dict[int, Any]) -> str:
-    pass
 
 
 if __name__ == "__main__":
