@@ -14,7 +14,7 @@ PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ.get("TOKEN")
 
 
-def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def start(update: Update, context: Any) -> None:
     """
     Start command
     """
@@ -33,7 +33,7 @@ def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def help(update: Update, context: Any) -> None:
     """
     Help command
     """
@@ -51,7 +51,7 @@ def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-def donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def donate(update: Update, context: Any) -> None:
     """
     Donate command
     """
@@ -60,7 +60,7 @@ def donate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "Thanks for donating. Details below.\nName: Christian Abrokwa\nNumber: 0547642843")
 
 
-def contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def contact(update: Update, context: Any) -> None:
     """
     Contact command
     """
@@ -81,7 +81,7 @@ def contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def about(update: Update, context: Any) -> None:
     """
     About command
     """
@@ -102,7 +102,7 @@ def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-def get_chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+def get_chat_id(update: Update, context: Any) -> int:
     """
     A function that returns the chat id of the user
     """
@@ -164,7 +164,7 @@ def validate_user_input(past_question_name: str) -> Union[Match[str], Any]:
     return cleaned_user_input
 
 
-def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def button(update: Update, context: Any) -> None:
     """
     Callback function, takes the user's choice and returns a past question assigned to their choice.
     """
@@ -193,7 +193,7 @@ def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
 
 
-def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+def handle_message(update: Update, context: Any) -> None:
     """
     A function to handle user messages.
     Takes the text and returns options of the avaliable of the text.

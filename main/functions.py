@@ -14,8 +14,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from bot import get_chat_id
-
 # Used when polling.
 # from webdriver_manager.chrome import ChromeDriverManager
 # PATH = "path to folder"
