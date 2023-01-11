@@ -1,13 +1,13 @@
+"""Main bot file."""
 import logging
 import os
 import re
 from typing import Any, List, Match, Union
 
 import telegram.ext
+from functions import *
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackQueryHandler, ContextTypes
-
-from functions import *
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s: %(message)s")
 PORT = int(os.environ.get("PORT", "8443"))
@@ -57,7 +57,8 @@ def donate(update: Update, context: Any) -> None:
     """
 
     update.message.reply_text(
-        "Thanks for donating. Details below.\nName: Christian Abrokwa\nNumber: 0547642843")
+        "Thanks for donating. Details below.\nName: Christian Abrokwa\nNumber: 0547642843"
+    )
 
 
 def contact(update: Update, context: Any) -> None:
@@ -157,9 +158,10 @@ def validate_user_input(past_question_name: str) -> Union[Match[str], Any]:
     if len(course_code) != 3:  # Legon course codes have 3 characters.
         return None
 
-    cleaned_user_input = (course_name + " " + course_code)
+    cleaned_user_input = course_name + " " + course_code
     logging.info(
-        f"User input has been changed from {past_question_name} to {cleaned_user_input}")
+        f"User input has been changed from {past_question_name} to {cleaned_user_input}"
+    )
     # The site's search won't work if it isn't spaced.
     return cleaned_user_input
 
@@ -173,7 +175,8 @@ def button(update: Update, context: Any) -> None:
     past_question_links = get_links_of_past_question()
     if len(past_question_links) == 0:
         update.message.reply_text(
-            "Unexpected error. Please try again. If error persists contact @Daquiver.")
+            "Unexpected error. Please try again. If error persists contact @Daquiver."
+        )
         return None
 
     update.send_message_text(f"You selected {choice.data}_update")
@@ -195,7 +198,8 @@ def button(update: Update, context: Any) -> None:
             "Unexpected error. Try again.\n If error persists contact @Daquiver."
         )
         update.send_message_text(
-            f"Unexpected error. Try again.\n If error persists contact @Daquiver.")
+            f"Unexpected error. Try again.\n If error persists contact @Daquiver."
+        )
 
 
 def handle_message(update: Update, context: Any) -> None:
@@ -216,14 +220,16 @@ def handle_message(update: Update, context: Any) -> None:
         return None
 
     logging.info(
-        f"{update.message.from_user.username} is searching for {cleaned_user_input}.")
+        f"{update.message.from_user.username} is searching for {cleaned_user_input}."
+    )
     update.message.reply_text(
         f"Searching database for {cleaned_user_input} past questions."
     )
 
     if search_for_past_question(cleaned_user_input) == 1:
         update.message.reply_text(
-            f"Error searching for {cleaned_user_input}. Try again.")
+            f"Error searching for {cleaned_user_input}. Try again."
+        )
         return None
 
     past_question_list = get_list_of_past_question()
@@ -241,8 +247,9 @@ def handle_message(update: Update, context: Any) -> None:
 
     for past_question_index in range(len(past_question_list)):
         update.message.reply_text(
-            str(past_question_index + 1) + ") " +
-            past_question_list[past_question_index]
+            str(past_question_index + 1)
+            + ") "
+            + past_question_list[past_question_index]
         )  # display available past questions.
         options.append(
             InlineKeyboardButton(

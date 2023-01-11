@@ -1,3 +1,4 @@
+"""Functions file."""
 import logging
 import os
 import sys
@@ -5,6 +6,7 @@ import time
 from typing import Any, Dict, List
 
 import requests
+from bot import chat_id
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
@@ -14,15 +16,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from bot import chat_id
-
 # Used when polling.
-# from webdriver_manager.chrome import ChromeDriverManager
-# PATH = "path to folder"
-# s = Service(ChromeDriverManager().install())
-# options = webdriver.ChromeOptions()
-# options.headless = True
-# driver = webdriver.Chrome(service=s, options = options)
+from webdriver_manager.chrome import ChromeDriverManager
+
+PATH = "path to folder"
+s = Service(ChromeDriverManager().install())
+options = webdriver.ChromeOptions()
+options.headless = True
+driver = webdriver.Chrome(service=s, options=options)
 # Constants
 URL = "https://balme.ug.edu.gh/past.exampapers/index.php?p=member"
 USER_NAME = os.environ.get("USER_NAME")
@@ -33,26 +34,27 @@ PASSWORD = os.environ.get("PASSWORD")
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s: %(message)s")
 
 # Deployed Selenium Setup
-try:
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--no-sandbox")
-    PATH = "/tmp"
-    PROFILE = {
-        "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-        "download.default_directory": PATH,
-        "download.extensions_to_open": "",
-    }  # Open externally not with chrome's pdf viewer
-    chrome_options.add_experimental_option("prefs", PROFILE)
-    driver = webdriver.Chrome(
-        executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options
-    )
-    logging.info("Setup successfully completed.")
-except:
-    logging.critical("Failed to set up selenium")
-    sys.exit("Error setting up selenium.")
+# try:
+#     chrome_options = webdriver.ChromeOptions()
+#     chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+#     chrome_options.add_argument("--headless")
+#     chrome_options.add_argument("--disable-dev-shm-usage")
+#     chrome_options.add_argument("--no-sandbox")
+#     PATH = "/tmp"
+#     PROFILE = {
+#         "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
+#         "download.default_directory": PATH,
+#         "download.extensions_to_open": "",
+#     }  # Open externally not with chrome's pdf viewer
+#     chrome_options.add_experimental_option("prefs", PROFILE)
+#     driver = webdriver.Chrome(
+#         executable_path=os.environ.get("CHROMEDRIVER_PATH"),
+#         chrome_options=chrome_options,
+#     )
+#     logging.info("Setup successfully completed.")
+# except:
+#     logging.critical("Failed to set up selenium")
+#     sys.exit("Error setting up selenium.")
 
 
 # Log in
@@ -78,7 +80,9 @@ def get_past_question_path(path: str, number_of_files: int = 1) -> List[Any]:
     logging.info("Checking path for latest file.")
     file_path = os.listdir(path)
     pdfs = [
-        os.path.join(path, basename) for basename in file_path if basename.endswith(".pdf")
+        os.path.join(path, basename)
+        for basename in file_path
+        if basename.endswith(".pdf")
     ]
 
     pdfs = sorted(pdfs, key=os.path.getctime)
@@ -100,7 +104,8 @@ def search_for_past_question(cleaned_pasco_name: str) -> int:
 
     """
     logging.info(
-        f"Searching for {cleaned_pasco_name}: The current_url is {driver.current_url}")
+        f"Searching for {cleaned_pasco_name}: The current_url is {driver.current_url}"
+    )
     try:
         search_field = driver.find_element(By.NAME, "keywords")
         search_button = driver.find_element(By.NAME, "search")
@@ -109,11 +114,11 @@ def search_for_past_question(cleaned_pasco_name: str) -> int:
         search_button.click()
         logging.info("Search was clicked successfully.")
         logging.info(
-            f"After searching for {cleaned_pasco_name}: The current_url is {driver.current_url}")
+            f"After searching for {cleaned_pasco_name}: The current_url is {driver.current_url}"
+        )
         return 0
     except:
-        logging.error(
-            "Failed to search for {cleaned_pasco_name}", exc_info=True)
+        logging.error("Failed to search for {cleaned_pasco_name}", exc_info=True)
         return 1
 
 
@@ -128,14 +133,15 @@ def get_list_of_past_question() -> List[str]:
 
     filtered_past_question_list = []
     logging.info(
-        f"Retrieving list of past question: The current_url is {driver.current_url}")
+        f"Retrieving list of past question: The current_url is {driver.current_url}"
+    )
 
     try:
         past_question_page = requests.get(driver.current_url)
-        past_question_content = BeautifulSoup(
-            past_question_page.content, "lxml")
+        past_question_content = BeautifulSoup(past_question_page.content, "lxml")
         past_question_list = past_question_content.find_all(
-            "div", class_="item biblioRecord")
+            "div", class_="item biblioRecord"
+        )
         logging.info("Got list of past questions successfully.")
     except:
         logging.error("Failed to find past questions.", exc_info=True)
@@ -143,12 +149,13 @@ def get_list_of_past_question() -> List[str]:
     else:
         if past_question_list:
             for past_question in past_question_list:
-                past_question_title = past_question.find(
-                    "a", class_="titleField")
+                past_question_title = past_question.find("a", class_="titleField")
                 past_question_year = past_question.find(
-                    "div", class_="customField isbnField")
+                    "div", class_="customField isbnField"
+                )
                 past_question_semester = past_question.find(
-                    "div", class_="customField collationField")
+                    "div", class_="customField collationField"
+                )
                 filtered_past_question_list.append(
                     past_question_title.get_text()
                     + "\n"
@@ -157,7 +164,8 @@ def get_list_of_past_question() -> List[str]:
                     + past_question_semester.get_text()
                 )
         logging.info(
-            "Appeneded key aspects of past questions to filtered list successfully.")
+            "Appeneded key aspects of past questions to filtered list successfully."
+        )
         return filtered_past_question_list
 
 
@@ -169,18 +177,16 @@ def get_links_of_past_question() -> Dict[int, Any]:
     """
     past_question_links = {}
     logging.info(
-        f"Retrieving links of past question: The current_url is {driver.current_url}")
+        f"Retrieving links of past question: The current_url is {driver.current_url}"
+    )
 
     try:
         past_question_page = requests.get(driver.current_url)
-        past_question_content = BeautifulSoup(
-            past_question_page.content, "lxml")
-        past_question_list = past_question_content.find_all(
-            "a", class_="titleField")
+        past_question_content = BeautifulSoup(past_question_page.content, "lxml")
+        past_question_list = past_question_content.find_all("a", class_="titleField")
         logging.info("Retrieved past question links successfully.")
     except:
-        logging.error(
-            "Failed to extract links of past questions.", exc_info=True)
+        logging.error("Failed to extract links of past questions.", exc_info=True)
         return past_question_links
     else:
         for past_question_index in range(1, len(past_question_list) + 1):
@@ -203,7 +209,7 @@ def get_past_question(past_question_links: Dict[int, Any], choice: int) -> List[
     number_of_files = 1
 
     curr_dir = os.getcwd()
-    new_dir = os.getcwd()+f"files\{str(chat_id)}"
+    new_dir = os.getcwd() + f"files\{str(chat_id)}"
     if not os.path.exists(new_dir):
         os.mkdir(new_dir)
     os.chdir(new_dir)
@@ -227,15 +233,13 @@ def get_past_question(past_question_links: Dict[int, Any], choice: int) -> List[
 
 
 def download_past_question():
-    logging.info(
-        f"Downloading past question: The current_url is {driver.current_url}")
+    logging.info(f"Downloading past question: The current_url is {driver.current_url}")
     file = driver.find_element(By.CLASS_NAME, "openPopUp")
     driver.execute_script(
         "arguments[0].click();", file
     )  # screen displayed is a frame, so adapts to a frame.
     wait = WebDriverWait(driver, 10)
-    wait.until(EC.frame_to_be_available_and_switch_to_it(
-        (By.CLASS_NAME, "cboxIframe")))
+    wait.until(EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe")))
     wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
 
     logging.info("Downloading file...")
