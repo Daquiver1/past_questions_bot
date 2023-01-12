@@ -1,7 +1,10 @@
 """Main bot file."""
+import html
+import json
 import logging
 import os
 import re
+import traceback
 from typing import List, Union
 
 import dotenv
@@ -21,6 +24,7 @@ dotenv.load_dotenv()
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s: %(message)s")
 # PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.getenv("TOKEN")
+DEVELOPER_CHAT_ID = os.getenv("DEVELOPER_CHAT_ID")
 function_class = None
 
 
@@ -29,12 +33,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"""
     Hello {update.message.from_user.username}
-    Welcome to Daquiver's Past Questions bot
+Welcome to Daquiver's Past Questions bot
 
-    This bot is simple.
-    Type the name of the past question, select the one you want and it'll be sent to you.
-    Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )
-    Check out the /about section for more info.
+Type the name of the past question, select the one you want and it'll be sent to you.
+Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )
+Check the /about section for more info.
 
         """
     )
@@ -46,11 +49,11 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
     The following commands are available:
 
-    /donate -> Buy me a drink.
-    /start -> Welcome Message.
-    /help -> This Message.
-    /contact -> My contact details.
-    /about -> Why did I build this?
+/donate -> Buy me a drink.
+/start -> Welcome Message.
+/help -> This Message.
+/contact -> My contact details.
+/about -> Why did I build this?
     """
     )
 
@@ -58,7 +61,7 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def donate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Donate command."""
     await update.message.reply_text(
-        "Thanks for donating. Details below.\nName: Christian Abrokwa\nNumber: 0547642843"
+        "Thanks for buying me coffee. Details below.\nName: Christian Abrokwa\nNumber: 0547642843"
     )
 
 
@@ -66,34 +69,38 @@ async def contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Contact command."""
     await update.message.reply_text(
         """
-        You can contact me via the following
-        Gmail: Cabrokwa11@gmail.com
+        You can contact me via the following:
+Gmail: Cabrokwa11@gmail.com
 
-        Telegram: @Daquiver
+Telegram: @Daquiver
 
-        Github: https://github.com/Daquiver1
+Github: https://github.com/Daquiver1
 
-        Twitter: https://www.twitter.com/daquiver1
+Twitter: https://www.twitter.com/daquiver1
 
-        LinkedIn: https://www.linkedin.com/in/daquiver
+LinkedIn: https://www.linkedin.com/in/daquiver
         """
     )
 
 
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """About command."""
+    await context.bot.send_message(
+        chat_id="737547053", text="Checking if it sends successfully."
+    )
     await update.message.reply_text(
         """
-    Hey I'm Christian, Christian Abrokwa. A student of the University of Ghana. During the day I'm a software engineer and in the nights I'm a superhero. Somewhere in between, I'm a student.\nSo why did I build this?
+    Hey I'm Christian, Christian Abrokwa. Nice to meet you.
 
-    I noticed there was a bottleneck with the current system of getting a past question. It took a student about a week to get access to a past question.
-    So, I built and developed this system which allows University of Ghana students to download past questions under 30 seconds.
+During the day I'm a software engineer and at nights I'm a superhero. Somewhere in between, I perform my student responsibilities. \nSo why did I build this?
 
-    It works by scraping the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returning files matching the users criteria.
+I noticed there was a bottleneck with the current system of getting a past question. It took a student about a week to get access to a past question. So, I built and developed this system which allows University of Ghana students to download past questions under 30 seconds.
 
-    It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question.
+It works by scraping the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returning files matching the users criteria.
 
-    * This bot was built on January 4th, 2022.
+It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question.
+
+* This bot was built on January 4th, 2022.
         """
     )
 
@@ -101,26 +108,34 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_chat_id(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> Union[int, str]:
-    """A function that returns the chat id of the user."""
-    if update.message is not None:
-        # text message
-        return update.message.chat.id
-    elif update.callback_query is not None:
-        # callback message
-        return update.callback_query.message.chat.id
-    elif update.poll is not None:
-        # answer in Poll
-        return context.bot_data[update.poll.id]
+    """
+    It returns the chat id of the message that triggered the bot
 
+    Args:
+      update (Update): Update
+      context (ContextTypes.DEFAULT_TYPE): ContextTypes.DEFAULT_TYPE
+
+    Returns:
+      The chat id of the user who sent the message.
+    """
+    # text message
+    if update.message is not None:
+        return update.message.chat.id
+    # callback message
+    elif update.callback_query is not None:
+        return update.callback_query.message.chat.id
     return -1
 
 
 def validate_user_input(past_question_name: str) -> Union[str, None]:
     """
-    A function that returns the cleaned name of user's text.
+    It takes a string, checks if it's a valid course name and code, and returns the cleaned string if it is. A cleaned string is one which has a space in between the course name and course code. The website's search field won't work if it isn't spaced.
 
     Args:
       past_question_name (str): str
+
+    Returns:
+      a string or None.
     """
     if len(past_question_name.split()) == 1:
         numbers_text_check = re.compile(
@@ -152,21 +167,30 @@ def validate_user_input(past_question_name: str) -> Union[str, None]:
     logging.info(
         f"User input has been changed from {past_question_name} to {cleaned_user_input}"
     )
-    # The site's search won't work if it isn't spaced.
+
     return cleaned_user_input
 
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Callback function, takes the user's choice and returns a past question assigned to their choice."""
+    """
+    It takes the user's choice and returns a past question assigned to their choice.
+
+    Args:
+      update (Update): Update
+      context (ContextTypes.DEFAULT_TYPE): ContextTypes.DEFAULT_TYPE
+
+    Returns:
+      The past question file.
+    """
     choice = update.callback_query
     await choice.answer()
 
     past_question_links = function_class.get_links_of_past_question()
     if len(past_question_links) == 0:
-        await update.message.reply_text(
-            "Unexpected error. Please try again. If error persists contact @Daquiver."
+        return await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text=f"You selected #{choice.data}",
         )
-        return None
 
     await context.bot.send_message(
         chat_id=await get_chat_id(update, context),
@@ -182,7 +206,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if file_path is None:
             await context.bot.send_message(
                 chat_id=await get_chat_id(update, context),
-                text="NO files available to download.",
+                text="Unexpected error. Try again. If error persists contact @Daquiver.",
             )
         await context.bot.send_message(
             chat_id=await get_chat_id(update, context),
@@ -192,7 +216,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.sendDocument(
             chat_id=await get_chat_id(update, context), document=open(file_path, "rb")
         )
-    except:
+    except telegram.error.TelegramError:
         logging.error("Failed to download past question", exc_info=True)
         await context.bot.send_message(
             chat_id=await get_chat_id(update, context),
@@ -201,24 +225,23 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """It takes a user's input, searches for the past questions, displays the past questions, and then asks the user which past question they want to download.
+    """It takes a user's input, searches for the past question, displays the past questions, and then asks the user which past question they want to download.
 
     Args:
       update (Update): Update
       context (ContextTypes.DEFAULT_TYPE): ContextTypes.DEFAULT_TYPE
 
     Returns:
-      a list of past questions.
+      displays a list of buttons which trigger a callback query.
     """
     options: List[List] = [[], []]
 
     await update.message.reply_text(f"You said {update.message.text}.")
     cleaned_user_input = validate_user_input(update.message.text)
     if cleaned_user_input is None:
-        await update.message.reply_text(
+        return await update.message.reply_text(
             "Please enter a valid past question name (eg. dcit 103, math 122, ugrc 110)."
         )
-        return None
     await update.message.reply_text(
         f"Searching database for {cleaned_user_input} past questions..."
     )
@@ -232,30 +255,33 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         + str(await get_chat_id(update, context))
     )
     function_class = functions.Functions(path)
+    if function_class.logged_in is False:
+        return await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text="Error occurred. Contact @Daquiver immediately.",
+        )
     logging.info(
         f"{update.message.from_user.username} is searching for {cleaned_user_input}."
     )
 
     if function_class.search_for_past_question(cleaned_user_input) == 1:
-        await update.message.reply_text(
+        return await update.message.reply_text(
             f"Error searching for {cleaned_user_input}. Try again."
         )
-        return None
 
     past_question_list = function_class.get_list_of_past_question()
     if (
         len(past_question_list) == 0
     ):  # Check if there are past questions available for users text.
-        await update.message.reply_text(
+        return await update.message.reply_text(
             f"Unfortunately, there are no {cleaned_user_input} past questions."
         )
-        return None
 
     await update.message.reply_text(
         f"We found {len(past_question_list)} {cleaned_user_input} past questions."
     )
-    text = function_class.clean_past_question_list(past_question_list)
-    await update.message.reply_text(text)  # display available past questions.
+    result = function_class.past_question_list_to_string(past_question_list)
+    await update.message.reply_text(result)  # display available past questions.
 
     for past_question_index in range(len(past_question_list)):
         if past_question_index < 5:
@@ -273,16 +299,39 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
             )
 
-    reply_mar = InlineKeyboardMarkup(options)
+    reply_markup = InlineKeyboardMarkup(options)
 
     await context.bot.send_message(
         chat_id=await get_chat_id(update, context),
         text="Which one do you want to download?",
-        reply_markup=reply_mar,
+        reply_markup=reply_markup,
     )
 
 
-if __name__ == "__main__":
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Log the error and send a telegram message to notify the developer."""
+    logging.error(msg="Exception while handling an update:", exc_info=context.error)
+
+    message = (
+        f"An exception was raised while handling an update\n"
+        f"User's text: {update.message.text}\n"
+        f"User's id: {update.message.from_user.id}\n"
+        f"User's first_name: {update.message.from_user.first_name}\n"
+        f"User's last_name: {update.message.from_user.last_name}\n"
+        f"User's username: {update.message.from_user.username}\n"
+        f"Traceback: {traceback.format_exc()}"
+    )
+
+    if DEVELOPER_CHAT_ID:
+        await context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
+
+    await context.bot.send_message(
+        chat_id=await get_chat_id(update, context), text="Unexpected error occurred."
+    )
+
+
+def main():
+    """Start bot."""
     if TOKEN:
         app = ApplicationBuilder().token(TOKEN).build()
         app.add_handler(telegram.ext.CommandHandler("start", start))
@@ -295,6 +344,8 @@ if __name__ == "__main__":
             MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message)
         )
 
+        app.add_error_handler(error_handler)
+
         # for polling
         app.run_polling()
 
@@ -305,3 +356,7 @@ if __name__ == "__main__":
         #     webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
         # )
     print("Token can't be empty.")
+
+
+if __name__ == "__main__":
+    main()
