@@ -4,7 +4,7 @@ import os
 import re
 import sys
 import time
-from typing import Any, Dict, List
+from typing import Dict, List, Union
 
 import dotenv
 import requests
@@ -33,8 +33,15 @@ PASSWORD = os.getenv("PASSWORD")
 
 
 class Functions:
+    """Functions class."""
+
     def __init__(self, path):
-        self.path = path  # os.getcwd() + "\past_questions"
+        """Initializes a headless chrome browser and logs in to a website.
+
+        Args:
+          path: the path to the directory where the pdf's will be downloaded
+        """
+        self.path = path
         s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
@@ -44,31 +51,9 @@ class Functions:
             "download.extensions_to_open": "",
         }
         options.add_experimental_option("prefs", self.PROFILE)
+        options.add_argument("--no-sandbox")
         options.headless = True
         self.driver = webdriver.Chrome(service=s, options=options)
-
-        # Deployed Selenium Setup
-        # try:
-        #     chrome_options = webdriver.ChromeOptions()
-        #     chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-        #     chrome_options.add_argument("--headless")
-        #     chrome_options.add_argument("--disable-dev-shm-usage")
-        #     chrome_options.add_argument("--no-sandbox")
-        #     PATH = "/tmp"
-        #     PROFILE = {
-        #         "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-        #         "download.default_directory": PATH,
-        #         "download.extensions_to_open": "",
-        #     }  # Open externally not with chrome's pdf viewer
-        #     chrome_options.add_experimental_option("prefs", PROFILE)
-        #     driver = webdriver.Chrome(
-        #         executable_path=os.environ.get("CHROMEDRIVER_PATH"),
-        #         chrome_options=chrome_options,
-        #     )
-        #     logging.info("Setup successfully completed.")
-        # except:
-        #     logging.critical("Failed to set up selenium")
-        #     sys.exit("Error setting up selenium.")
 
         # Log in
         try:
@@ -84,29 +69,35 @@ class Functions:
             logging.critical("Failed to log in.")
             sys.exit("Error logging in.")
 
-    def get_past_question_path(self, path: str, number_of_files: int = 1) -> List[Any]:
-        """
-        A function that returns the path of the downloaded file.
-        It checks the past questions directory and returns the most recent one.
+    def get_past_question_path(self, path: str) -> Union[str, None]:
+        """It takes a path as an argument, checks if there are any pdf files in the path, and if there are, it returns the most recent file in the path.
+
+        Args:
+          path (str): The path to the directory where the file is located.
+
+        Returns:
+          The path of the latest file in the directory.
         """
         logging.info("Checking path for latest file.")
         file_path = os.listdir(path)
 
-        pdfs = [
+        user_file_path = [
             os.path.join(path, basename)
             for basename in file_path
             if basename.endswith(".pdf")
         ]
-        return max(pdfs, key=os.path.getctime)
+        if len(user_file_path) == 0:
+            return None
+        return max(user_file_path, key=os.path.getctime)
 
     def search_for_past_question(self, cleaned_pasco_name: str) -> int:
-        """
-        A function to search for past question.
-        It takes in the concatenated course name and course code.
+        """It searches for a past question on the website, and returns 0 if it was successful, and 1 if it wasn't.
 
-        Returns 0 if it was able to search.
-        Returns 1 if there was an error encountered.
+        Args:
+          cleaned_pasco_name (str): The name of the file you're searching for.
 
+        Returns:
+          The return value is the status code of the function.
         """
         logging.info(
             f"Searching for {cleaned_pasco_name}: The current_url is {self.driver.current_url}"
@@ -117,7 +108,6 @@ class Functions:
             # Double Quotes give accurate queries
             search_field.send_keys(f'"{cleaned_pasco_name}"')
             search_button.click()
-            logging.info("Search was clicked successfully.")
             logging.info(
                 f"After searching for {cleaned_pasco_name}: The current_url is {self.driver.current_url}"
             )
@@ -128,17 +118,13 @@ class Functions:
 
     def get_list_of_past_question(self) -> List[str]:
         """
-        A function to retrieve the names, year and semester of
-        past questions displayed.
+        It retrieves the names, year and semester of past questions displayed then adds them to a list.
 
-        output: A print-out of the name, year and semester of
-                        past question.
+        Returns:
+          A list of strings.
         """
-
-        filtered_past_question_list = []
-        logging.info(
-            f"Retrieving list of past question: The current_url is {self.driver.current_url}"
-        )
+        filtered_past_question_list: List[str] = []
+        logging.info(f"Retrieving list of past question from {self.driver.current_url}")
 
         try:
             past_question_page = requests.get(self.driver.current_url)
@@ -172,7 +158,15 @@ class Functions:
             )
             return filtered_past_question_list
 
-    def clean_past_question_list(self, list_of_values):
+    def clean_past_question_list(self, list_of_values: List[str]) -> str:
+        """It takes a list of strings, and returns a string with each item in the list on a new line, with a number in front of it.
+
+        Args:
+          list_of_values (List[str]): List[str]
+
+        Returns:
+          A string
+        """
         updated_list = []
         for value in range(len(list_of_values)):
             updated_list.append(
@@ -184,15 +178,15 @@ class Functions:
 
         return modified_text
 
-    def get_links_of_past_question(self) -> Dict[int, Any]:
+    def get_links_of_past_question(self) -> Dict[int, str]:
         """
         A function to retrieve the links of all the past questions displayed.
 
         output: A dictionary containing the index and the past question link.
         """
-        past_question_links = {}
+        past_question_links: Dict[int, str] = {}
         logging.info(
-            f"Retrieving links of past question: The current_url is {self.driver.current_url}"
+            f"Retrieving links of past question from {self.driver.current_url}"
         )
 
         try:
@@ -216,28 +210,17 @@ class Functions:
             return past_question_links
 
     def get_past_question(
-        self, past_question_links: Dict[int, Any], choice: int
+        self, past_question_links: Dict[int, str], choice: int
     ) -> List[str]:
+        """It takes in a dictionary of past question links and a choice from the user, then it moves to the url of the users choice and downloads the past question.
+
+        Args:
+          past_question_links (Dict[int, Any]): This is a dictionary of the past questions links.
+          choice (int): The choice of the user.
+
+        Returns:
+          past_question_file
         """
-        A function to download past questions.
-        It takes in the links of the past questions and the users choice.
-        Returns the path of the downloaded past question.
-
-        """
-        number_of_files = 1
-
-        # curr_dir = os.getcwd()
-        # new_dir = os.getcwd() + f"files\{str(chat_id)}"
-        # if not os.path.exists(new_dir):
-        #     os.mkdir(new_dir)
-        # os.chdir(new_dir)
-
-        if int(choice) == -1:
-            number_of_files = len(past_question_link.values())
-            for i in range(past_question_link.values()):
-                self.driver.get(i)
-                self.download_past_question()
-
         for index, past_question_link in past_question_links.items():
             if int(choice) == index:
                 self.driver.get(past_question_link)  # Move to the url of users choice.
@@ -245,13 +228,12 @@ class Functions:
                 self.download_past_question()
                 break
 
-        past_question_file = self.get_past_question_path(self.path, number_of_files)
+        past_question_file = self.get_past_question_path(self.path)
         return past_question_file
 
-    def download_past_question(self):
-        logging.info(
-            f"Downloading past question: The current_url is {self.driver.current_url}"
-        )
+    def download_past_question(self) -> None:
+        """Clicks on a button that opens a frame, then clicks on a button in the frame to download a file."""
+        logging.info(f"Downloading past question from {self.driver.current_url}")
         file = self.driver.find_element(By.CLASS_NAME, "openPopUp")
         self.driver.execute_script(
             "arguments[0].click();", file
@@ -268,10 +250,10 @@ class Functions:
 
 
 if __name__ == "__main__":
-    function_class = Functions(str(os.getcwd() + "\Daquiver"))
+    function_class = Functions(str(os.getcwd()))
     name = input("Please enter the course name : ")
     function_class.search_for_past_question(name)
     questions = function_class.get_list_of_past_question()
     pasco_links = function_class.get_links_of_past_question()
-    user_choice = input("Number please: ")
+    user_choice = int(input("The number of the past question you want to download: "))
     function_class.get_past_question(pasco_links, user_choice)

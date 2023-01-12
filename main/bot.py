@@ -2,17 +2,12 @@
 import logging
 import os
 import re
-from typing import Any, Awaitable, List, Match, Union
+from typing import List, Union
 
 import dotenv
 import functions
 import telegram.ext
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    Update,
-)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     ApplicationBuilder,
     CallbackQueryHandler,
@@ -165,6 +160,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Callback function, takes the user's choice and returns a past question assigned to their choice."""
     choice = update.callback_query
     await choice.answer()
+
     past_question_links = function_class.get_links_of_past_question()
     if len(past_question_links) == 0:
         await update.message.reply_text(
@@ -182,14 +178,19 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        file = function_class.get_past_question(past_question_links, choice.data)
+        file_path = function_class.get_past_question(past_question_links, choice.data)
+        if file_path is None:
+            await context.bot.send_message(
+                chat_id=await get_chat_id(update, context),
+                text="NO files available to download.",
+            )
         await context.bot.send_message(
             chat_id=await get_chat_id(update, context),
             text="Uploading past question...",
         )
 
         await context.bot.sendDocument(
-            chat_id=await get_chat_id(update, context), document=open(file, "rb")
+            chat_id=await get_chat_id(update, context), document=open(file_path, "rb")
         )
     except:
         logging.error("Failed to download past question", exc_info=True)
@@ -200,15 +201,20 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """It takes a user's input, searches for the past questions, displays the past questions, and then asks the user which past question they want to download.
+
+    Args:
+      update (Update): Update
+      context (ContextTypes.DEFAULT_TYPE): ContextTypes.DEFAULT_TYPE
+
+    Returns:
+      a list of past questions.
     """
-    A function to handle user messages.
-    Takes the text and returns options of the available of the text.
-    Assuming it matched the criteria specified in clean_name()
-    """
-    options = [[], []]
+    options: List[List] = [[], []]
+
     await update.message.reply_text(f"You said {update.message.text}.")
     cleaned_user_input = validate_user_input(update.message.text)
-    if cleaned_user_input == None:
+    if cleaned_user_input is None:
         await update.message.reply_text(
             "Please enter a valid past question name (eg. dcit 103, math 122, ugrc 110)."
         )
@@ -250,6 +256,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     text = function_class.clean_past_question_list(past_question_list)
     await update.message.reply_text(text)  # display available past questions.
+
     for past_question_index in range(len(past_question_list)):
         if past_question_index < 5:
             options[0].append(
@@ -275,26 +282,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-def main():
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(telegram.ext.CommandHandler("start", start))
-    app.add_handler(telegram.ext.CommandHandler("help", help))
-    app.add_handler(telegram.ext.CommandHandler("about", about))
-    app.add_handler(telegram.ext.CommandHandler("donate", donate))
-    app.add_handler(CallbackQueryHandler(button))
-    app.add_handler(telegram.ext.CommandHandler("contact", contact))
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-
-    # for polling
-    app.run_polling()
-
-    # updater.start_webhook(
-    #     listen="0.0.0.0",
-    #     port=PORT,
-    #     url_path=TOKEN,
-    #     webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
-    # )
-
-
 if __name__ == "__main__":
-    main()
+    if TOKEN:
+        app = ApplicationBuilder().token(TOKEN).build()
+        app.add_handler(telegram.ext.CommandHandler("start", start))
+        app.add_handler(telegram.ext.CommandHandler("help", help))
+        app.add_handler(telegram.ext.CommandHandler("about", about))
+        app.add_handler(telegram.ext.CommandHandler("donate", donate))
+        app.add_handler(CallbackQueryHandler(button))
+        app.add_handler(telegram.ext.CommandHandler("contact", contact))
+        app.add_handler(
+            MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message)
+        )
+
+        # for polling
+        app.run_polling()
+
+        # updater.start_webhook(
+        #     listen="0.0.0.0",
+        #     port=PORT,
+        #     url_path=TOKEN,
+        #     webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
+        # )
+    print("Token can't be empty.")
