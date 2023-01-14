@@ -1,7 +1,6 @@
 """Main bot file."""
-import html
-import json
 import logging
+import logging.config
 import os
 import re
 import traceback
@@ -19,12 +18,19 @@ from telegram.ext import (
     filters,
 )
 
-dotenv.load_dotenv()
+# Logging setup
+logging.config.fileConfig(
+    fname="log.ini",
+    disable_existing_loggers=False,
+)
+# logging.basicConfig(level=logging.DEBUG)
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s: %(message)s")
+logger = logging.getLogger(__name__)
+
+dotenv.load_dotenv()
 # PORT = int(os.environ.get("PORT", "8443"))
-TOKEN = os.getenv("TOKEN")
-DEVELOPER_CHAT_ID = os.getenv("DEVELOPER_CHAT_ID")
+TOKEN = os.environ["TOKEN"]
+DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
 function_class = None
 
 
@@ -85,9 +91,6 @@ LinkedIn: https://www.linkedin.com/in/daquiver
 
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """About command."""
-    await context.bot.send_message(
-        chat_id="737547053", text="Checking if it sends successfully."
-    )
     await update.message.reply_text(
         """
     Hey I'm Christian, Christian Abrokwa. Nice to meet you.
@@ -164,7 +167,7 @@ def validate_user_input(past_question_name: str) -> Union[str, None]:
         return None
 
     cleaned_user_input = course_name + " " + course_code
-    logging.info(
+    logger.info(
         f"User input has been changed from {past_question_name} to {cleaned_user_input}"
     )
 
@@ -187,9 +190,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     past_question_links = function_class.get_links_of_past_question()
     if len(past_question_links) == 0:
-        return await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text=f"You selected #{choice.data}",
+        return await error_handler(
+            update, context, False, "Failed to extract past question links."
         )
 
     await context.bot.send_message(
@@ -204,10 +206,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         file_path = function_class.get_past_question(past_question_links, choice.data)
         if file_path is None:
-            await context.bot.send_message(
-                chat_id=await get_chat_id(update, context),
-                text="Unexpected error. Try again. If error persists contact @Daquiver.",
+            return await error_handler(
+                update, context, False, "Failed to download file and upload file."
             )
+
         await context.bot.send_message(
             chat_id=await get_chat_id(update, context),
             text="Uploading past question...",
@@ -216,11 +218,9 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.sendDocument(
             chat_id=await get_chat_id(update, context), document=open(file_path, "rb")
         )
-    except telegram.error.TelegramError:
-        logging.error("Failed to download past question", exc_info=True)
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="Unexpected error. Try again.\n If error persists contact @Daquiver.",
+    except Exception:
+        return await error_handler(
+            update, context, False, "Failed to download past question."
         )
 
 
@@ -249,18 +249,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global function_class
     path = (
         os.getcwd()
-        + "\\"
+        + "\\past_questions\\"
         + update.message.chat.username
         + "_"
         + str(await get_chat_id(update, context))
     )
     function_class = functions.Functions(path)
     if function_class.logged_in is False:
-        return await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="Error occurred. Contact @Daquiver immediately.",
-        )
-    logging.info(
+        return await error_handler(update, context, False, "Failed to log in.")
+
+    logger.info(
         f"{update.message.from_user.username} is searching for {cleaned_user_input}."
     )
 
@@ -308,54 +306,67 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def error_handler(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    *args,
+    automated_caller: bool = True,
+    issue: str = "None",
+) -> None:
     """Log the error and send a telegram message to notify the developer."""
-    logging.error(msg="Exception while handling an update:", exc_info=context.error)
+    if not automated_caller:
+        message = (
+            f"An exception was raised while handling an update\n"
+            f"User's text: {update.message.text}\n"
+            f"User's id: {update.message.from_user.id}\n"
+            f"User's first_name: {update.message.from_user.first_name}\n"
+            f"User's last_name: {update.message.from_user.last_name}\n"
+            f"User's username: {update.message.from_user.username}\n"
+            f"What's the issue: {issue}\n"
+            f"Automated message?: {automated_caller}\n"
+            f"Traceback: {traceback.format_exc()}"
+        )
+        logger.exception("Exception while handling an update.")
+        await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text="Unexpected error occurred. Try again. If error persists contact @Daquiver.",
+        )
+    else:
+        message = (
+            f"Automated message?: {automated_caller}\n"
+            f"Traceback: {traceback.format_exc()}"
+        )
+        logger.error("A logical error occurred:", issue)
+        await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text="Unexpected error. Try again. If error persists contact @Daquiver.",
+        )
 
-    message = (
-        f"An exception was raised while handling an update\n"
-        f"User's text: {update.message.text}\n"
-        f"User's id: {update.message.from_user.id}\n"
-        f"User's first_name: {update.message.from_user.first_name}\n"
-        f"User's last_name: {update.message.from_user.last_name}\n"
-        f"User's username: {update.message.from_user.username}\n"
-        f"Traceback: {traceback.format_exc()}"
-    )
-
-    if DEVELOPER_CHAT_ID:
-        await context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
-
-    await context.bot.send_message(
-        chat_id=await get_chat_id(update, context), text="Unexpected error occurred."
-    )
+    await context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
 
 
 def main():
     """Start bot."""
-    if TOKEN:
-        app = ApplicationBuilder().token(TOKEN).build()
-        app.add_handler(telegram.ext.CommandHandler("start", start))
-        app.add_handler(telegram.ext.CommandHandler("help", help))
-        app.add_handler(telegram.ext.CommandHandler("about", about))
-        app.add_handler(telegram.ext.CommandHandler("donate", donate))
-        app.add_handler(CallbackQueryHandler(button))
-        app.add_handler(telegram.ext.CommandHandler("contact", contact))
-        app.add_handler(
-            MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message)
-        )
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(telegram.ext.CommandHandler("start", start))
+    app.add_handler(telegram.ext.CommandHandler("help", help))
+    app.add_handler(telegram.ext.CommandHandler("about", about))
+    app.add_handler(telegram.ext.CommandHandler("donate", donate))
+    app.add_handler(CallbackQueryHandler(button))
+    app.add_handler(telegram.ext.CommandHandler("contact", contact))
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
-        app.add_error_handler(error_handler)
+    app.add_error_handler(error_handler)
 
-        # for polling
-        app.run_polling()
+    # for polling
+    app.run_polling()
 
-        # updater.start_webhook(
-        #     listen="0.0.0.0",
-        #     port=PORT,
-        #     url_path=TOKEN,
-        #     webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
-        # )
-    print("Token can't be empty.")
+    # updater.start_webhook(
+    #     listen="0.0.0.0",
+    #     port=PORT,
+    #     url_path=TOKEN,
+    #     webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
+    # )
 
 
 if __name__ == "__main__":
