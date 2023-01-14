@@ -4,3 +4,4 @@ past_questions/
 .env
 .flake8
 .vscode/
+stats_file.log
