@@ -5,3 +5,4 @@ past_questions/
 .flake8
 .vscode/
 stats_file.log
+__init__.py
