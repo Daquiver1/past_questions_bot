@@ -23,7 +23,6 @@ logging.config.fileConfig(
     fname="log.ini",
     disable_existing_loggers=False,
 )
-# logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 

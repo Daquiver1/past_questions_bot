@@ -115,6 +115,15 @@ class Functions:
         return None
 
     def rename_past_question_file(self, pasco_directory, file_path):
+        """It takes a file path and renames the file to the first 20 characters of the file name.
+
+        Args:
+          pasco_directory: The directory where the past questions are stored.
+          file_path: The path to the file that you want to rename.
+
+        Returns:
+          The new path of the file.
+        """
         file_name = os.path.basename(file_path)
         new_path = pasco_directory + "\\" + file_name[:20] + ".pdf"
         os.rename(file_path, new_path)
@@ -133,7 +142,7 @@ class Functions:
         current_time = time.time()
         file_created_time = os.path.getctime(path)
 
-        if (current_time - file_created_time) > 20:
+        if (current_time - file_created_time) > 10:
             return False
         return True
 
