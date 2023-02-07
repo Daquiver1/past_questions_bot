@@ -293,8 +293,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 InlineKeyboardButton(
                     text=str(past_question_index + 1),
                     callback_data=str(past_question_index + 1),
-                )
+                ),
             )
+    options[1].append(InlineKeyboardButton(text="All", callback_data=str(-1)))
 
     reply_markup = InlineKeyboardMarkup(options)
 
