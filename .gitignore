@@ -1,3 +1,8 @@
 *.log
 __pycache__/
 past_questions/
+.env
+.flake8
+.vscode/
+stats_file.log
+__init__.py
