@@ -9,20 +9,16 @@ from typing import Dict, List, Union
 
 import dotenv
 import requests
-
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (
-    NoSuchAttributeException,
-    NoSuchElementException,
-    TimeoutException,
-)
+from selenium.common.exceptions import (NoSuchAttributeException,
+                                        NoSuchElementException,
+                                        TimeoutException)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -62,7 +58,7 @@ class Functions:
             "download.extensions_to_open": "",
         }
         options.add_experimental_option("prefs", self.PROFILE)
-        # options.headless = True
+        #options.headless = True
         self.driver = webdriver.Chrome(service=s, options=options)
 
         # Log in
@@ -102,17 +98,22 @@ class Functions:
             return None
 
         new_file_path = max(user_file_path, key=os.path.getctime)
+        file_logger.info(
+            f"Downloaded file from path {new_file_path} has been uploaded to user."
+        )
+        file_logger.info("")
+        return new_file_path
 
-        if self.is_new_file(new_file_path):
-            logger.info("it is a new file")
-            file_logger.info(
-                f"Downloaded file from path {new_file_path} has been uploaded to user."
-            )
-            file_logger.info("")
-            new_file_path = self.rename_past_question_file(path, new_file_path)
-            return new_file_path
-        logger.info("It is not a new file.")
-        return None
+        # if self.is_new_file(new_file_path):
+        #     logger.info("it is a new file")
+        #     file_logger.info(
+        #         f"Downloaded file from path {new_file_path} has been uploaded to user."
+        #     )
+        #     file_logger.info("")
+        #     new_file_path = self.rename_past_question_file(path, new_file_path)
+        #     return new_file_path
+        # logger.info("It is not a new file.")
+        # return None
 
     def rename_past_question_file(self, pasco_directory, file_path):
         """It takes a file path and renames the file to the first 20 characters of the file name.
@@ -125,13 +126,13 @@ class Functions:
           The new path of the file.
         """
         file_name = os.path.basename(file_path)
-        new_path = pasco_directory + "\\" + file_name[:20] + ".pdf"
+        new_path = f"{pasco_directory} + \\ + {file_name[:20]}.pdf"
         os.rename(file_path, new_path)
 
         return new_path
 
-    def is_new_file(self, path):
-        """If the current time minus the file creation time is greater than 20 seconds, then return False, otherwise return True.
+    def is_new_file(self, path) -> bool:
+        """If the current time minus the file creation time is greater than 10 seconds, then return False, otherwise return True.
 
         Args:
           path: The path to the file you want to check.
@@ -278,7 +279,7 @@ class Functions:
 
     def get_past_question(
         self, past_question_links: Dict[int, str], choice: int
-    ) -> Union[str, None]:
+    ) -> str:
         """It takes in a dictionary of past question links and a choice from the user, then it moves to the url of the users choice and downloads the past question.
 
         Args:
@@ -286,23 +287,25 @@ class Functions:
           choice (int): The choice of the user.
 
         Returns:
-          past_question_file
+          The path to the past_question_file
         """
-        for index, past_question_link in past_question_links.items():
-            if int(choice) == index:
-                self.driver.get(past_question_link)  # Move to the url of users choice.
+        if int(choice) == -1:
+            for past_question_link in past_question_links.values():
+                self.driver.get(past_question_link)
                 logger.info(f"Moved to {past_question_link} successfully.")
-                print()
-                print()
-                print()
-                print(self.path)
-                print()
-                print()
-                print()
                 self.download_past_question(past_question_link)
-                break
+                yield self.get_past_question_path(self.path)
+        else:
+            for index, past_question_link in past_question_links.items():
+                if int(choice) == index:
+                    self.driver.get(
+                        past_question_link
+                    )  # Move to the url of users choice.
+                    logger.info(f"Moved to {past_question_link} successfully.")
 
-        return self.get_past_question_path(self.path)
+                    self.download_past_question(past_question_link)
+                    yield self.get_past_question_path(self.path)
+                    break
 
     def download_past_question(self, past_question_link) -> None:
         """Clicks on a button that opens a frame, then clicks on a button in the frame to download a file."""
