@@ -5,7 +5,7 @@ import os
 import re
 import time
 import traceback
-from typing import Dict, List, Union
+from typing import Dict, Generator, List, Union
 
 import dotenv
 import requests
@@ -276,8 +276,8 @@ class Functions:
             return past_question_links
 
     def get_past_question(
-        self, past_question_links: Dict[int, str], choice: int
-    ) -> str:
+        self, chat_id: str, past_question_links: Dict[int, str], choice: int
+    ) -> Generator:
         """It takes in a dictionary of past question links and a choice from the user, then it moves to the url of the users choice and downloads the past question.
 
         Args:
@@ -292,7 +292,7 @@ class Functions:
                 self.driver.get(past_question_link)
                 logger.info(f"Moved to {past_question_link} successfully.")
                 self.download_past_question(past_question_link)
-                yield self.get_past_question_path(self.path)
+                yield self.get_past_question_path(chat_id, self.path)
         else:
             for index, past_question_link in past_question_links.items():
                 if int(choice) == index:
@@ -302,7 +302,7 @@ class Functions:
                     logger.info(f"Moved to {past_question_link} successfully.")
 
                     self.download_past_question(past_question_link)
-                    yield self.get_past_question_path(self.path)
+                    yield self.get_past_question_path(chat_id, self.path)
                     break
 
     def download_past_question(self, past_question_link) -> None:

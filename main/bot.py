@@ -219,7 +219,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         gen_file_path = function_class.get_past_question(
-            past_question_links, choice.data
+            await get_chat_id(), past_question_links, choice.data
         )
         if gen_file_path is None:
         gen_file_path = function_class.get_past_question(
