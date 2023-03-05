@@ -196,6 +196,16 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_id=await get_chat_id(update, context),
             text=f"You selected #{choice.data}",
         )
+    if choice.data == "-1":
+        await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text="You selected all.",
+        )
+    else:
+        await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text=f"You selected #{choice.data}",
+        )
 
     past_question_links = function_class.get_links_of_past_question()
     if len(past_question_links) == 0:
@@ -212,6 +222,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             past_question_links, choice.data
         )
         if gen_file_path is None:
+        gen_file_path = function_class.get_past_question(
+            past_question_links, choice.data
+        )
+        if gen_file_path is None:
             return await error_handler(
                 update, context, False, "Failed to download file and upload file."
             )
@@ -221,7 +235,6 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="Uploading past question...",
         )
         for _ in range(len(past_question_links)):
-
             await context.bot.sendDocument(
                 chat_id=await get_chat_id(update, context),
                 document=open(next(gen_file_path), "rb"),
