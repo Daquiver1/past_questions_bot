@@ -26,6 +26,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
 
+from utils.uuid import generate_6_digits_uuid
+
 # Logging setup
 logging.config.fileConfig(
     fname="log.ini",
@@ -81,7 +83,7 @@ class Functions:
         except Exception:
             logger.exception("Error occurred while logging in.")
 
-    def get_past_question_path(self, path: str) -> Union[str, None]:
+    def get_past_question_path(self, chat_id: str, path: str) -> Union[str, None]:
         """It takes a path as an argument, checks if there are any pdf files in the path, and if there are, it returns the most recent file in the path, if they aren't it returns None.
 
         Args:
@@ -102,19 +104,16 @@ class Functions:
             return None
 
         new_file_path = max(user_file_path, key=os.path.getctime)
+        file_logger.info(
+            f"Downloaded file from path {new_file_path} has been uploaded to user."
+        )
+        new_file_path = self.rename_past_question_file(chat_id, path, new_file_path)
+        file_logger.info("")
+        return new_file_path
 
-        if self.is_new_file(new_file_path):
-            logger.info("it is a new file")
-            file_logger.info(
-                f"Downloaded file from path {new_file_path} has been uploaded to user."
-            )
-            file_logger.info("")
-            new_file_path = self.rename_past_question_file(path, new_file_path)
-            return new_file_path
-        logger.info("It is not a new file.")
-        return None
-
-    def rename_past_question_file(self, pasco_directory, file_path):
+    def rename_past_question_file(
+        self, chat_id: str, pasco_directory: str, file_path: str
+    ):
         """It takes a file path and renames the file to the first 20 characters of the file name.
 
         Args:
@@ -124,8 +123,8 @@ class Functions:
         Returns:
           The new path of the file.
         """
-        file_name = os.path.basename(file_path)
-        new_path = pasco_directory + "\\" + file_name[:20] + ".pdf"
+        # file_name = os.path.basename(file_path)
+        new_path = f"{pasco_directory}\\{chat_id}_{generate_6_digits_uuid}.pdf"
         os.rename(file_path, new_path)
 
         return new_path

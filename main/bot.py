@@ -30,7 +30,7 @@ dotenv.load_dotenv()
 # PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ["TOKEN"]
 DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
-function_class = None
+function_class = functions.Functions("/pasco")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -221,10 +221,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="Uploading past question...",
         )
         for _ in range(len(past_question_links)):
-            await context.bot.sendMessage(
-                chat_id=await get_chat_id(update, context),
-                document=open(next(gen_file_path), "rb"),
-            )
+
             await context.bot.sendDocument(
                 chat_id=await get_chat_id(update, context),
                 document=open(next(gen_file_path), "rb"),
@@ -245,6 +242,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Returns:
       displays a list of buttons which trigger a callback query.
     """
+    if function_class.logged_in is False:
+        return await error_handler(update, context, False, "Failed to log in.")
+
     options: List[List] = [[], []]
 
     await update.message.reply_text(f"You said {update.message.text}.")
@@ -256,19 +256,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"Searching database for {cleaned_user_input} past questions..."
     )
-    # Start selenium.
-    global function_class
-    path = (
-        os.getcwd()
-        + "\\past_questions\\"
-        + update.message.chat.username
-        + "_"
-        + str(await get_chat_id(update, context))
-    )
-    function_class = functions.Functions(path)
-    if function_class.logged_in is False:
-        return await error_handler(update, context, False, "Failed to log in.")
-
     logger.info(
         f"{update.message.from_user.username} is searching for {cleaned_user_input}."
     )
