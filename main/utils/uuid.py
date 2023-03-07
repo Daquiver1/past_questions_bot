@@ -1,4 +1,4 @@
-"""Generate 8 character uuid"""
+"""Generate a 6 character uuid"""
 import uuid
 
 

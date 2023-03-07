@@ -9,6 +9,7 @@ from typing import Dict, Generator, List, Union
 
 import dotenv
 import requests
+import utils.uuid as uuid
 
 # Polling Selenium setup
 from bs4 import BeautifulSoup
@@ -25,8 +26,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
-
-from utils.uuid import generate_6_digits_uuid
 
 # Logging setup
 logging.config.fileConfig(
@@ -123,8 +122,8 @@ class Functions:
         Returns:
           The new path of the file.
         """
-        # file_name = os.path.basename(file_path)
-        new_path = f"{pasco_directory}\\{chat_id}_{generate_6_digits_uuid}.pdf"
+        file_name = os.path.basename(file_path)
+        new_path = f"{pasco_directory}\\{chat_id}_{uuid.generate_6_digits_uuid()}_{file_name[:9]}.pdf"
         os.rename(file_path, new_path)
 
         return new_path

@@ -30,7 +30,7 @@ dotenv.load_dotenv()
 # PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ["TOKEN"]
 DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
-function_class = functions.Functions("/pasco")
+function_class = functions.Functions(os.getcwd() + "\\past_questions")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -186,26 +186,6 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     choice = update.callback_query
     await choice.answer()
-    if choice.data == "-1":
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="You selected all.",
-        )
-    else:
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text=f"You selected #{choice.data}",
-        )
-    if choice.data == "-1":
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="You selected all.",
-        )
-    else:
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text=f"You selected #{choice.data}",
-        )
 
     past_question_links = function_class.get_links_of_past_question()
     if len(past_question_links) == 0:
@@ -213,18 +193,29 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             update, context, False, "Failed to extract past question links."
         )
 
+    if choice.data == "-1":
+        await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text="You selected all.",
+        )
+        count = len(past_question_links)
+
+    else:
+        await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text=f"You selected #{choice.data}",
+        )
+        count = 1
+
     await context.bot.send_message(
         chat_id=await get_chat_id(update, context), text="Downloading past question..."
     )
 
     try:
         gen_file_path = function_class.get_past_question(
-            await get_chat_id(), past_question_links, choice.data
+            await get_chat_id(update, context), past_question_links, choice.data
         )
-        if gen_file_path is None:
-        gen_file_path = function_class.get_past_question(
-            past_question_links, choice.data
-        )
+
         if gen_file_path is None:
             return await error_handler(
                 update, context, False, "Failed to download file and upload file."
@@ -234,7 +225,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_id=await get_chat_id(update, context),
             text="Uploading past question...",
         )
-        for _ in range(len(past_question_links)):
+        for _ in range(count):
             await context.bot.sendDocument(
                 chat_id=await get_chat_id(update, context),
                 document=open(next(gen_file_path), "rb"),
