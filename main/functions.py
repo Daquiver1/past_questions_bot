@@ -54,6 +54,8 @@ class Functions:
         """
         self.logged_in = False
         self.path = path
+        self.PREV_UUID = "PREV_UUID"
+        self.CURRENT_UUID = "CURRENT_UUID"
         s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
@@ -92,27 +94,44 @@ class Functions:
           The path of the latest file in the directory.
         """
         logger.info("Checking path for latest file.")
-        file_path = os.listdir(path)
-
+        path_directory = os.listdir(self.path)
         user_file_path = [
             os.path.join(path, basename)
-            for basename in file_path
+            for basename in path_directory
             if basename.endswith(".pdf")
         ]
+        user_file_path = sorted(user_file_path, key=os.path.getctime)
+        print(user_file_path)
+
         if len(user_file_path) == 0:
             return None
 
-        new_file_path = max(user_file_path, key=os.path.getctime)
-        file_logger.info(
-            f"Downloaded file from path {new_file_path} has been uploaded to user."
-        )
-        new_file_path = self.rename_past_question_file(chat_id, path, new_file_path)
-        file_logger.info("")
-        return new_file_path
+        for file in user_file_path:
+            print()
+            print()
+            print()
+            print()
+            print(self.PREV_UUID)
+            print(file)
+            print(self.CURRENT_UUID)
+            print()
+            print()
+            print()
+            print()
+            print()
+            if chat_id[:7] in file and self.PREV_UUID not in file:
+                print("Is new file")
+                file_logger.info(
+                    f"Downloaded file from path {file} has been uploaded to user."
+                )
+                file_logger.info("")
+                self.PREV_UUID = self.CURRENT_UUID
+                return file
+            continue
 
-    def rename_past_question_file(
-        self, chat_id: str, pasco_directory: str, file_path: str
-    ):
+        return None
+
+    def rename_past_question_file(self, chat_id: str):
         """It takes a file path and renames the file to the first 20 characters of the file name.
 
         Args:
@@ -122,11 +141,27 @@ class Functions:
         Returns:
           The new path of the file.
         """
-        file_name = os.path.basename(file_path)
-        new_path = f"{pasco_directory}\\{chat_id}_{uuid.generate_6_digits_uuid()}_{file_name[:9]}.pdf"
-        os.rename(file_path, new_path)
+        new_uuid = uuid.generate_6_digits_uuid()
+        self.CURRENT_UUID = new_uuid
 
-        return new_path
+        path_directory = os.listdir(self.path)
+        absolute_path_directory = [
+            os.path.join(self.path, basename)
+            for basename in path_directory
+            if basename.endswith(".pdf")
+        ]
+        user_file_path = sorted(
+            absolute_path_directory, key=os.path.getctime, reverse=True
+        )
+        for file in user_file_path:
+            if chat_id[:7] in file:
+                continue
+            # downloaded_file_path = max(absolute_path_directory, key=os.path.getctime)
+            file_name = os.path.basename(file)
+            new_path = f"{self.path}\\{chat_id}_{self.CURRENT_UUID}_{file_name[:9]}.pdf"
+            os.replace(file, new_path)
+
+            return new_path
 
     def is_new_file(self, path) -> bool:
         """If the current time minus the file creation time is greater than 10 seconds, then return False, otherwise return True.
@@ -290,7 +325,7 @@ class Functions:
             for past_question_link in past_question_links.values():
                 self.driver.get(past_question_link)
                 logger.info(f"Moved to {past_question_link} successfully.")
-                self.download_past_question(past_question_link)
+                self.download_past_question(chat_id, past_question_link)
                 yield self.get_past_question_path(chat_id, self.path)
         else:
             for index, past_question_link in past_question_links.items():
@@ -300,11 +335,11 @@ class Functions:
                     )  # Move to the url of users choice.
                     logger.info(f"Moved to {past_question_link} successfully.")
 
-                    self.download_past_question(past_question_link)
+                    self.download_past_question(chat_id, past_question_link)
                     yield self.get_past_question_path(chat_id, self.path)
                     break
 
-    def download_past_question(self, past_question_link) -> None:
+    def download_past_question(self, chat_id, past_question_link) -> None:
         """Clicks on a button that opens a frame, then clicks on a button in the frame to download a file."""
         logger.info(f"Downloading past question from {self.driver.current_url}")
         try:
@@ -322,6 +357,7 @@ class Functions:
             file_logger.info(f"{past_question_link} has been downloaded.")
             self.driver.back()
             time.sleep(2)
+            self.rename_past_question_file(chat_id)
         except (NoSuchElementException, NoSuchAttributeException):
             logger.exception("Failed to find download button.")
             raise

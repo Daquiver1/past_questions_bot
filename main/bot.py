@@ -28,9 +28,9 @@ logger = logging.getLogger(__name__)
 
 dotenv.load_dotenv()
 # PORT = int(os.environ.get("PORT", "8443"))
-TOKEN = os.environ["TOKEN"]
+TOKEN = os.environ["TOKEN_ENV"]
 DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
-function_class = functions.Functions(os.getcwd() + "\\past_questions")
+function_class = functions.Functions(os.getcwd() + "\\past_questions_test")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -213,7 +213,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         gen_file_path = function_class.get_past_question(
-            await get_chat_id(update, context), past_question_links, choice.data
+            str(await get_chat_id(update, context)), past_question_links, choice.data
         )
 
         if gen_file_path is None:
@@ -226,6 +226,13 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="Uploading past question...",
         )
         for _ in range(count):
+            print()
+            print()
+            print(count)
+            print(_)
+            print()
+            print()
+            print()
             await context.bot.sendDocument(
                 chat_id=await get_chat_id(update, context),
                 document=open(next(gen_file_path), "rb"),
