@@ -12,7 +12,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
                           ContextTypes, MessageHandler, filters)
 
-import helpers as functions
+from past_question_bot.helpers import Scrapper
+
 from past_question_bot.constant import (APPLICATIONS, DEVELOPER_CHAT_ID, ENV,
                                         PORT, TOKEN)
 
@@ -20,10 +21,6 @@ logger = logging.getLogger("past_question_bot")
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 
-
-
-
-function_class = None
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -190,7 +187,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=f"You selected #{choice.data}",
         )
 
-    past_question_links = function_class.get_links_of_past_question()
+    past_question_links = Scrapper.get_links_of_past_question()
     if len(past_question_links) == 0:
         return await error_handler(
             update, context, False, "Failed to extract past question links."
@@ -201,7 +198,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        gen_file_path = function_class.get_past_question(
+        gen_file_path = Scrapper.get_past_question(
             past_question_links, choice.data
         )
         if gen_file_path is None:
@@ -236,9 +233,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"Searching database for {cleaned_user_input} past questions..."
     )
-    # Start selenium.
-    global function_class
-    
+
     # Change to saving in s3 bucket
     path = (
         os.getcwd()
@@ -247,20 +242,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         + "_"
         + str(await get_chat_id(update, context))
     )
-    function_class = functions.Functions(path)
-    if function_class.logged_in is False:
+    scapper = Scrapper(path)
+    if scapper.logged_in is False:
         return await error_handler(update, context, False, "Failed to log in.")
 
     logger.info(
         f"{update.message.from_user.username} is searching for {cleaned_user_input}."
     )
 
-    if function_class.search_for_past_question(cleaned_user_input) == 1:
+    if scapper.search_for_past_question(cleaned_user_input) == 1:
         return await update.message.reply_text(
             f"Error searching for {cleaned_user_input}. Try again."
         )
 
-    past_question_list = function_class.get_list_of_past_question()
+    past_question_list = scapper.get_list_of_past_question()
     if (
         len(past_question_list) == 0
     ):
@@ -271,7 +266,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"We found {len(past_question_list)} {cleaned_user_input} past questions."
     )
-    result = function_class.past_question_list_to_string(past_question_list)
+    result = scapper.past_question_list_to_string(past_question_list)
     await update.message.reply_text(result)  # display available past questions.
 
     for past_question_index in range(len(past_question_list)):
