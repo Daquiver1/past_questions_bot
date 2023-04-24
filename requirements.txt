@@ -1,6 +1,0 @@
-python-telegram-bot
-beautifulsoup4
-webdriver-manager
-selenium
-requests
-lxml

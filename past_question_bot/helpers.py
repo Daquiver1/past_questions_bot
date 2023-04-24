@@ -7,9 +7,11 @@ import time
 import traceback
 from typing import Dict, List, Union
 
-import dotenv
 import requests
-# Polling Selenium setup
+
+
+from past_question_bot.constant import URL, USERNAME, PASSWORD
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import (NoSuchAttributeException,
@@ -19,49 +21,31 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-# Used when polling.
+
+
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Logging setup
-logging.config.fileConfig(
-    fname="log.ini",
-    disable_existing_loggers=False,
-)
-logger = logging.getLogger(__name__)
-file_logger = logging.getLogger("fileLogger")
+logger = logging.getLogger("helpers")
 
 
-# Constants
-dotenv.load_dotenv()
-URL = os.getenv("URL")
-USERNAME = os.getenv("USER_NAME")
-PASSWORD = os.getenv("PASSWORD")
-
-
-class Functions:
-    """Functions class."""
+class Scrapper:
 
     def __init__(self, path):
-        """Initializes a headless chrome browser and logs in to a website.
-
-        Args:
-          path: the path to the directory where the pdf's will be downloaded
-        """
         self.logged_in = False
         self.path = path
         s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
-        # Open externally not with chrome's pdf viewer
+
         self.PROFILE = {
             "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-            "download.default_directory": path,
+            "download.default_directory": path, #Emile: path to save file
             "download.extensions_to_open": "",
         }
+
         options.add_experimental_option("prefs", self.PROFILE)
-        #options.headless = True
+        
         self.driver = webdriver.Chrome(service=s, options=options)
 
-        # Log in
         try:
             self.driver.get(URL)
             username_field = self.driver.find_element(By.NAME, "memberID")
@@ -78,14 +62,6 @@ class Functions:
             logger.exception("Error occurred while logging in.")
 
     def get_past_question_path(self, path: str) -> Union[str, None]:
-        """It takes a path as an argument, checks if there are any pdf files in the path, and if there are, it returns the most recent file in the path, if they aren't it returns None.
-
-        Args:
-          path (str): The path to the directory where the file is located.
-
-        Returns:
-          The path of the latest file in the directory.
-        """
         logger.info("Checking path for latest file.")
         file_path = os.listdir(path)
 
@@ -98,33 +74,14 @@ class Functions:
             return None
 
         new_file_path = max(user_file_path, key=os.path.getctime)
-        file_logger.info(
+        logger.info(
             f"Downloaded file from path {new_file_path} has been uploaded to user."
         )
-        file_logger.info("")
+        logger.info("")
         return new_file_path
 
-        # if self.is_new_file(new_file_path):
-        #     logger.info("it is a new file")
-        #     file_logger.info(
-        #         f"Downloaded file from path {new_file_path} has been uploaded to user."
-        #     )
-        #     file_logger.info("")
-        #     new_file_path = self.rename_past_question_file(path, new_file_path)
-        #     return new_file_path
-        # logger.info("It is not a new file.")
-        # return None
 
     def rename_past_question_file(self, pasco_directory, file_path):
-        """It takes a file path and renames the file to the first 20 characters of the file name.
-
-        Args:
-          pasco_directory: The directory where the past questions are stored.
-          file_path: The path to the file that you want to rename.
-
-        Returns:
-          The new path of the file.
-        """
         file_name = os.path.basename(file_path)
         new_path = f"{pasco_directory} + \\ + {file_name[:20]}.pdf"
         os.rename(file_path, new_path)
@@ -132,14 +89,6 @@ class Functions:
         return new_path
 
     def is_new_file(self, path) -> bool:
-        """If the current time minus the file creation time is greater than 10 seconds, then return False, otherwise return True.
-
-        Args:
-          path: The path to the file you want to check.
-
-        Returns:
-          A boolean value based on the match.
-        """
         current_time = time.time()
         file_created_time = os.path.getctime(path)
 
@@ -148,22 +97,13 @@ class Functions:
         return True
 
     def search_for_past_question(self, cleaned_pasco_name: str) -> int:
-        """It searches for a past question on the website, and returns 0 if it was successful, and 1 if it wasn't.
-
-        Args:
-          cleaned_pasco_name (str): The name of the file you're searching for.
-
-        Returns:
-          The return value is the status code of the function.
-        """
         logger.info(
             f"Searching for {cleaned_pasco_name}: The current_url is {self.driver.current_url}"
         )
-        file_logger.info(f"User has requested for {cleaned_pasco_name} past question.")
+        logger.info(f"User has requested for {cleaned_pasco_name} past question.")
         try:
             search_field = self.driver.find_element(By.NAME, "keywords")
             search_button = self.driver.find_element(By.NAME, "search")
-            # Double Quotes give accurate queries
             search_field.send_keys(f'"{cleaned_pasco_name}"')
             search_button.click()
             logger.info(
@@ -178,12 +118,6 @@ class Functions:
             return 1
 
     def get_list_of_past_question(self) -> List[str]:
-        """
-        It retrieves the names, year and semester of past questions displayed then adds them to a list.
-
-        Returns:
-          A list of strings.
-        """
         filtered_past_question_list: List[str] = []
         logger.info(f"Retrieving list of past question from {self.driver.current_url}")
 
@@ -223,14 +157,6 @@ class Functions:
             return filtered_past_question_list
 
     def past_question_list_to_string(self, list_of_values: List[str]) -> str:
-        """It takes a list of strings, and returns a string with each item in the list on a new line, with a number in front of it.
-
-        Args:
-          list_of_values (List[str]): List[str]
-
-        Returns:
-          A string
-        """
         updated_list = []
         for value in range(len(list_of_values)):
             updated_list.append(
@@ -243,12 +169,6 @@ class Functions:
         return modified_text
 
     def get_links_of_past_question(self) -> Dict[int, str]:
-        """
-        It gets the links of past questions from the current page.
-
-        Returns:
-          A dictionary of past question links.
-        """
         past_question_links: Dict[int, str] = {}
         logger.info(f"Retrieving links of past question from {self.driver.current_url}")
 
@@ -280,15 +200,6 @@ class Functions:
     def get_past_question(
         self, past_question_links: Dict[int, str], choice: int
     ) -> str:
-        """It takes in a dictionary of past question links and a choice from the user, then it moves to the url of the users choice and downloads the past question.
-
-        Args:
-          past_question_links (Dict[int, Any]): This is a dictionary of the past questions links.
-          choice (int): The choice of the user.
-
-        Returns:
-          The path to the past_question_file
-        """
         if int(choice) == -1:
             for past_question_link in past_question_links.values():
                 self.driver.get(past_question_link)
@@ -300,7 +211,7 @@ class Functions:
                 if int(choice) == index:
                     self.driver.get(
                         past_question_link
-                    )  # Move to the url of users choice.
+                    )
                     logger.info(f"Moved to {past_question_link} successfully.")
 
                     self.download_past_question(past_question_link)
@@ -308,13 +219,12 @@ class Functions:
                     break
 
     def download_past_question(self, past_question_link) -> None:
-        """Clicks on a button that opens a frame, then clicks on a button in the frame to download a file."""
         logger.info(f"Downloading past question from {self.driver.current_url}")
         try:
             file = self.driver.find_element(By.CLASS_NAME, "openPopUp")
             self.driver.execute_script(
                 "arguments[0].click();", file
-            )  # screen displayed is a frame, so adapts to a frame.
+            )
             wait = WebDriverWait(self.driver, 10)
             wait.until(
                 EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe"))
@@ -322,7 +232,7 @@ class Functions:
             wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
 
             logger.info("Downloading file...")
-            file_logger.info(f"{past_question_link} has been downloaded.")
+            logger.info(f"{past_question_link} has been downloaded.")
             self.driver.back()
             time.sleep(2)
         except (NoSuchElementException, NoSuchAttributeException):
@@ -336,8 +246,9 @@ class Functions:
             raise
 
 
+# Move to test
 if __name__ == "__main__":
-    function_class = Functions(str(os.getcwd()))
+    function_class = Scrapper(str(os.getcwd()))
     name = input("Please enter the course name : ")
     function_class.search_for_past_question(name)
     questions = function_class.get_list_of_past_question()

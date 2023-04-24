@@ -3,33 +3,26 @@ import logging
 import logging.config
 import os
 import re
+import sys
 import traceback
 from typing import List, Union
 
-import dotenv
-import functions
 import telegram.ext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (
-    ApplicationBuilder,
-    CallbackQueryHandler,
-    ContextTypes,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
+                          ContextTypes, MessageHandler, filters)
 
-# Logging setup
-logging.config.fileConfig(
-    fname="log.ini",
-    disable_existing_loggers=False,
-)
+import helpers as functions
+from past_question_bot.constant import (APPLICATIONS, DEVELOPER_CHAT_ID, ENV,
+                                        PORT, TOKEN)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("past_question_bot")
 
-dotenv.load_dotenv()
-# PORT = int(os.environ.get("PORT", "8443"))
-TOKEN = os.environ["TOKEN"]
-DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
+
+
+
+
 function_class = None
 
 
@@ -232,28 +225,21 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """It takes a user's input, searches for the past question, displays the past questions, and then asks the user which past question they want to download.
-
-    Args:
-      update (Update): Update
-      context (ContextTypes.DEFAULT_TYPE): ContextTypes.DEFAULT_TYPE
-
-    Returns:
-      displays a list of buttons which trigger a callback query.
-    """
     options: List[List] = [[], []]
 
     await update.message.reply_text(f"You said {update.message.text}.")
     cleaned_user_input = validate_user_input(update.message.text)
     if cleaned_user_input is None:
         return await update.message.reply_text(
-            "Please enter a valid past question name (eg. dcit 103, math 122, ugrc 110)."
+            "Please enter a valid past question name (eg. dcit 103, math 122)."
         )
     await update.message.reply_text(
         f"Searching database for {cleaned_user_input} past questions..."
     )
     # Start selenium.
     global function_class
+    
+    # Change to saving in s3 bucket
     path = (
         os.getcwd()
         + "\\past_questions\\"
@@ -277,7 +263,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     past_question_list = function_class.get_list_of_past_question()
     if (
         len(past_question_list) == 0
-    ):  # Check if there are past questions available for users text.
+    ):
         return await update.message.reply_text(
             f"Unfortunately, there are no {cleaned_user_input} past questions."
         )
@@ -352,10 +338,7 @@ async def error_handler(
 
     await context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
 
-
-def main():
-    """Start bot."""
-    app = ApplicationBuilder().token(TOKEN).build()
+def start_app(app: ApplicationBuilder) -> None:
     app.add_handler(telegram.ext.CommandHandler("start", start))
     app.add_handler(telegram.ext.CommandHandler("help", help))
     app.add_handler(telegram.ext.CommandHandler("about", about))
@@ -366,16 +349,31 @@ def main():
 
     app.add_error_handler(error_handler)
 
-    # for polling
-    app.run_polling()
 
-    # updater.start_webhook(
-    #     listen="0.0.0.0",
-    #     port=PORT,
-    #     url_path=TOKEN,
-    #     webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
-    # )
+
+def main():
+    logger.info("Starting Application")
+    app = ApplicationBuilder().token(TOKEN).build()
+
+    if ENV == "DEV" or ENV == "STG":
+        start_app(app)
+        app.run_polling()
+
+    else:
+        app.start_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TOKEN,
+        webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN, # change to fly.io public url
+    )
 
 
 if __name__ == "__main__":
+    root_logger = logging.getLogger("")
+    if not root_logger.handlers:
+        root_logger.addHandler(logging.StreamHandler(sys.stdout))
+
+    for name in APPLICATIONS:
+        logging.getLogger(name).setLevel(LOG_LEVEL)
+
     main()
