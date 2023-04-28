@@ -1,4 +1,5 @@
 python-telegram-bot
+python-telegram-bot[webhooks]
 beautifulsoup4
 webdriver-manager
 selenium
