@@ -73,7 +73,7 @@ class Functions:
         options.add_argument("disable-gpu")
         options.add_argument("disable-extensions")
         options.add_argument("disable-infobars")
-        self.driver = webdriver.Chrome( service=s, options=options)
+        self.driver = webdriver.Chrome(executable_path=CHROME_DRIVER_RENDER_PATH, service=s, options=options)
 
         # Log in
         try:
