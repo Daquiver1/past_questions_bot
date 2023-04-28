@@ -71,10 +71,11 @@ class Functions:
         options.add_argument("force-dark-mode")
         options.add_argument("start-maximized")
         options.add_argument("disable-gpu")
-        options.binary_location = CHROME_DRIVER_RENDER_PATH
+        # options.binary_location = os.getcwd() + CHROME_DRIVER_RENDER_PATH
+        options.binary_location = "/opt/render/project/.render/chrome/opt/google/chrome/google-chrome"
         options.add_argument("disable-extensions")
         options.add_argument("disable-infobars")
-        self.driver = webdriver.Chrome(options=options)
+        self.driver = webdriver.Chrome(executable_path=CHROME_DRIVER_RENDER_PATH, options=options)
 
         # Log in
         try:
