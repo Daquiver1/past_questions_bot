@@ -6,3 +6,4 @@ past_questions/
 .vscode/
 stats_file.log
 __init__.py
+past_questions_test
