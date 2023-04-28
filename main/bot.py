@@ -10,13 +10,8 @@ import dotenv
 import functions
 import telegram.ext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (
-    ApplicationBuilder,
-    CallbackQueryHandler,
-    ContextTypes,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
+                          ContextTypes, MessageHandler, filters)
 
 # Logging setup
 logging.config.fileConfig(
@@ -28,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 dotenv.load_dotenv()
 # PORT = int(os.environ.get("PORT", "8443"))
-TOKEN = os.environ["TOKEN_ENV"]
+TOKEN = os.environ["TOKEN"]
 DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
 function_class = functions.Functions(os.getcwd() + "\\past_questions_test")
 
@@ -199,7 +194,6 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="You selected all.",
         )
         count = len(past_question_links)
-
     else:
         await context.bot.send_message(
             chat_id=await get_chat_id(update, context),
@@ -226,13 +220,6 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="Uploading past question...",
         )
         for _ in range(count):
-            print()
-            print()
-            print(count)
-            print(_)
-            print()
-            print()
-            print()
             await context.bot.sendDocument(
                 chat_id=await get_chat_id(update, context),
                 document=open(next(gen_file_path), "rb"),
@@ -320,39 +307,17 @@ async def error_handler(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     *args,
-    automated_caller: bool = True,
     issue: str = "None",
 ) -> None:
     """Log the error and send a telegram message to notify the developer."""
-    if not automated_caller:
-        message = (
-            f"An exception was raised while handling an update\n"
-            f"User's text: {update.message.text}\n"
-            f"User's id: {update.message.from_user.id}\n"
-            f"User's first_name: {update.message.from_user.first_name}\n"
-            f"User's last_name: {update.message.from_user.last_name}\n"
-            f"User's username: {update.message.from_user.username}\n"
-            f"What's the issue: {issue}\n"
-            f"Automated message?: {automated_caller}\n"
-            f"Traceback: {traceback.format_exc()}"
-        )
+    if update is not None:
         logger.exception("Exception while handling an update.")
         await context.bot.send_message(
             chat_id=await get_chat_id(update, context),
             text="Unexpected error occurred. Try again. If error persists contact @Daquiver.",
         )
-    else:
-        message = (
-            f"Automated message?: {automated_caller}\n"
-            f"Traceback: {traceback.format_exc()}"
-        )
-        logger.error("A logical error occurred:", issue)
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="Unexpected error. Try again. If error persists contact @Daquiver.",
-        )
-
-    await context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
+        message = f"Traceback: {traceback.format_exc()}"
+        await context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
 
 
 def main():
