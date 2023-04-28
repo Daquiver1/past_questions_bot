@@ -55,7 +55,7 @@ class Functions:
         self.CURRENT_UUID = "CURRENT_UUID"
         # s = Service(ChromeDriverManager().install())
         #s = Service("/opt/render/project/src/main/chromedriver.exe")
-        s = Service(CHROME_DRIVER_RENDER_PATH)
+        # s = Service(CHROME_DRIVER_RENDER_PATH)
 
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
@@ -71,9 +71,10 @@ class Functions:
         options.add_argument("force-dark-mode")
         options.add_argument("start-maximized")
         options.add_argument("disable-gpu")
+        options.binary_location = CHROME_DRIVER_RENDER_PATH
         options.add_argument("disable-extensions")
         options.add_argument("disable-infobars")
-        self.driver = webdriver.Chrome(executable_path=CHROME_DRIVER_RENDER_PATH, service=s, options=options)
+        self.driver = webdriver.Chrome(options=options)
 
         # Log in
         try:
