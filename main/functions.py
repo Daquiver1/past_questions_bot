@@ -75,6 +75,7 @@ class Functions:
         options.binary_location = "/opt/render/project/.render/chrome/opt/google/chrome/google-chrome"
         options.add_argument("disable-extensions")
         options.add_argument("disable-infobars")
+        print(os.getcwd())
         self.driver = webdriver.Chrome(executable_path=CHROME_DRIVER_RENDER_PATH, options=options)
 
         # Log in
