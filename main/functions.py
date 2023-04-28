@@ -10,20 +10,16 @@ from typing import Dict, Generator, List, Union
 import dotenv
 import requests
 import utils.uuid as uuid
-
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (
-    NoSuchAttributeException,
-    NoSuchElementException,
-    TimeoutException,
-)
+from selenium.common.exceptions import (NoSuchAttributeException,
+                                        NoSuchElementException,
+                                        TimeoutException)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -100,36 +96,14 @@ class Functions:
             for basename in path_directory
             if basename.endswith(".pdf")
         ]
-        user_file_path = sorted(user_file_path, key=os.path.getctime)
-        print(user_file_path)
-
         if len(user_file_path) == 0:
             return None
+        user_file = max(user_file_path, key=os.path.getctime)
+        file_logger.info(f"Downloaded file from path {user_file} has been uploaded to user.")
+        file_logger.info("")
 
-        for file in user_file_path:
-            print()
-            print()
-            print()
-            print()
-            print(self.PREV_UUID)
-            print(file)
-            print(self.CURRENT_UUID)
-            print()
-            print()
-            print()
-            print()
-            print()
-            if chat_id[:7] in file and self.PREV_UUID not in file:
-                print("Is new file")
-                file_logger.info(
-                    f"Downloaded file from path {file} has been uploaded to user."
-                )
-                file_logger.info("")
-                self.PREV_UUID = self.CURRENT_UUID
-                return file
-            continue
+        return user_file
 
-        return None
 
     def rename_past_question_file(self, chat_id: str):
         """It takes a file path and renames the file to the first 20 characters of the file name.
@@ -162,22 +136,6 @@ class Functions:
             os.replace(file, new_path)
 
             return new_path
-
-    def is_new_file(self, path) -> bool:
-        """If the current time minus the file creation time is greater than 10 seconds, then return False, otherwise return True.
-
-        Args:
-          path: The path to the file you want to check.
-
-        Returns:
-          A boolean value based on the match.
-        """
-        current_time = time.time()
-        file_created_time = os.path.getctime(path)
-
-        if (current_time - file_created_time) > 10:
-            return False
-        return True
 
     def search_for_past_question(self, cleaned_pasco_name: str) -> int:
         """It searches for a past question on the website, and returns 0 if it was successful, and 1 if it wasn't.
@@ -326,6 +284,7 @@ class Functions:
                 self.driver.get(past_question_link)
                 logger.info(f"Moved to {past_question_link} successfully.")
                 self.download_past_question(chat_id, past_question_link)
+                time.sleep(2)
                 yield self.get_past_question_path(chat_id, self.path)
         else:
             for index, past_question_link in past_question_links.items():
@@ -336,6 +295,7 @@ class Functions:
                     logger.info(f"Moved to {past_question_link} successfully.")
 
                     self.download_past_question(chat_id, past_question_link)
+                    time.sleep(2)
                     yield self.get_past_question_path(chat_id, self.path)
                     break
 
