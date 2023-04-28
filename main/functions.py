@@ -37,6 +37,8 @@ dotenv.load_dotenv()
 URL = os.getenv("URL")
 USERNAME = os.getenv("USER_NAME")
 PASSWORD = os.getenv("PASSWORD")
+CHROME_DRIVER_LOCAL_PATH = os.getenv("CHROME_DRIVER_LOCAL_PATH")
+CHROME_DRIVER_RENDER_PATH = os.getenv("CHROME_DRIVER_RENDER_PATH")
 
 
 class Functions:
@@ -50,9 +52,11 @@ class Functions:
         """
         self.logged_in = False
         self.path = path
-        self.PREV_UUID = "PREV_UUID"
         self.CURRENT_UUID = "CURRENT_UUID"
-        s = Service(ChromeDriverManager().install())
+        # s = Service(ChromeDriverManager().install())
+        #s = Service("/opt/render/project/src/main/chromedriver.exe")
+        s = Service(CHROME_DRIVER_RENDER_PATH)
+
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
         self.PROFILE = {
@@ -61,8 +65,15 @@ class Functions:
             "download.extensions_to_open": "",
         }
         options.add_experimental_option("prefs", self.PROFILE)
-        # options.headless = True
-        self.driver = webdriver.Chrome(service=s, options=options)
+        options.add_argument("no-sandbox")
+        # options.add_argument("headless")
+        options.add_argument("disable-dev-shm-usage")
+        options.add_argument("force-dark-mode")
+        options.add_argument("start-maximized")
+        options.add_argument("disable-gpu")
+        options.add_argument("disable-extensions")
+        options.add_argument("disable-infobars")
+        self.driver = webdriver.Chrome( service=s, options=options)
 
         # Log in
         try:
