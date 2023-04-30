@@ -9,16 +9,20 @@ from typing import Dict, Generator, List, Union
 
 import dotenv
 import requests
+
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (NoSuchAttributeException,
-                                        NoSuchElementException,
-                                        TimeoutException)
+from selenium.common.exceptions import (
+    NoSuchAttributeException,
+    NoSuchElementException,
+    TimeoutException,
+)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -50,15 +54,18 @@ class Functions:
         Args:
           path: the path to the directory where the pdf's will be downloaded
         """
+
         self.logged_in = False
         self.path = os.getcwd() + get_file_separator() + path
+        logger.info(f"Path to download past questions is {self.path}")
         self.CURRENT_UUID = "CURRENT_UUID"
         s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
+
         self.PROFILE = {
             "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-            "download.default_directory": path,
+            "download.default_directory": self.path,
             "download.extensions_to_open": "",
         }
         options.add_experimental_option("prefs", self.PROFILE)
@@ -104,13 +111,14 @@ class Functions:
         logger.info(path_directory)
         if len(user_file_path) == 0:
             return None
-        
+
         user_file = max(user_file_path, key=os.path.getctime)
-        file_logger.info(f"Downloaded file from path {user_file} has been uploaded to user.")
+        file_logger.info(
+            f"Downloaded file from path {user_file} has been uploaded to user."
+        )
         file_logger.info("")
 
         return user_file
-
 
     def rename_past_question_file(self, chat_id: str):
         """It takes a file path and renames the file to the first 20 characters of the file name.
@@ -343,4 +351,4 @@ if __name__ == "__main__":
     questions = function_class.get_list_of_past_question()
     pasco_links = function_class.get_links_of_past_question()
     user_choice = int(input("The number of the past question you want to download: "))
-    function_class.get_past_question("1",pasco_links, user_choice)
+    function_class.get_past_question("1", pasco_links, user_choice)
