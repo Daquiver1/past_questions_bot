@@ -9,20 +9,16 @@ from typing import Dict, Generator, List, Union
 
 import dotenv
 import requests
-
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (
-    NoSuchAttributeException,
-    NoSuchElementException,
-    TimeoutException,
-)
+from selenium.common.exceptions import (NoSuchAttributeException,
+                                        NoSuchElementException,
+                                        TimeoutException)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -58,7 +54,7 @@ class Functions:
 
         self.PROFILE = {
             "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-            "download.default_directory": self.path,
+            "download.default_directory": '/app/src/tmp/',
             "download.extensions_to_open": "",
         }
         options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
