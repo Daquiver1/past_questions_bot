@@ -202,11 +202,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         count = len(past_question_links)
         time.sleep(4)
-        await context.bot.send_message(
+        return await context.bot.send_message(
             chat_id=await get_chat_id(update, context),
             text="Failed to download all past questions. Try downloading them one at a time.",
         )
-        count = len(past_question_links)
 
     else:
         await context.bot.send_message(
