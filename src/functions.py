@@ -56,7 +56,7 @@ class Functions:
         )
         logger.info(f"Path to download past questions is {self.path}")
         self.CURRENT_UUID = "CURRENT_UUID"
-        s = Service(ChromeDriverManager().install())
+        # s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
         logger.info(f"Path to download past questions is {self.path}")
@@ -65,7 +65,7 @@ class Functions:
             "download.default_directory": self.path,
             "download.extensions_to_open": "",
         }
-        # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+        options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         options.add_experimental_option("prefs", self.PROFILE)
         options.add_argument("--headless=new")
 
@@ -75,7 +75,7 @@ class Functions:
         self.driver = webdriver.Chrome(
             executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
         )
-        self.driver = webdriver.Chrome(service=s, options=options)
+        # self.driver = webdriver.Chrome(service=s, options=options)
 
         # Log in
         try:
