@@ -302,13 +302,10 @@ class Functions:
 
         except (NoSuchElementException, NoSuchAttributeException):
             logger.exception("Failed to find download button.")
-            raise
         except TimeoutException:
             logger.exception("Timeout waiting for frame to load.")
-            raise
         except Exception:
             logger.exception("Error occurred while downloading file.")
-            raise
 
 
 if __name__ == "__main__":
