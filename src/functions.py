@@ -51,7 +51,7 @@ class Functions:
           path: the path to the directory where the pdf's will be downloaded
         """
         self.logged_in = False
-        self.path = path
+        self.path = os.getcwd() + get_file_separator() + path
         self.CURRENT_UUID = "CURRENT_UUID"
         s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()

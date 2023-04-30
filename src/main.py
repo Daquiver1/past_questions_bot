@@ -13,6 +13,7 @@ from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
                           ContextTypes, MessageHandler, filters)
 
 import functions
+from src.utils.path_separator import get_file_separator
 
 # Logging setup
 logging.config.fileConfig(
@@ -26,7 +27,7 @@ dotenv.load_dotenv()
 PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ["TOKEN"]
 DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
-function_class = functions.Functions(os.getcwd() + "\\past_questions_test")
+function_class = functions.Functions("past_questions")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
