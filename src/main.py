@@ -7,11 +7,12 @@ import traceback
 from typing import List, Union
 
 import dotenv
-import functions
 import telegram.ext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
                           ContextTypes, MessageHandler, filters)
+
+import functions
 
 # Logging setup
 logging.config.fileConfig(
@@ -334,14 +335,14 @@ def main():
     app.add_error_handler(error_handler)
 
     # for polling
-    app.run_polling()
+    #app.run_polling()
 
-    # app.run_webhook(
-    #     listen="0.0.0.0",
-    #     port=PORT,
-    #     url_path=TOKEN,
-    #     webhook_url="https://past-questions-bot.onrender.com" + TOKEN,
-    # )
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TOKEN,
+        webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
+    )
 
 
 if __name__ == "__main__":

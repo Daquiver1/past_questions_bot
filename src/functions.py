@@ -61,7 +61,7 @@ class Functions:
             "download.extensions_to_open": "",
         }
         options.add_experimental_option("prefs", self.PROFILE)
-        options.headless = False
+        options.headless = True
         
         self.driver = webdriver.Chrome(service=s, options=options)
 
