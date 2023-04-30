@@ -48,15 +48,11 @@ PASSWORD = os.getenv("PASSWORD")
 class Functions:
     """Functions class."""
 
-    def __init__(self, path):
-        """Initializes a headless chrome browser and logs in to a website.
-
-        Args:
-          path: the path to the directory where the pdf's will be downloaded
-        """
+    def __init__(self):
+        """Initializes a headless chrome browser and logs in to a website."""
 
         self.logged_in = False
-        self.path = os.getcwd() + get_file_separator() + path
+        self.path = os.getcwd() + get_file_separator() + "tmp"
         logger.info(f"Path to download past questions is {self.path}")
         self.CURRENT_UUID = "CURRENT_UUID"
         s = Service(ChromeDriverManager().install())

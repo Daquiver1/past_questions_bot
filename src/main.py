@@ -9,8 +9,13 @@ from typing import List, Union
 import dotenv
 import telegram.ext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (ApplicationBuilder, CallbackQueryHandler,
-                          ContextTypes, MessageHandler, filters)
+from telegram.ext import (
+    ApplicationBuilder,
+    CallbackQueryHandler,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
 
 import functions
 
@@ -26,7 +31,7 @@ dotenv.load_dotenv()
 PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ["TOKEN"]
 DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
-function_class = functions.Functions("past_questions")
+function_class = functions.Functions()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -335,7 +340,7 @@ def main():
     app.add_error_handler(error_handler)
 
     # for polling
-    #app.run_polling()
+    # app.run_polling()
 
     app.run_webhook(
         listen="0.0.0.0",
