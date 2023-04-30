@@ -61,8 +61,11 @@ class Functions:
             "download.extensions_to_open": "",
         }
         options.add_experimental_option("prefs", self.PROFILE)
-        options.headless = True
-        
+        options.add_argument("--headless")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+
         self.driver = webdriver.Chrome(service=s, options=options)
 
         # Log in
@@ -337,4 +340,4 @@ if __name__ == "__main__":
     questions = function_class.get_list_of_past_question()
     pasco_links = function_class.get_links_of_past_question()
     user_choice = int(input("The number of the past question you want to download: "))
-    function_class.get_past_question(pasco_links, user_choice)
+    function_class.get_past_question("1",pasco_links, user_choice)
