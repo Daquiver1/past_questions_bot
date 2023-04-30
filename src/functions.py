@@ -70,6 +70,7 @@ class Functions:
             executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
         )
         # self.driver = webdriver.Chrome(service=s, options=options)
+        self.driver.implicitly_wait(15)
 
         # Log in
         try:
@@ -288,7 +289,6 @@ class Functions:
             wait.until(
                 EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe"))
             )
-            time.sleep(5)
             self.driver.find_element(By.ID, "download").click()
 
             # wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
