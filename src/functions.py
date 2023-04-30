@@ -80,9 +80,7 @@ class Functions:
         # Log in
         try:
             self.driver.get(URL)
-            WebDriverWait(driver, 20).until(
-                EC.element_to_be_clickable((By.NAME, "logMeIn"))
-            ).click()
+
             username_field = self.driver.find_element(By.NAME, "memberID")
             password_field = self.driver.find_element(By.NAME, "memberPassWord")
 
