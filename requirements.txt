@@ -1,7 +1,7 @@
-python-telegram-bot
+python-telegram-bot==20.0
 python-telegram-bot[webhooks]
-beautifulsoup4
-webdriver-manager
-selenium
-requests
-lxml
+beautifulsoup4==4.11.1
+webdriver-manager==3.8.5
+selenium==4.6.0
+requests==2.28.1
+lxml==4.9.2
