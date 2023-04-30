@@ -80,6 +80,7 @@ class Functions:
         # Log in
         try:
             self.driver.get(URL)
+            time.sleep(2)
             username_field = self.driver.find_element(By.NAME, "memberID")
             password_field = self.driver.find_element(By.NAME, "memberPassWord")
             login_button = self.driver.find_element(By.NAME, "logMeIn")
