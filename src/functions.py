@@ -9,18 +9,24 @@ from typing import Dict, Generator, List, Union
 
 import dotenv
 import requests
+
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (NoSuchAttributeException,
-                                        NoSuchElementException,
-                                        TimeoutException)
+from selenium.common.exceptions import (
+    NoSuchAttributeException,
+    NoSuchElementException,
+    TimeoutException,
+)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
+
+from utils.path_separator import get_file_separator
 
 # Logging setup
 logging.config.fileConfig(
@@ -45,28 +51,31 @@ class Functions:
         """Initializes a headless chrome browser and logs in to a website."""
 
         self.logged_in = False
-        self.path = "/tmp"
+        self.path = (
+            os.getcwd() + get_file_separator() + "src" + get_file_separator() + "tmp"
+        )
         logger.info(f"Path to download past questions is {self.path}")
         self.CURRENT_UUID = "CURRENT_UUID"
-        # s = Service(ChromeDriverManager().install())
+        s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
-
+        logger.info(f"Path to download past questions is {self.path}")
         self.PROFILE = {
             "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-            "download.default_directory": '/app/src/tmp/',
+            "download.default_directory": self.path,
             "download.extensions_to_open": "",
         }
-        options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+        # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         options.add_experimental_option("prefs", self.PROFILE)
-        options.add_argument("--headless")
-        options.add_argument("--disable-gpu")
+        options.add_argument("--headless=new")
+
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
 
         self.driver = webdriver.Chrome(
             executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
         )
+        self.driver = webdriver.Chrome(service=s, options=options)
 
         # Log in
         try:
@@ -79,6 +88,7 @@ class Functions:
             login_button.click()
             logger.info("Logged in successfully, waiting for user input...")
             self.logged_in = True
+
         except (NoSuchElementException, NoSuchAttributeException):
             logger.critical("Failed to log in.", exc_info=True)
         except Exception:
@@ -290,8 +300,8 @@ class Functions:
             file_logger.info(f"{past_question_link} has been downloaded.")
             self.driver.back()
             time.sleep(2)
-            logger.info(f"downloaded at {os.listdir(self.path)}")
-            logger.info(f"downloaded at {os.listdir('/app/src/tmp/')}")
+            # logger.info(f"downloaded at {os.listdir(self.path)}")
+            # logger.info(f"downloaded at {os.listdir('/app/src/tmp/')}")
 
         except (NoSuchElementException, NoSuchAttributeException):
             logger.exception("Failed to find download button.")
