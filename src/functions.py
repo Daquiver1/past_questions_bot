@@ -80,13 +80,20 @@ class Functions:
         # Log in
         try:
             self.driver.get(URL)
-            time.sleep(2)
+            WebDriverWait(driver, 20).until(
+                EC.element_to_be_clickable((By.NAME, "logMeIn"))
+            ).click()
             username_field = self.driver.find_element(By.NAME, "memberID")
             password_field = self.driver.find_element(By.NAME, "memberPassWord")
-            login_button = self.driver.find_element(By.NAME, "logMeIn")
+
+            # login_button = self.driver.find_element(By.NAME, "logMeIn")
             username_field.send_keys(USERNAME)
             password_field.send_keys(PASSWORD)
-            login_button.click()
+            WebDriverWait(self.driver, 7).until(
+                EC.element_to_be_clickable((By.NAME, "logMeIn"))
+            ).click()
+
+            # login_button.click()
             logger.info("Logged in successfully, waiting for user input...")
             self.logged_in = True
 
