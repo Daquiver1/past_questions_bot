@@ -3,6 +3,7 @@ import logging
 import logging.config
 import os
 import re
+import sys
 import time
 import traceback
 from typing import Dict, Generator, List, Union
@@ -289,7 +290,7 @@ class Functions:
             self.driver.execute_script(
                 "arguments[0].click();", file
             )  # screen displayed is a frame, so adapts to a frame.
-            wait = WebDriverWait(self.driver, 30)
+            wait = WebDriverWait(self.driver, 15)
             wait.until(
                 EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe"))
             )
@@ -302,10 +303,13 @@ class Functions:
 
         except (NoSuchElementException, NoSuchAttributeException):
             logger.exception("Failed to find download button.")
+            sys.exit("Failed to find download button.")
         except TimeoutException:
             logger.exception("Timeout waiting for frame to load.")
+            sys.exit("Timeout waiting for frame to load.")
         except Exception:
             logger.exception("Error occurred while downloading file.")
+            sys.exit("Error occurred while downloading file.")
 
 
 if __name__ == "__main__":
