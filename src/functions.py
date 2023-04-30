@@ -9,20 +9,16 @@ from typing import Dict, Generator, List, Union
 
 import dotenv
 import requests
-
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (
-    NoSuchAttributeException,
-    NoSuchElementException,
-    TimeoutException,
-)
+from selenium.common.exceptions import (NoSuchAttributeException,
+                                        NoSuchElementException,
+                                        TimeoutException)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -68,7 +64,6 @@ class Functions:
         options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         options.add_experimental_option("prefs", self.PROFILE)
         options.add_argument("--headless=new")
-
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
 
@@ -84,10 +79,8 @@ class Functions:
             username_field = self.driver.find_element(By.NAME, "memberID")
             password_field = self.driver.find_element(By.NAME, "memberPassWord")
 
-            # login_button = self.driver.find_element(By.NAME, "logMeIn")
             username_field.send_keys(USERNAME)
             password_field.send_keys(PASSWORD)
-            # login_button.click()
             logger.info("Logged in successfully, waiting for user input...")
             self.logged_in = True
 
