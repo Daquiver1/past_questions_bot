@@ -9,16 +9,20 @@ from typing import Dict, Generator, List, Union
 
 import dotenv
 import requests
+
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (NoSuchAttributeException,
-                                        NoSuchElementException,
-                                        TimeoutException)
+from selenium.common.exceptions import (
+    NoSuchAttributeException,
+    NoSuchElementException,
+    TimeoutException,
+)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -285,7 +289,7 @@ class Functions:
             self.driver.execute_script(
                 "arguments[0].click();", file
             )  # screen displayed is a frame, so adapts to a frame.
-            wait = WebDriverWait(self.driver, 10)
+            wait = WebDriverWait(self.driver, 30)
             wait.until(
                 EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe"))
             )
@@ -295,8 +299,6 @@ class Functions:
             file_logger.info(f"{past_question_link} has been downloaded.")
             self.driver.back()
             time.sleep(2)
-            # logger.info(f"downloaded at {os.listdir(self.path)}")
-            # logger.info(f"downloaded at {os.listdir('/app/src/tmp/')}")
 
         except (NoSuchElementException, NoSuchAttributeException):
             logger.exception("Failed to find download button.")
