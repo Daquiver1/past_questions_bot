@@ -26,9 +26,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 # Used when polling.
 from webdriver_manager.chrome import ChromeDriverManager
 
-import utils.uuid as uuid
-from utils.path_separator import get_file_separator
-
 # Logging setup
 logging.config.fileConfig(
     fname="log.ini",
@@ -55,7 +52,7 @@ class Functions:
         self.path = "/tmp"
         logger.info(f"Path to download past questions is {self.path}")
         self.CURRENT_UUID = "CURRENT_UUID"
-        s = Service(ChromeDriverManager().install())
+        # s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
 
@@ -64,13 +61,16 @@ class Functions:
             "download.default_directory": self.path,
             "download.extensions_to_open": "",
         }
+        options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         options.add_experimental_option("prefs", self.PROFILE)
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
 
-        self.driver = webdriver.Chrome(service=s, options=options)
+        self.driver = webdriver.Chrome(
+            executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
+        )
 
         # Log in
         try:
@@ -307,7 +307,7 @@ class Functions:
 
 
 if __name__ == "__main__":
-    function_class = Functions(str(os.getcwd()))
+    function_class = Functions()
     name = input("Please enter the course name : ")
     function_class.search_for_past_question(name)
     questions = function_class.get_list_of_past_question()
