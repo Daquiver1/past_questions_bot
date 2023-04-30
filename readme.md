@@ -41,7 +41,7 @@ Before running the script, please make sure you have the following:
 5. Run the python file with the following command:
 
     ```python
-    python src/main/bot.py
+    python src/main.py
     ```
 
 6. `The app is now running.`
