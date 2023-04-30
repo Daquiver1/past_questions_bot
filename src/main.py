@@ -3,6 +3,7 @@ import logging
 import logging.config
 import os
 import re
+import time
 import traceback
 from typing import List, Union
 
@@ -200,6 +201,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="You selected all.",
         )
         count = len(past_question_links)
+        time.sleep(4)
+        return await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text="Failed to download all past questions. Try downloading it one at a time.",
+        )
+
     else:
         await context.bot.send_message(
             chat_id=await get_chat_id(update, context),

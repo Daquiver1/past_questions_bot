@@ -3,7 +3,6 @@ import logging
 import logging.config
 import os
 import re
-import sys
 import time
 import traceback
 from typing import Dict, Generator, List, Union
@@ -23,9 +22,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
-# Used when polling.
-from webdriver_manager.chrome import ChromeDriverManager
 
 from utils.path_separator import get_file_separator
 
@@ -55,12 +51,10 @@ class Functions:
         self.path = (
             os.getcwd() + get_file_separator() + "src" + get_file_separator() + "tmp"
         )
-        logger.info(f"Path to download past questions is {self.path}")
         self.CURRENT_UUID = "CURRENT_UUID"
         # s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
-        logger.info(f"Path to download past questions is {self.path}")
         self.PROFILE = {
             "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
             "download.default_directory": self.path,
@@ -303,13 +297,11 @@ class Functions:
 
         except (NoSuchElementException, NoSuchAttributeException):
             logger.exception("Failed to find download button.")
-            sys.exit("Failed to find download button.")
         except TimeoutException:
             logger.exception("Timeout waiting for frame to load.")
-            sys.exit("Timeout waiting for frame to load.")
+
         except Exception:
             logger.exception("Error occurred while downloading file.")
-            sys.exit("Error occurred while downloading file.")
 
 
 if __name__ == "__main__":

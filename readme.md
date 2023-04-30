@@ -53,7 +53,7 @@ Before running the script, please make sure you have the following:
 ![image3](images/3.jpg)
 ![image4](images/4.jpg)
 
-## TODOS
+## TODO
 
 * [ ] Include files in the next page.
 * [X] Add an all feature which will download all the available past questions specified.
