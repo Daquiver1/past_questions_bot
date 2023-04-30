@@ -101,8 +101,10 @@ class Functions:
             for basename in path_directory
             if basename.endswith(".pdf")
         ]
+        logger.info(path_directory)
         if len(user_file_path) == 0:
             return None
+        
         user_file = max(user_file_path, key=os.path.getctime)
         file_logger.info(f"Downloaded file from path {user_file} has been uploaded to user.")
         file_logger.info("")
