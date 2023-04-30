@@ -23,6 +23,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 import utils.uuid as uuid
+from utils.path_separator import get_file_separator
 
 # Logging setup
 logging.config.fileConfig(
@@ -136,7 +137,7 @@ class Functions:
                 continue
             # downloaded_file_path = max(absolute_path_directory, key=os.path.getctime)
             file_name = os.path.basename(file)
-            new_path = f"{self.path}\\{chat_id}_{self.CURRENT_UUID}_{file_name[:9]}.pdf"
+            new_path = f"{self.path}{get_file_separator()}{chat_id}_{self.CURRENT_UUID}_{file_name[:9]}.pdf"
             os.replace(file, new_path)
 
             return new_path
