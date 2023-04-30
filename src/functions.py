@@ -294,6 +294,8 @@ class Functions:
             file_logger.info(f"{past_question_link} has been downloaded.")
             self.driver.back()
             time.sleep(2)
+            logger.info(f"downloaded at {os.listdir(self.path)}")
+            logger.info(f"downloaded at {os.listdir('/app/src/tmp/')}")
 
         except (NoSuchElementException, NoSuchAttributeException):
             logger.exception("Failed to find download button.")
