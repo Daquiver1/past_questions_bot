@@ -3,11 +3,11 @@ import logging
 import logging.config
 import os
 import re
+import time
 import traceback
 from typing import List, Union
 
 import dotenv
-import functions
 import telegram.ext
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
@@ -18,6 +18,8 @@ from telegram.ext import (
     filters,
 )
 
+import functions
+
 # Logging setup
 logging.config.fileConfig(
     fname="log.ini",
@@ -27,10 +29,10 @@ logging.config.fileConfig(
 logger = logging.getLogger(__name__)
 
 dotenv.load_dotenv()
-# PORT = int(os.environ.get("PORT", "8443"))
+PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ["TOKEN"]
 DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
-function_class = None
+function_class = functions.Functions()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -186,16 +188,6 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     choice = update.callback_query
     await choice.answer()
-    if choice.data == "-1":
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="You selected all.",
-        )
-    else:
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text=f"You selected #{choice.data}",
-        )
 
     past_question_links = function_class.get_links_of_past_question()
     if len(past_question_links) == 0:
@@ -203,14 +195,34 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             update, context, False, "Failed to extract past question links."
         )
 
+    if choice.data == "-1":
+        await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text="You selected all.",
+        )
+        count = len(past_question_links)
+        time.sleep(4)
+        return await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text="Failed to download all past questions. Try downloading them one at a time.",
+        )
+
+    else:
+        await context.bot.send_message(
+            chat_id=await get_chat_id(update, context),
+            text=f"You selected #{choice.data}",
+        )
+        count = 1
+
     await context.bot.send_message(
         chat_id=await get_chat_id(update, context), text="Downloading past question..."
     )
 
     try:
         gen_file_path = function_class.get_past_question(
-            past_question_links, choice.data
+            str(await get_chat_id(update, context)), past_question_links, choice.data
         )
+
         if gen_file_path is None:
             return await error_handler(
                 update, context, False, "Failed to download file and upload file."
@@ -220,7 +232,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_id=await get_chat_id(update, context),
             text="Uploading past question...",
         )
-        for _ in range(len(past_question_links)):
+        for _ in range(count):
             await context.bot.sendDocument(
                 chat_id=await get_chat_id(update, context),
                 document=open(next(gen_file_path), "rb"),
@@ -241,6 +253,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Returns:
       displays a list of buttons which trigger a callback query.
     """
+    if function_class.logged_in is False:
+        return await error_handler(update, context, False, "Failed to log in.")
+
     options: List[List] = [[], []]
 
     await update.message.reply_text(f"You said {update.message.text}.")
@@ -252,19 +267,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"Searching database for {cleaned_user_input} past questions..."
     )
-    # Start selenium.
-    global function_class
-    path = (
-        os.getcwd()
-        + "\\past_questions\\"
-        + update.message.chat.username
-        + "_"
-        + str(await get_chat_id(update, context))
-    )
-    function_class = functions.Functions(path)
-    if function_class.logged_in is False:
-        return await error_handler(update, context, False, "Failed to log in.")
-
     logger.info(
         f"{update.message.from_user.username} is searching for {cleaned_user_input}."
     )
@@ -318,39 +320,17 @@ async def error_handler(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     *args,
-    automated_caller: bool = True,
     issue: str = "None",
 ) -> None:
     """Log the error and send a telegram message to notify the developer."""
-    if not automated_caller:
-        message = (
-            f"An exception was raised while handling an update\n"
-            f"User's text: {update.message.text}\n"
-            f"User's id: {update.message.from_user.id}\n"
-            f"User's first_name: {update.message.from_user.first_name}\n"
-            f"User's last_name: {update.message.from_user.last_name}\n"
-            f"User's username: {update.message.from_user.username}\n"
-            f"What's the issue: {issue}\n"
-            f"Automated message?: {automated_caller}\n"
-            f"Traceback: {traceback.format_exc()}"
-        )
+    if update is not None:
         logger.exception("Exception while handling an update.")
         await context.bot.send_message(
             chat_id=await get_chat_id(update, context),
             text="Unexpected error occurred. Try again. If error persists contact @Daquiver.",
         )
-    else:
-        message = (
-            f"Automated message?: {automated_caller}\n"
-            f"Traceback: {traceback.format_exc()}"
-        )
-        logger.error("A logical error occurred:", issue)
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="Unexpected error. Try again. If error persists contact @Daquiver.",
-        )
-
-    await context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
+        message = f"Traceback: {traceback.format_exc()}"
+        await context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
 
 
 def main():
@@ -367,14 +347,14 @@ def main():
     app.add_error_handler(error_handler)
 
     # for polling
-    app.run_polling()
+    # app.run_polling()
 
-    # updater.start_webhook(
-    #     listen="0.0.0.0",
-    #     port=PORT,
-    #     url_path=TOKEN,
-    #     webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
-    # )
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TOKEN,
+        webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
+    )
 
 
 if __name__ == "__main__":

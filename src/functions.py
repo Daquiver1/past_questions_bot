@@ -5,22 +5,25 @@ import os
 import re
 import time
 import traceback
-from typing import Dict, List, Union
+from typing import Dict, Generator, List, Union
 
 import dotenv
 import requests
+
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (NoSuchAttributeException,
-                                        NoSuchElementException,
-                                        TimeoutException)
+from selenium.common.exceptions import (
+    NoSuchAttributeException,
+    NoSuchElementException,
+    TimeoutException,
+)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-# Used when polling.
-from webdriver_manager.chrome import ChromeDriverManager
+
+from utils.path_separator import get_file_separator
 
 # Logging setup
 logging.config.fileConfig(
@@ -41,37 +44,46 @@ PASSWORD = os.getenv("PASSWORD")
 class Functions:
     """Functions class."""
 
-    def __init__(self, path):
-        """Initializes a headless chrome browser and logs in to a website.
+    def __init__(self):
+        """Initializes a headless chrome browser and logs in to a website."""
 
-        Args:
-          path: the path to the directory where the pdf's will be downloaded
-        """
         self.logged_in = False
-        self.path = path
-        s = Service(ChromeDriverManager().install())
+        self.path = (
+            os.getcwd() + get_file_separator() + "src" + get_file_separator() + "tmp"
+        )
+        self.CURRENT_UUID = "CURRENT_UUID"
+        # s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
         self.PROFILE = {
             "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-            "download.default_directory": path,
+            "download.default_directory": self.path,
             "download.extensions_to_open": "",
         }
+        options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         options.add_experimental_option("prefs", self.PROFILE)
-        #options.headless = True
-        self.driver = webdriver.Chrome(service=s, options=options)
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+
+        self.driver = webdriver.Chrome(
+            executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
+        )
+        # self.driver = webdriver.Chrome(service=s, options=options)
+        self.driver.implicitly_wait(15)
 
         # Log in
         try:
             self.driver.get(URL)
+
             username_field = self.driver.find_element(By.NAME, "memberID")
             password_field = self.driver.find_element(By.NAME, "memberPassWord")
-            login_button = self.driver.find_element(By.NAME, "logMeIn")
+
             username_field.send_keys(USERNAME)
             password_field.send_keys(PASSWORD)
-            login_button.click()
             logger.info("Logged in successfully, waiting for user input...")
             self.logged_in = True
+
         except (NoSuchElementException, NoSuchAttributeException):
             logger.critical("Failed to log in.", exc_info=True)
         except Exception:
@@ -87,65 +99,23 @@ class Functions:
           The path of the latest file in the directory.
         """
         logger.info("Checking path for latest file.")
-        file_path = os.listdir(path)
-
+        path_directory = os.listdir(self.path)
         user_file_path = [
             os.path.join(path, basename)
-            for basename in file_path
+            for basename in path_directory
             if basename.endswith(".pdf")
         ]
+        logger.info(path_directory)
         if len(user_file_path) == 0:
             return None
 
-        new_file_path = max(user_file_path, key=os.path.getctime)
+        user_file = max(user_file_path, key=os.path.getctime)
         file_logger.info(
-            f"Downloaded file from path {new_file_path} has been uploaded to user."
+            f"Downloaded file from path {user_file} has been uploaded to user."
         )
         file_logger.info("")
-        return new_file_path
 
-        # if self.is_new_file(new_file_path):
-        #     logger.info("it is a new file")
-        #     file_logger.info(
-        #         f"Downloaded file from path {new_file_path} has been uploaded to user."
-        #     )
-        #     file_logger.info("")
-        #     new_file_path = self.rename_past_question_file(path, new_file_path)
-        #     return new_file_path
-        # logger.info("It is not a new file.")
-        # return None
-
-    def rename_past_question_file(self, pasco_directory, file_path):
-        """It takes a file path and renames the file to the first 20 characters of the file name.
-
-        Args:
-          pasco_directory: The directory where the past questions are stored.
-          file_path: The path to the file that you want to rename.
-
-        Returns:
-          The new path of the file.
-        """
-        file_name = os.path.basename(file_path)
-        new_path = f"{pasco_directory} + \\ + {file_name[:20]}.pdf"
-        os.rename(file_path, new_path)
-
-        return new_path
-
-    def is_new_file(self, path) -> bool:
-        """If the current time minus the file creation time is greater than 10 seconds, then return False, otherwise return True.
-
-        Args:
-          path: The path to the file you want to check.
-
-        Returns:
-          A boolean value based on the match.
-        """
-        current_time = time.time()
-        file_created_time = os.path.getctime(path)
-
-        if (current_time - file_created_time) > 10:
-            return False
-        return True
+        return user_file
 
     def search_for_past_question(self, cleaned_pasco_name: str) -> int:
         """It searches for a past question on the website, and returns 0 if it was successful, and 1 if it wasn't.
@@ -278,8 +248,8 @@ class Functions:
             return past_question_links
 
     def get_past_question(
-        self, past_question_links: Dict[int, str], choice: int
-    ) -> str:
+        self, chat_id: str, past_question_links: Dict[int, str], choice: int
+    ) -> Generator:
         """It takes in a dictionary of past question links and a choice from the user, then it moves to the url of the users choice and downloads the past question.
 
         Args:
@@ -315,32 +285,33 @@ class Functions:
             self.driver.execute_script(
                 "arguments[0].click();", file
             )  # screen displayed is a frame, so adapts to a frame.
-            wait = WebDriverWait(self.driver, 10)
+            wait = WebDriverWait(self.driver, 15)
             wait.until(
                 EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe"))
             )
-            wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
+            self.driver.find_element(By.ID, "download").click()
+
+            # wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
 
             logger.info("Downloading file...")
             file_logger.info(f"{past_question_link} has been downloaded.")
             self.driver.back()
             time.sleep(2)
+
         except (NoSuchElementException, NoSuchAttributeException):
             logger.exception("Failed to find download button.")
-            raise
         except TimeoutException:
             logger.exception("Timeout waiting for frame to load.")
-            raise
+
         except Exception:
             logger.exception("Error occurred while downloading file.")
-            raise
 
 
 if __name__ == "__main__":
-    function_class = Functions(str(os.getcwd()))
+    function_class = Functions()
     name = input("Please enter the course name : ")
     function_class.search_for_past_question(name)
     questions = function_class.get_list_of_past_question()
     pasco_links = function_class.get_links_of_past_question()
     user_choice = int(input("The number of the past question you want to download: "))
-    function_class.get_past_question(pasco_links, user_choice)
+    function_class.get_past_question("1", pasco_links, user_choice)
