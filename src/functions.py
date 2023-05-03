@@ -53,7 +53,7 @@ class Functions:
             os.getcwd() + get_file_separator() + "src" + get_file_separator() + "tmp"
         )
         self.CURRENT_UUID = "CURRENT_UUID"
-        s = Service(ChromeDriverManager().install())
+        # s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
         self.PROFILE = {
@@ -67,10 +67,10 @@ class Functions:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
 
-        # self.driver = webdriver.Chrome(
-        #     executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
-        # )
-        self.driver = webdriver.Chrome(service=s, options=options)
+        self.driver = webdriver.Chrome(
+            executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
+        )
+        # self.driver = webdriver.Chrome(service=s, options=options)
         self.driver.implicitly_wait(15)
 
         # Log in
