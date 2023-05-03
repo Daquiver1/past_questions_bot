@@ -53,7 +53,7 @@ class Functions:
             os.getcwd() + get_file_separator() + "src" + get_file_separator() + "tmp"
         )
         self.CURRENT_UUID = "CURRENT_UUID"
-        # s = Service(ChromeDriverManager().install())
+        s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
         self.PROFILE = {
@@ -79,9 +79,12 @@ class Functions:
 
             username_field = self.driver.find_element(By.NAME, "memberID")
             password_field = self.driver.find_element(By.NAME, "memberPassWord")
+            button = self.driver.find_element(By.NAME, "logMeIn")
 
             username_field.send_keys(USERNAME)
             password_field.send_keys(PASSWORD)
+            button.click()
+
             logger.info("Logged in successfully, waiting for user input...")
             self.logged_in = True
 
