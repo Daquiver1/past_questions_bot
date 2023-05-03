@@ -20,6 +20,7 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
@@ -79,11 +80,12 @@ class Functions:
 
             username_field = self.driver.find_element(By.NAME, "memberID")
             password_field = self.driver.find_element(By.NAME, "memberPassWord")
-            button = self.driver.find_element(By.NAME, "logMeIn")
+            # button = self.driver.find_element(By.NAME, "logMeIn")
 
             username_field.send_keys(USERNAME)
             password_field.send_keys(PASSWORD)
-            button.click()
+            password_field.send_keys(Keys.ENTER)
+            # button.click()
 
             logger.info("Logged in successfully, waiting for user input...")
             self.logged_in = True
