@@ -80,12 +80,10 @@ class Functions:
 
             username_field = self.driver.find_element(By.NAME, "memberID")
             password_field = self.driver.find_element(By.NAME, "memberPassWord")
-            # button = self.driver.find_element(By.NAME, "logMeIn")
 
             username_field.send_keys(USERNAME)
             password_field.send_keys(PASSWORD)
             password_field.send_keys(Keys.ENTER)
-            # button.click()
 
             logger.info("Logged in successfully, waiting for user input...")
             self.logged_in = True
