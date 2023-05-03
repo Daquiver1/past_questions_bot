@@ -20,8 +20,13 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
+
+
 
 from utils.path_separator import get_file_separator
 
@@ -52,7 +57,7 @@ class Functions:
             os.getcwd() + get_file_separator() + "src" + get_file_separator() + "tmp"
         )
         self.CURRENT_UUID = "CURRENT_UUID"
-        # s = Service(ChromeDriverManager().install())
+        s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
         self.PROFILE = {
@@ -81,6 +86,7 @@ class Functions:
 
             username_field.send_keys(USERNAME)
             password_field.send_keys(PASSWORD)
+            password_field.send_keys(Keys.ENTER)
             logger.info("Logged in successfully, waiting for user input...")
             self.logged_in = True
 
