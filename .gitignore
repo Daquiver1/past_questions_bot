@@ -3,7 +3,8 @@ __pycache__/
 .env
 .flake8
 .vscode/
-.mypy_cache
+.pytest_cache/
+.mypy_cache/
 stats_file.log
 __init__.py
 past_questions_test
