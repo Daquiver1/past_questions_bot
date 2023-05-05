@@ -65,17 +65,17 @@ class Functions:
             "download.default_directory": self.path,
             "download.extensions_to_open": "",
         }
-        options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+        # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         options.add_experimental_option("prefs", self.PROFILE)
         options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
 
-        self.driver = webdriver.Chrome(
-            executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
-        )
-        # self.driver = webdriver.Chrome(service=s, options=options)
-        self.driver.implicitly_wait(15)
+        # self.driver = webdriver.Chrome(
+        #     executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
+        # )
+        self.driver = webdriver.Chrome(service=s, options=options)
+        self.driver.implicitly_wait(6)
 
         # Log in
         try:
@@ -88,6 +88,8 @@ class Functions:
             password_field.send_keys(PASSWORD)
             password_field.send_keys(Keys.ENTER)
             logger.info("Logged in successfully, waiting for user input...")
+
+            self.driver.find_element(By.ID, "memberLogout")
             self.logged_in = True
 
         except (NoSuchElementException, NoSuchAttributeException):
@@ -254,7 +256,7 @@ class Functions:
             return past_question_links
 
     def get_past_question(
-        self, chat_id: str, past_question_links: Dict[int, str], choice: int
+        self, past_question_links: Dict[int, str], choice: int
     ) -> Generator:
         """It takes in a dictionary of past question links and a choice from the user, then it moves to the url of the users choice and downloads the past question.
 
@@ -265,25 +267,30 @@ class Functions:
         Returns:
           The path to the past_question_file
         """
+        print("kwame")
         if int(choice) == -1:
+            print("nii")
             for past_question_link in past_question_links.values():
                 self.driver.get(past_question_link)
                 logger.info(f"Moved to {past_question_link} successfully.")
-                self.download_past_question(past_question_link)
+                self.download_past_question()
                 yield self.get_past_question_path(self.path)
         else:
+            print("temp")
             for index, past_question_link in past_question_links.items():
                 if int(choice) == index:
+                    print("yooo")
                     self.driver.get(
                         past_question_link
                     )  # Move to the url of users choice.
                     logger.info(f"Moved to {past_question_link} successfully.")
 
-                    self.download_past_question(past_question_link)
+                    self.download_past_question()
                     yield self.get_past_question_path(self.path)
                     break
+                print("herh")
 
-    def download_past_question(self, past_question_link) -> None:
+    def download_past_question(self) -> bool:
         """Clicks on a button that opens a frame, then clicks on a button in the frame to download a file."""
         logger.info(f"Downloading past question from {self.driver.current_url}")
         try:
@@ -300,17 +307,20 @@ class Functions:
             # wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
 
             logger.info("Downloading file...")
-            file_logger.info(f"{past_question_link} has been downloaded.")
+            file_logger.info(f"{self.driver.current_url} has been downloaded.")
             self.driver.back()
             time.sleep(2)
-
+            return True
         except (NoSuchElementException, NoSuchAttributeException):
             logger.exception("Failed to find download button.")
+            return False
         except TimeoutException:
             logger.exception("Timeout waiting for frame to load.")
+            return False
 
         except Exception:
             logger.exception("Error occurred while downloading file.")
+            return False
 
 
 if __name__ == "__main__":

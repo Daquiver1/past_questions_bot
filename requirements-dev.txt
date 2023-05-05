@@ -5,3 +5,4 @@ isort==5.10.1
 pre-commit==2.19.0
 python-dotenv==0.21.0
 pytest==7.3.1
+pytest-mock==3.10.0

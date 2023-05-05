@@ -37,14 +37,25 @@ Before running the script, please make sure you have the following:
     ```
 
 4. Rename the `.env.template` file to `.env` and update the environment variables with your own values.
+5. Run unit tests.
 
-5. Run the python file with the following command:
+    ```python
+    python -m unit -v
+    ```
+
+6. Run integration tests.
+
+    ```python
+    python -m integration -v 
+    ```
+
+7. Run the python file with the following command:
 
     ```python
     python src/main.py
     ```
 
-6. `The app is now running.`
+8. `The app is now running.`
 
 ## Bot Preview
 
@@ -58,7 +69,7 @@ Before running the script, please make sure you have the following:
 * [ ] Include files in the next page.
 * [X] Add an all feature which will download all the available past questions specified.
 * [X] Let the options be displayed in one message instead of a plethora of messages.
-* [ ] Add test cases.
+* [X] Add test cases.
 * [ ] Cache all files downloaded to avoid downloading them again.
 * [ ] Integrate with an s3 bucket to store all downloaded files.
 * [ ] Integrate Datadog for monitoring.
