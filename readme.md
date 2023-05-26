@@ -21,7 +21,7 @@ Before running the script, please make sure you have the following:
 1. Clone the repository:
 
     ```python
-    git clone <https://github.com/Daquiver1/past_questions_bot>
+    git clone https://github.com/Daquiver1/past_questions_bot
     ```
 
 2. Change to the project directory:
