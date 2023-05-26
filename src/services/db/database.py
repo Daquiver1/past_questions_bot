@@ -1,1 +1,0 @@
-"""SqlLite service model"""
