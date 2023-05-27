@@ -6,7 +6,7 @@ from databases import Database
 async def connect_to_db():
     try:
         print("Setting up database...")
-        database = Database("sqlite:///app.db", echo=True)
+        database = Database("sqlite:///app.db")
         await database.connect()
         print("Database connected")
     except Exception as e:
