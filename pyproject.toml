@@ -16,6 +16,8 @@ requests = "^2.31.0"
 lxml = "^4.9.2"
 databases = {extras = ["aiosqlite"], version = "^0.7.0"}
 alembic = "^1.11.1"
+pydantic = "^1.10.8"
+pytest-asyncio = "^0.21.0"
 
 
 [tool.poetry.group.dev.dependencies]
