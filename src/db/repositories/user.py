@@ -4,7 +4,7 @@ from typing import Union
 
 from db.repositories.base import BaseRepository
 from models.user import UserCreate, UserInDb, UserPublic
-from utils.uuid import generate_10_digit_uuid
+from utils.uuid import generate_n_digit_uuid
 
 CREATE_NEW_USER_QUERY = """
     INSERT INTO users (username, telegram_id, is_subscribed, is_eligible, balance,uuid)
@@ -47,7 +47,7 @@ class UserRepository(BaseRepository):
     async def create_new_user(
         self, *, new_user: UserCreate
     ) -> Union[UserInDb, UserPublic, None]:
-        uuid_ = generate_10_digit_uuid()
+        uuid_ = generate_n_digit_uuid(10)
 
         """Create new user."""
         if await self.get_user_by_telegram_id(telegram_id=new_user.telegram_id):

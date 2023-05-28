@@ -3,7 +3,7 @@ from typing import Union
 
 from db.repositories.base import BaseRepository
 from models.past_question_category import PastQuestionCategoryInDb
-from utils.uuid import generate_10_digit_uuid
+from utils.uuid import generate_n_digit_uuid
 
 GET_PAST_QUESTION_CATEGORY_BY_NAME_QUERY = """
     SELECT *
@@ -42,7 +42,7 @@ class PastQuestionCategoriesRepository(BaseRepository):
         self, *, category_name: str
     ) -> Union[PastQuestionCategoryInDb, None]:
         """Create new past question category."""
-        uuid_ = generate_10_digit_uuid()
+        uuid_ = generate_n_digit_uuid(10)
 
         await self.db.execute(
             query=CREATE_NEW_PAST_QUESTION_CATEGORY_QUERY,
