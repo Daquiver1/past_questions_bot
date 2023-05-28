@@ -10,18 +10,6 @@ from models.past_question import PastQuestionCreate
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture
-def new_past_question() -> PastQuestionCreate:
-    return PastQuestionCreate(
-        course_code="DCIT 104",
-        course_name="Microsoft office and productivity tools.",
-        lecturer="Michael Soli",
-        past_question_url="http://example.com",
-        semester="First",
-        year="2022",
-    )
-
-
 async def test_get_past_questions_by_course_code(
     db: Coroutine[None, None, Database], new_past_question: PastQuestionCreate
 ):
