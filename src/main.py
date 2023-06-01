@@ -19,6 +19,7 @@ from telegram.ext import (
 )
 
 import functions
+from services.sentry.sentry import SentryClass
 
 # Logging setup
 logging.config.fileConfig(
@@ -33,6 +34,7 @@ PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ["TOKEN"]
 DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
 function_class = functions.Functions()
+SentryClass()
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
