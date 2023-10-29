@@ -18,6 +18,8 @@ databases = {extras = ["aiosqlite"], version = "^0.7.0"}
 alembic = "^1.11.1"
 pydantic = "^1.10.8"
 pytest-asyncio = "^0.21.0"
+boto3 = "^1.26.142"
+validators = "^0.20.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -25,6 +27,7 @@ black = "^23.3.0"
 pytest = "^7.3.1"
 isort = "^5.12.0"
 pytest-mock = "^3.10.0"
+boto3-stubs = {version = "1.26.142", extras = ["s3"]}
 
 [build-system]
 requires = ["poetry-core"]

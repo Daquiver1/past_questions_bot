@@ -3,7 +3,7 @@ from typing import List, Union
 
 from db.repositories.base import BaseRepository
 from models.past_question import PastQuestionCreate, PastQuestionInDb
-from utils.uuid import generate_10_digit_uuid
+from utils.uuid import generate_n_digit_uuid
 
 CREATE_NEW_PAST_QUESTION_QUERY = """
     INSERT INTO past_questions (course_code, course_name, lecturer, past_question_url, semester, year, category_id, uuid)
@@ -184,7 +184,7 @@ class PastQuestionRepository(BaseRepository):
     async def create_new_past_question(
         self, *, past_question: PastQuestionCreate, category_id: int
     ) -> Union[PastQuestionInDb, None]:
-        uuid_ = generate_10_digit_uuid()
+        uuid_ = generate_n_digit_uuid(10)
         await self.db.execute(
             query=CREATE_NEW_PAST_QUESTION_QUERY,
             values={**past_question.dict(), "category_id": category_id, "uuid": uuid_},
