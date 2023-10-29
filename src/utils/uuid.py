@@ -1,7 +1,7 @@
-"""Generate a 6 character uuid"""
+"""Generate a 10 character uuid"""
 import uuid
 
 
-def generate_6_digits_uuid():
+def generate_10_digit_uuid():
     """Generate 6 digit uuid"""
-    return str(uuid.uuid4().hex[:6])
+    return str(uuid.uuid4().hex[:10])
