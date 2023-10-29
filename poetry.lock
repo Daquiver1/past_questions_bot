@@ -1488,6 +1488,48 @@ trio-websocket = ">=0.9,<1.0"
 urllib3 = {version = ">=1.26,<3", extras = ["socks"]}
 
 [[package]]
+name = "sentry-sdk"
+version = "1.24.0"
+description = "Python client for Sentry (https://sentry.io)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sentry-sdk-1.24.0.tar.gz", hash = "sha256:0bbcecda9f51936904c1030e7fef0fe693e633888f02a14d1cb68646a50e83b3"},
+    {file = "sentry_sdk-1.24.0-py2.py3-none-any.whl", hash = "sha256:56d6d9d194c898d853a7c1dd99bed92ce82334ee1282292c15bcc967ff1a49b5"},
+]
+
+[package.dependencies]
+certifi = "*"
+urllib3 = {version = ">=1.26.11,<2.0.0", markers = "python_version >= \"3.6\""}
+
+[package.extras]
+aiohttp = ["aiohttp (>=3.5)"]
+arq = ["arq (>=0.23)"]
+beam = ["apache-beam (>=2.12)"]
+bottle = ["bottle (>=0.12.13)"]
+celery = ["celery (>=3)"]
+chalice = ["chalice (>=1.16.0)"]
+django = ["django (>=1.8)"]
+falcon = ["falcon (>=1.4)"]
+fastapi = ["fastapi (>=0.79.0)"]
+flask = ["blinker (>=1.1)", "flask (>=0.11)", "markupsafe"]
+grpcio = ["grpcio (>=1.21.1)"]
+httpx = ["httpx (>=0.16.0)"]
+huey = ["huey (>=2)"]
+loguru = ["loguru (>=0.5)"]
+opentelemetry = ["opentelemetry-distro (>=0.35b0)"]
+pure-eval = ["asttokens", "executing", "pure-eval"]
+pymongo = ["pymongo (>=3.1)"]
+pyspark = ["pyspark (>=2.4.4)"]
+quart = ["blinker (>=1.1)", "quart (>=0.16.1)"]
+rq = ["rq (>=0.6)"]
+sanic = ["sanic (>=0.8)"]
+sqlalchemy = ["sqlalchemy (>=1.2)"]
+starlette = ["starlette (>=0.19.1)"]
+starlite = ["starlite (>=1.48)"]
+tornado = ["tornado (>=5)"]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1786,4 +1828,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "6f475821795e57e80ddd018e502248d0f5486344a15fb829db67c951b5af7a1f"
+content-hash = "10a6e08b29e6673ac30740903ae3e84d41b839fb5f03480959ec0a2e1060fc04"
