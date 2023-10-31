@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "past_questions_bot"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 python-telegram-bot = {extras = ["webhooks"], version = "^20.3"}
 beautifulsoup4 = "^4.12.2"
 webdriver-manager = "^3.8.6"
