@@ -1,0 +1,16 @@
+version: '3'
+services:
+  my-app:
+    image: past-questions-bot:latest
+    environment:
+      - USER_NAME=10900000
+      - PASSWORD=0000
+      - URL=https://balme.ug.edu.gh/past.exampapers/index.php?p=member
+      - TOKEN=tokenfrombotfather
+      - DEVELOPER_CHAT_ID=developerchatid
+      - PORT=8443
+      - BUCKET_NAME=bucket_name
+      - REGION=us-east-1
+    command: python src/main.py
+    ports:
+      - "80:80"
