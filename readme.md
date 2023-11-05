@@ -78,3 +78,12 @@ For more information about the Telegram Bot API and how to create your own bot, 
 ## Challenges Faced
 
 - I encountered several challenges while implementing the request command, where users input their requests and the bot saves them to a text file. However, I successfully resolved these issues in the end.
+- 
+<img width="551" alt="Screenshot 2023-11-05 at 11 51 47 PM" src="https://github.com/childerx/past_questions_bot/assets/102569865/ee360d0e-f400-462d-ba46-0cf315950c7e">
+
+<img width="547" alt="Screenshot 2023-11-05 at 11 53 50 PM" src="https://github.com/childerx/past_questions_bot/assets/102569865/d9edd77c-56c8-48d9-bd6f-7779b43d39ce">
+
+<img width="614" alt="Screenshot 2023-11-05 at 11 55 31 PM" src="https://github.com/childerx/past_questions_bot/assets/102569865/02bb6a05-6625-495b-9aa2-9eda2f425434">
+
+
+
