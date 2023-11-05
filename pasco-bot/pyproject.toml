@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pasco-bot"
+version = "0.1.0"
+description = "A telegram bot for getting past questions"
+authors = ["greatnessmensah <ephraimmensah99@gmail.com>"]
+readme = "README.md"
+packages = [{include = "pasco_bot"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+python-telegram-bot = "^20.3"
+python-dotenv = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
