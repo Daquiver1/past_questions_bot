@@ -1,4 +1,4 @@
-# PyBot Telegram Bot
+# Past Question Telegram Bot
 
 PyBot is a Telegram bot designed to assist users with accessing past question files. It allows users to search for specific past question files, submit queries and suggestions, and receive help with available commands.
 
