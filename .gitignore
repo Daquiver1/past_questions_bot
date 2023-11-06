@@ -6,5 +6,4 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 stats_file.log
-__init__.py
 past_questions_test
