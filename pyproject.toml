@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Christian Abrokwa <Cabrokwa11@gmail.com>"]
 readme = "README.md"
-packages = [{include = "past_questions_bot"}]
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
