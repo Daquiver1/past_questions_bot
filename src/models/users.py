@@ -4,17 +4,16 @@
 from typing import Optional
 
 # Third party imports
-from models.base import CoreModel, DateTimeModelMixin, IDModelMixin, UUIDModelMixin
+from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin, UUIDModelMixin
 
 
 class UserBase(CoreModel):
     """All common characteristics of user."""
 
     username: Optional[str]
+    first_name: str
+    last_name: str
     telegram_id: str
-    is_subscribed: Optional[bool]
-    is_eligible: Optional[bool]
-    balance: Optional[float]
 
 
 class UserCreate(UserBase):
@@ -23,7 +22,7 @@ class UserCreate(UserBase):
     pass
 
 
-class UserInDb(IDModelMixin, DateTimeModelMixin, UUIDModelMixin, UserBase):
+class UserInDB(IDModelMixin, DateTimeModelMixin, UUIDModelMixin, UserBase):
     """User coming from DB."""
 
     pass
