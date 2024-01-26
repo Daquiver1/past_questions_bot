@@ -4,7 +4,7 @@ import pytest
 from databases import Database
 
 from db.repositories.user import UserRepository
-from models.user import UserCreate, UserInDb
+from models.users import UserCreate, UserInDb
 
 pytestmark = pytest.mark.asyncio
 

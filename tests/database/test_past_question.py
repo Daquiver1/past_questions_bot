@@ -5,7 +5,7 @@ from databases import Database
 
 from db.repositories.past_question import PastQuestionRepository
 from db.repositories.past_question_categories import PastQuestionCategoriesRepository
-from models.past_question import PastQuestionCreate
+from models.past_questions import PastQuestionCreate
 
 pytestmark = pytest.mark.asyncio
 

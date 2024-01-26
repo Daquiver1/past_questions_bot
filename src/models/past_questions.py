@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from models.base import CoreModel, DateTimeModelMixin, IDModelMixin, UUIDModelMixin
+from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin, UUIDModelMixin
 
 
 class PastQuestionBase(CoreModel):
@@ -10,7 +10,7 @@ class PastQuestionBase(CoreModel):
 
     course_code: Optional[str]
     course_name: Optional[str]
-    lecturer: Optional[str]
+    lecturer_name: Optional[str]
     past_question_url: Optional[str]
     semester: Optional[str]
     year: Optional[str]
@@ -22,7 +22,7 @@ class PastQuestionCreate(PastQuestionBase):
     pass
 
 
-class PastQuestionInDb(
+class PastQuestionInDB(
     IDModelMixin, DateTimeModelMixin, UUIDModelMixin, PastQuestionBase
 ):
     """Past Question coming from DB."""

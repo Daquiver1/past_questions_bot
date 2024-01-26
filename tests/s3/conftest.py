@@ -1,6 +1,6 @@
 import pytest
 
-from models.past_question import PastQuestionCreate
+from models.past_questions import PastQuestionCreate
 from services.s3.s3 import delete_folder
 
 

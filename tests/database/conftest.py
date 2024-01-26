@@ -5,7 +5,7 @@ import pytest
 from alembic.config import Config
 from databases import Database
 
-from models.past_question import PastQuestionCreate
+from models.past_questions import PastQuestionCreate
 
 
 # apply migration at beginning and end of testing session
