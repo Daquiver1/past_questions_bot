@@ -4,7 +4,7 @@ import boto3
 import dotenv
 from botocore.exceptions import ClientError
 
-from models.past_question import PastQuestionCreate
+from models.past_questions import PastQuestionCreate
 from utils.uuid import generate_n_digit_uuid
 
 dotenv.load_dotenv()
