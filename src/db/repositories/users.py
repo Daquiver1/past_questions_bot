@@ -4,6 +4,7 @@
 from typing import Optional
 
 from databases import Database
+from redis.asyncio import Redis
 
 from src.db.repositories.base import BaseRepository
 from src.models.users import UserCreate, UserInDB
@@ -36,20 +37,26 @@ DELETE_USER_BY_TELEGRAM_ID_QUERY = """
 class UserRepository(BaseRepository):
     """All db actions associated with the user resource."""
 
-    def __init__(self, db: Database) -> None:
+    def __init__(self, db: Database, r_db: Redis) -> None:
         """Initialize db"""
-        super().__init__(db)
+        super().__init__(db, r_db)
 
     async def add_new_user(self, *, new_user: UserCreate) -> UserInDB:
         """Create new users data."""
-        return await self.db.fetch_one(
+        user = await self.db.fetch_one(
             query=ADD_USER_QUERY,
             values=new_user.dict(),
         )
+        if user:
+            return UserInDB(**user)
+        return None
 
     async def get_all_users(self) -> list[UserInDB]:
         """Get all users data"""
-        return await self.db.fetch_all(query=GET_ALL_USERS_QUERY)
+        users = await self.db.fetch_all(query=GET_ALL_USERS_QUERY)
+        if users: 
+            return [UserInDB(**user) for user in users]
+        return None
 
     async def get_user_details(self, telegram_id: str) -> Optional[UserInDB]:
         """Get user data"""
@@ -57,7 +64,9 @@ class UserRepository(BaseRepository):
             query=GET_USER_BY_TELEGRAM_ID_QUERY,
             values={"telegram_id": telegram_id},
         )
-        return user
+        if user:
+            return UserInDB(**user)
+        return None
 
     async def delete_user(self, *, telegram_id: str) -> str:
         """Delete user data by telegram_id."""

@@ -1,6 +1,7 @@
 """DB repo for downloads."""
 
 from databases import Database
+from redis.asyncio import Redis
 
 from src.db.repositories.base import BaseRepository
 from src.models.downloads import DownloadCreate, DownloadInDB
@@ -44,16 +45,19 @@ DELETE_DOWNLOAD_BY_DOWNLOAD_ID_QUERY = """
 class DownloadRepository(BaseRepository):
     """All db actions associated with the downloads resource."""
 
-    def __init__(self, db: Database) -> None:
+    def __init__(self, db: Database, r_db: Redis) -> None:
         """Initialize db"""
-        super().__init__(db)
+        super().__init__(db, r_db)
 
     async def add_new_download(self, *, new_download: DownloadCreate) -> DownloadInDB:
         """Create new downloads data."""
-        return await self.db.fetch_one(
+        download = await self.db.fetch_one(
             query=ADD_DOWNLOAD_QUERY,
             values=new_download.dict(),
         )
+        if download:
+            return DownloadInDB(**download)
+        return None
 
     async def get_all_user_downloads(self, telegram_id: str) -> list[DownloadInDB]:
         """Get user downloads data"""
@@ -61,7 +65,9 @@ class DownloadRepository(BaseRepository):
             query=GET_DOWNLOAD_BY_TELEGRAM_ID_QUERY,
             values={"telegram_id": telegram_id},
         )
-        return downloads
+        if downloads:
+            return [DownloadInDB(**download) for download in downloads]
+        return []
 
     async def get_all_past_question_downloads(
         self, past_question_id: int
@@ -71,7 +77,9 @@ class DownloadRepository(BaseRepository):
             query=GET_DOWNLOAD_BY_PAST_QUESTION_ID_QUERY,
             values={"past_question_id": past_question_id},
         )
-        return downloads
+        if downloads:
+            return [DownloadInDB(**download) for download in downloads]
+        return []
 
     async def delete_download(self, *, id: str) -> str:
         """Delete downloads data"""
@@ -85,4 +93,6 @@ class DownloadRepository(BaseRepository):
         downloads = await self.db.fetch_all(
             query=GET_ALL_DOWNLOADS_QUERY,
         )
-        return downloads
+        if downloads:
+            return [DownloadInDB(**download) for download in downloads]
+        return []

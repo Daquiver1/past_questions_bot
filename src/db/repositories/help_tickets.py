@@ -3,6 +3,7 @@
 from typing import Optional
 
 from databases import Database
+from redis.asyncio import Redis
 
 from src.models.help_ticket_status_enum import HelpTicketStatus
 from src.db.repositories.base import BaseRepository
@@ -48,9 +49,9 @@ DELETE_HELP_TICKET_BY_HELP_TICKET_ID_QUERY = """
 class HelpTicketRepository(BaseRepository):
     """All db actions associated with the help ticket resource."""
 
-    def __init__(self, db: Database) -> None:
+    def __init__(self, db: Database, r_db: Redis) -> None:
         """Initialize db"""
-        super().__init__(db)
+        super().__init__(db, r_db)
 
     async def add_new_help_ticket(
         self, *, help_ticket: HelpTicketsCreate
@@ -62,10 +63,13 @@ class HelpTicketRepository(BaseRepository):
             }
         )
 
-        return await self.db.fetch_one(
+        help_ticket = await self.db.fetch_one(
             query=ADD_HELP_TICKET_QUERY,
             values=new_help_ticket.dict(),
         )
+        if help_ticket:
+            return HelpTicketsInDB(**help_ticket)
+        return None
 
     async def get_help_ticket_by_help_ticket_id(
         self, *, help_ticket_id: int
@@ -75,24 +79,30 @@ class HelpTicketRepository(BaseRepository):
             query=GET_HELP_TICKET_BY_HELP_TICKET_ID_QUERY,
             values={"help_ticket_id": help_ticket_id},
         )
-        return help_ticket
+        if help_ticket:
+            return HelpTicketsInDB(**help_ticket)
+        return None
 
     async def get_all_help_tickets_by_telegram_id(
         self, *, telegram_id: str
     ) -> list[HelpTicketsInDB]:
         """Get help tickets data"""
-        help_ticket = await self.db.fetch_all(
+        help_tickets = await self.db.fetch_all(
             query=GET_HELP_TICKET_BY_TELEGRAM_ID_QUERY,
             values={"telegram_id": telegram_id},
         )
-        return help_ticket
+        if help_tickets:
+            return [HelpTicketsInDB(**help_ticket) for help_ticket in help_tickets]
+        return None
 
     async def get_all_help_tickets(self) -> list[HelpTicketsInDB]:
         """Get all help tickets data"""
         help_tickets = await self.db.fetch_all(
             query=GET_ALL_HELP_TICKETS_QUERY,
         )
-        return help_tickets
+        if help_tickets:
+            return [HelpTicketsInDB(**help_ticket) for help_ticket in help_tickets]
+        return None
 
     async def update_help_ticket_status(
         self, *, help_ticket_id: int, status: HelpTicketStatus
@@ -102,12 +112,13 @@ class HelpTicketRepository(BaseRepository):
             query=UPDATE_HELP_TICKET_STATUS_QUERY,
             values={"help_ticket_id": help_ticket_id, "status": status.value},
         )
-        return help_ticket
+        if help_ticket:
+            return HelpTicketsInDB(**help_ticket)
+        return None
 
     async def delete_help_ticket(self, *, help_ticket_id: int) -> int:
         """Delete help tickets data"""
-        help_ticket = await self.db.fetch_one(
+        return await self.db.fetch_one(
             query=DELETE_HELP_TICKET_BY_HELP_TICKET_ID_QUERY,
             values={"help_ticket_id": help_ticket_id},
         )
-        return help_ticket

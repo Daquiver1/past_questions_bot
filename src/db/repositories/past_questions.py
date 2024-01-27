@@ -3,6 +3,7 @@
 from typing import Optional, Union
 
 from databases import Database
+from redis.asyncio import Redis
 
 from src.db.repositories.base import BaseRepository
 from src.models.past_questions import PastQuestionCreate, PastQuestionInDB
@@ -65,18 +66,21 @@ DELETE_PAST_QUESTION_BY_PAST_QUESTION_ID_QUERY = """
 class PastQuestionRepository(BaseRepository):
     """All db actions associated with the past question resource."""
 
-    def __init__(self, db: Database) -> None:
+    def __init__(self, db: Database, r_db: Redis) -> None:
         """Initialize db"""
-        super().__init__(db)
+        super().__init__(db, r_db)
 
     async def add_new_past_question(
         self, *, new_past_question: PastQuestionCreate
     ) -> PastQuestionInDB:
         """Create new past question data."""
-        return await self.db.fetch_one(
+        past_question = await self.db.fetch_one(
             query=ADD_PAST_QUESTION_QUERY,
             values=new_past_question.dict(),
         )
+        if past_question:
+            return PastQuestionInDB(**past_question)
+        return None
 
     async def get_past_question(
         self, filter_by: PastQuestionFilter, filter_value: Union[int, str]
@@ -104,11 +108,18 @@ class PastQuestionRepository(BaseRepository):
             query=query,
             values={filter_by: filter_value},
         )
-        return past_question
+        if past_question:
+            return PastQuestionInDB(**past_question)
+        return None
 
     async def get_all_past_questions(self) -> list[PastQuestionInDB]:
         """Get all past questions data."""
-        return await self.db.fetch_all(query=GET_ALL_PAST_QUESTIONS_QUERY)
+        past_questions = await self.db.fetch_all(query=GET_ALL_PAST_QUESTIONS_QUERY)
+        if past_questions:
+            return [
+                PastQuestionInDB(**past_question) for past_question in past_questions
+            ]
+        return None
 
     async def get_all_past_questions_by_filter(
         self, filter_by: PastQuestionFilter, filter_value: Union[int, str]
@@ -128,15 +139,19 @@ class PastQuestionRepository(BaseRepository):
             "year": GET_PAST_QUESTION_BY_YEAR_QUERY,
         }
 
-        query = query_mapping.get(filter_by)
+        query = query_mapping.get(filter_by.value)
         if not query:
             raise ValueError(f"Invalid filter: {filter_by}")
 
-        past_question = await self.db.fetch_all(
+        past_questions = await self.db.fetch_all(
             query=query,
-            values={filter_by: filter_value},
+            values={filter_by.value: filter_value},
         )
-        return past_question
+        if past_questions:
+            return [
+                PastQuestionInDB(**past_question) for past_question in past_questions
+            ]
+        return None
 
     async def delete_past_question(self, *, past_question_id: int) -> int:
         """Delete past question data by past_question_id."""

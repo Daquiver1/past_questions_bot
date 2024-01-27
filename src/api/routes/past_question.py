@@ -2,12 +2,13 @@
 
 from typing import Optional, Union
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
-
-from src.api.dependencies.database import get_repository
+from redis.asyncio import Redis
+from src.api.dependencies.database import get_repository, get_redis
 from src.db.repositories.past_questions import PastQuestionRepository
 from src.models.past_questions import PastQuestionCreate, PastQuestionPublic
 from src.models.past_question_filter_enum import PastQuestionFilter
 from src.services.s3.s3 import upload_file_to_bucket
+from src.utils.redis_serializers import store_data, get_data
 
 router = APIRouter()
 
@@ -35,7 +36,7 @@ async def create_new_past_question(
         lecturer_name=lecturer_name,
         semester=semester,
         year=year,
-        past_question_url=""
+        past_question_url="",
     )
     url = upload_file_to_bucket(past_question_file=file, past_question=past_question)
     past_question.past_question_url = url
@@ -95,8 +96,19 @@ async def get_all_past_questions_by_filter(
     past_question_repo: PastQuestionRepository = Depends(
         get_repository(PastQuestionRepository)
     ),
+    redis_client: Redis = Depends(get_redis),
 ) -> list[PastQuestionPublic]:
     """Get all past questions by filter."""
-    return await past_question_repo.get_all_past_questions_by_filter(
+    key = f"{filter_by.value}_{filter_value}"
+    cache_value = await get_data(redis_client=redis_client, key=key)
+    if cache_value:
+        return [PastQuestionPublic(**item) for item in cache_value]
+
+    questions = await past_question_repo.get_all_past_questions_by_filter(
         filter_by=filter_by, filter_value=filter_value
     )
+    if questions:
+        questions_data = [question.dict() for question in questions]
+        await store_data(redis_client=redis_client, key=key, data=questions_data)
+
+        return questions
