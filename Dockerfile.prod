@@ -1,0 +1,17 @@
+FROM python:3.11-slim-buster
+WORKDIR /backend
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONBUFFERED 1
+
+# install system dependencies
+RUN apt-get update \
+  && apt-get -y install netcat gcc postgresql \
+  && apt-get clean
+  
+COPY ./requirements.txt /code/requirements.txt
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+RUN ["chmod", "+x", "./run.sh"]
+CMD ./run.sh
