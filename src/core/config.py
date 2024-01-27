@@ -22,7 +22,7 @@ DATABASE_URL = config(
     default=f"postgresql://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}/{POSTGRES_DB}",
 )
 
-# S3_BUCKET_NAME = config("S3_BUCKET_NAME", cast=str)
-# S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID", cast=str)
-# S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY", cast=Secret)
-# REGION = config("REGION", cast=str)
+S3_BUCKET_NAME = config("S3_BUCKET_NAME", cast=str)
+S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID", cast=str)
+S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY", cast=Secret)
+S3_REGION = config("S3_REGION", cast=str)
