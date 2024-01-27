@@ -1,6 +1,7 @@
 *.log
 __pycache__/
 .env
+.env.prod
 .flake8
 .vscode/
 .pytest_cache/

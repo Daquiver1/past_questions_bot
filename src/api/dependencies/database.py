@@ -19,9 +19,7 @@ def get_database(request: Request) -> Database:
 def get_repository(repo_type: Union[Type[BaseRepository], BaseRepository]) -> Callable:
     """Dependency for db."""
 
-    def get_repo(
-        db: Database = Depends(get_database)
-    ) -> Type[BaseRepository]:
+    def get_repo(db: Database = Depends(get_database)) -> Type[BaseRepository]:
         return repo_type(db)  # type: ignore
 
     return get_repo

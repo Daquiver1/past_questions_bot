@@ -1,0 +1,8 @@
+**/.git
+**/.gitignore
+**/.vscode
+Dockerfile
+Dockerfile.prod
+README.md
+docker-compose.yml
+docker-compose.prod.yml
