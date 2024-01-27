@@ -1,19 +1,16 @@
 """Past Question Model"""
-
-from typing import Optional
-
-from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin, UUIDModelMixin
+from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin
 
 
 class PastQuestionBase(CoreModel):
     """All common characteristics of past question."""
 
-    course_code: Optional[str]
-    course_name: Optional[str]
-    lecturer_name: Optional[str]
-    past_question_url: Optional[str]
-    semester: Optional[str]
-    year: Optional[str]
+    course_code: str
+    course_name: str
+    lecturer_name: str
+    semester: str
+    year: str
+    past_question_url: str
 
 
 class PastQuestionCreate(PastQuestionBase):
@@ -22,12 +19,10 @@ class PastQuestionCreate(PastQuestionBase):
     pass
 
 
-class PastQuestionInDB(
-    IDModelMixin, DateTimeModelMixin, UUIDModelMixin, PastQuestionBase
-):
+class PastQuestionInDB(IDModelMixin, DateTimeModelMixin, PastQuestionBase):
     """Past Question coming from DB."""
 
-    category_id: Optional[int]
+    pass
 
 
 class PastQuestionPublic(PastQuestionBase):

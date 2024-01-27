@@ -24,7 +24,6 @@ class HelpTicketsInDB(HelpTicketsCreate, IDModelMixin, DateTimeModelMixin):
     status: HelpTicketStatus
 
 
-
 class HelpTicketsPublic(HelpTicketsBase):
     """Help Tickets to public."""
 
