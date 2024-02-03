@@ -7,7 +7,7 @@ from src.models.help_ticket_status_enum import HelpTicketStatus
 class HelpTicketsBase(CoreModel):
     """All common characteristics of help tickets."""
 
-    telegram_id: str
+    user_telegram_id: str
     subject: str
     message: str
 

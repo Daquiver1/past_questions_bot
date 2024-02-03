@@ -4,7 +4,7 @@
 from typing import Optional
 
 # Third party imports
-from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin, UUIDModelMixin
+from src.models.base import CoreModel, DateTimeModelMixin
 
 
 class UserBase(CoreModel):
@@ -12,8 +12,8 @@ class UserBase(CoreModel):
 
     username: Optional[str]
     first_name: str
-    last_name: str
-    telegram_id: str
+    last_name: Optional[str]
+    telegram_id: int
 
 
 class UserCreate(UserBase):
@@ -22,7 +22,7 @@ class UserCreate(UserBase):
     pass
 
 
-class UserInDB(IDModelMixin, DateTimeModelMixin, UUIDModelMixin, UserBase):
+class UserInDB(DateTimeModelMixin, UserBase):
     """User coming from DB."""
 
     pass

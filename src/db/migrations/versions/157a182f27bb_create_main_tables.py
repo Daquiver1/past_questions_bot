@@ -60,15 +60,15 @@ def create_users_table() -> None:
         "users",
         sa.Column(
             "telegram_id",
-            sa.String(),
+            sa.Integer(),
             primary_key=True,
             nullable=False,
             unique=True,
             index=True,
         ),
         sa.Column("username", sa.String(), index=True),
-        sa.Column("first_name", sa.String(), nullable=False),
-        sa.Column("last_name", sa.String(), nullable=False),
+        sa.Column("first_name", sa.String(), nullable=True),
+        sa.Column("last_name", sa.String()),
         *timestamps(),
     )
     op.execute(
@@ -89,6 +89,7 @@ def create_past_questions_table() -> None:
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
         sa.Column("course_code", sa.String(), index=True, nullable=False),
         sa.Column("course_name", sa.String(), index=True, nullable=False),
+        sa.Column("course_title", sa.String(), index=True, nullable=False),
         sa.Column("lecturer_name", sa.String(), index=True, nullable=False),
         sa.Column("past_question_url", sa.String(), nullable=False),
         sa.Column("semester", sa.String(), index=True, nullable=False),
@@ -112,7 +113,7 @@ def create_downloads_table() -> None:
         "downloads",
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
         sa.Column(
-            "telegram_id",
+            "user_telegram_id",
             sa.String(),
             sa.ForeignKey("users.telegram_id"),
             nullable=False,
@@ -152,8 +153,8 @@ def create_help_tickets_table() -> None:
         "help_tickets",
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
         sa.Column(
-            "telegram_id",
-            sa.String(),
+            "user_telegram_id",
+            sa.Integer(),
             sa.ForeignKey("users.telegram_id"),
             nullable=False,
             index=True,

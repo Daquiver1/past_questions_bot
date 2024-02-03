@@ -37,7 +37,7 @@ async def create_new_user(
     status_code=status.HTTP_200_OK,
 )
 async def get_user_details(
-    telegram_id: str,
+    telegram_id: int,
     user_repo: UserRepository = Depends(get_repository(UserRepository)),
 ) -> UserPublic:
     """Get user details."""
@@ -55,6 +55,23 @@ async def get_user_details(
 )
 async def get_all_users(
     user_repo: UserRepository = Depends(get_repository(UserRepository)),
-) -> UserPublic:
+) -> list[UserPublic]:
     """Get all users."""
     return await user_repo.get_all_users()
+
+
+@router.delete(
+    "/telegram/{telegram_id}",
+    response_model=Optional[int],
+    status_code=status.HTTP_200_OK,
+)
+async def delete_user(
+    telegram_id: int,
+    user_repo: UserRepository = Depends(get_repository(UserRepository)),
+) -> int:
+    """Delete user."""
+    telegram_id = await user_repo.delete_user(telegram_id=telegram_id)
+
+    if not telegram_id:
+        raise HTTPException(status_code=404, detail="User not found")
+    return telegram_id

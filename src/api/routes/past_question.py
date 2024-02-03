@@ -1,6 +1,6 @@
 """Route for accessing past questions."""
 
-from typing import Optional, Union
+from typing import Union
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from redis.asyncio import Redis
 from src.api.dependencies.database import get_repository, get_redis
@@ -8,36 +8,43 @@ from src.db.repositories.past_questions import PastQuestionRepository
 from src.models.past_questions import PastQuestionCreate, PastQuestionPublic
 from src.models.past_question_filter_enum import PastQuestionFilter
 from src.services.s3.s3 import upload_file_to_bucket
-from src.utils.redis_serializers import store_data, get_data
+from src.utils.redis_serializers import (
+    store_data,
+    get_data,
+    invalidate_related_cache_entries,
+)
 
 router = APIRouter()
 
 
 @router.post(
     "",
-    response_model=Optional[PastQuestionPublic],
+    response_model=PastQuestionPublic,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_new_past_question(
     file: UploadFile = File(...),
-    course_code: str = Form(...),
     course_name: str = Form(...),
+    course_code: str = Form(...),
     lecturer_name: str = Form(...),
     semester: str = Form(...),
     year: str = Form(...),
     past_question_repo: PastQuestionRepository = Depends(
         get_repository(PastQuestionRepository)
     ),
+    redis_client: Redis = Depends(get_redis),
 ) -> PastQuestionPublic:
     """Create a new past question."""
     past_question = PastQuestionCreate(
         course_code=course_code,
         course_name=course_name,
+        course_title=course_code + " " + course_name,
         lecturer_name=lecturer_name,
         semester=semester,
         year=year,
         past_question_url="",
     )
+    await invalidate_related_cache_entries(redis_client)
     url = upload_file_to_bucket(past_question_file=file, past_question=past_question)
     past_question.past_question_url = url
     past_question = await past_question_repo.add_new_past_question(
@@ -47,13 +54,12 @@ async def create_new_past_question(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Past question not created"
         )
-
     return past_question
 
 
 @router.get(
     "/{past_question_id}",
-    response_model=Optional[PastQuestionPublic],
+    response_model=PastQuestionPublic,
     status_code=status.HTTP_200_OK,
 )
 async def get_past_question(
@@ -111,4 +117,4 @@ async def get_all_past_questions_by_filter(
         questions_data = [question.dict() for question in questions]
         await store_data(redis_client=redis_client, key=key, data=questions_data)
 
-        return questions
+    return questions

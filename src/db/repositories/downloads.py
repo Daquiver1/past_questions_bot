@@ -7,31 +7,31 @@ from src.db.repositories.base import BaseRepository
 from src.models.downloads import DownloadCreate, DownloadInDB
 
 ADD_DOWNLOAD_QUERY = """
-    INSERT INTO downloads (telegram_id, past_question_id)
-    VALUES (:telegram_id, :past_question_id)
-    RETURNING id, telegram_id, past_question_id, created_At, updated_At;
+    INSERT INTO downloads (user_telegram_id, past_question_id)
+    VALUES (:user_telegram_id, :past_question_id)
+    RETURNING id, user_telegram_id, past_question_id, created_At, updated_At;
 """
 
 GET_DOWNLOAD_BY_DOWNLOAD_ID_QUERY = """
-    SELECT id, telegram_id, past_question_id, created_at, updated_at
+    SELECT id, user_telegram_id, past_question_id, created_at, updated_at
     FROM downloads
     WHERE id = :id;
     """
 
 GET_DOWNLOAD_BY_TELEGRAM_ID_QUERY = """
-    SELECT id, telegram_id, past_question_id, created_at, updated_at
+    SELECT id, user_telegram_id, past_question_id, created_at, updated_at
     FROM downloads
-    WHERE telegram_id = :telegram_id;
+    WHERE user_telegram_id = :user_telegram_id;
     """
 
 GET_DOWNLOAD_BY_PAST_QUESTION_ID_QUERY = """
-    SELECT id, telegram_id, past_question_id, created_at, updated_at
+    SELECT id, user_telegram_id, past_question_id, created_at, updated_at
     FROM downloads
     WHERE past_question_id = :past_question_id;
     """
 
 GET_ALL_DOWNLOADS_QUERY = """
-    SELECT id, telegram_id, past_question_id, created_at, updated_at
+    SELECT id, user_telegram_id, past_question_id, created_at, updated_at
     FROM downloads;
     """
 
@@ -59,11 +59,11 @@ class DownloadRepository(BaseRepository):
             return DownloadInDB(**download)
         return None
 
-    async def get_all_user_downloads(self, telegram_id: str) -> list[DownloadInDB]:
+    async def get_all_user_downloads(self, telegram_id: int) -> list[DownloadInDB]:
         """Get user downloads data"""
         downloads = await self.db.fetch_all(
             query=GET_DOWNLOAD_BY_TELEGRAM_ID_QUERY,
-            values={"telegram_id": telegram_id},
+            values={"user_telegram_id": telegram_id},
         )
         if downloads:
             return [DownloadInDB(**download) for download in downloads]

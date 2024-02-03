@@ -30,7 +30,7 @@ GET_ALL_USERS_QUERY = """
 DELETE_USER_BY_TELEGRAM_ID_QUERY = """
     DELETE FROM users
     WHERE telegram_id = :telegram_id
-    RETURNING id;
+    RETURNING telegram_id;
 """
 
 
@@ -43,6 +43,9 @@ class UserRepository(BaseRepository):
 
     async def add_new_user(self, *, new_user: UserCreate) -> UserInDB:
         """Create new users data."""
+        if await self.get_user_details(telegram_id=new_user.telegram_id):
+            return None
+
         user = await self.db.fetch_one(
             query=ADD_USER_QUERY,
             values=new_user.dict(),
@@ -54,11 +57,9 @@ class UserRepository(BaseRepository):
     async def get_all_users(self) -> list[UserInDB]:
         """Get all users data"""
         users = await self.db.fetch_all(query=GET_ALL_USERS_QUERY)
-        if users: 
-            return [UserInDB(**user) for user in users]
-        return None
+        return [UserInDB(**user) for user in users]
 
-    async def get_user_details(self, telegram_id: str) -> Optional[UserInDB]:
+    async def get_user_details(self, telegram_id: int) -> Optional[UserInDB]:
         """Get user data"""
         user = await self.db.fetch_one(
             query=GET_USER_BY_TELEGRAM_ID_QUERY,
@@ -68,7 +69,7 @@ class UserRepository(BaseRepository):
             return UserInDB(**user)
         return None
 
-    async def delete_user(self, *, telegram_id: str) -> str:
+    async def delete_user(self, *, telegram_id: int) -> int:
         """Delete user data by telegram_id."""
         return await self.db.execute(
             query=DELETE_USER_BY_TELEGRAM_ID_QUERY,

@@ -10,49 +10,55 @@ from src.models.past_questions import PastQuestionCreate, PastQuestionInDB
 from src.models.past_question_filter_enum import PastQuestionFilter
 
 ADD_PAST_QUESTION_QUERY = """
-    INSERT INTO past_questions (course_code, course_name, lecturer_name, past_question_url, semester, year)
-    VALUES (:course_code, :course_name, :lecturer_name, :past_question_url, :semester, :year)
-    RETURNING id, course_code, course_name, lecturer_name, past_question_url, semester, year, created_At, updated_At;
+    INSERT INTO past_questions (course_code, course_name, course_title, lecturer_name, past_question_url, semester, year)
+    VALUES (:course_code, :course_name, :course_title, :lecturer_name, :past_question_url, :semester, :year)
+    RETURNING id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_At, updated_At;
 """
 
 GET_PAST_QUESTION_BY_PAST_QUESTION_ID_QUERY = """
-    SELECT id, course_code, course_name, lecturer_name, past_question_url, semester, year, created_at, updated_at
+    SELECT id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_at, updated_at
     FROM past_questions
     WHERE id = :past_question_id;
     """
 
 GET_PAST_QUESTION_BY_COURSE_CODE_QUERY = """
-    SELECT id, course_code, course_name, lecturer_name, past_question_url, semester, year, created_at, updated_at
+    SELECT id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_at, updated_at
     FROM past_questions
     WHERE course_code = :course_code;
     """
 
 GET_PAST_QUESTION_BY_COURSE_NAME_QUERY = """
-    SELECT id, course_code, course_name, lecturer_name, past_question_url, semester, year, created_at, updated_at
+    SELECT id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_at, updated_at
     FROM past_questions
     WHERE course_name = :course_name;
     """
 
+GET_PAST_QUESTION_BY_COURSE_TITLE_QUERY = """
+    SELECT id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_at, updated_at
+    FROM past_questions
+    WHERE course_title = :course_title;
+    """
+
 GET_PAST_QUESTION_BY_LECTURER_NAME_QUERY = """
-    SELECT id, course_code, course_name, lecturer_name, past_question_url, semester, year, created_at, updated_at
+    SELECT id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_at, updated_at
     FROM past_questions
     WHERE lecturer_name = :lecturer_name;
     """
 
 GET_PAST_QUESTION_BY_SEMESTER_QUERY = """
-    SELECT id, course_code, course_name, lecturer_name, past_question_url, semester, year, created_at, updated_at
+    SELECT id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_at, updated_at
     FROM past_questions
     WHERE semester = :semester;
     """
 
 GET_PAST_QUESTION_BY_YEAR_QUERY = """
-    SELECT id, course_code, course_name, lecturer_name, past_question_url, semester, year, created_at, updated_at
+    SELECT id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_at, updated_at
     FROM past_questions
     WHERE year = :year;
     """
 
 GET_ALL_PAST_QUESTIONS_QUERY = """
-    SELECT id, course_code, course_name, lecturer_name, past_question_url, semester, year, created_at, updated_at
+    SELECT id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_at, updated_at
     FROM past_questions;
     """
 
@@ -95,6 +101,7 @@ class PastQuestionRepository(BaseRepository):
             "past_question_id": GET_PAST_QUESTION_BY_PAST_QUESTION_ID_QUERY,
             "course_code": GET_PAST_QUESTION_BY_COURSE_CODE_QUERY,
             "course_name": GET_PAST_QUESTION_BY_COURSE_NAME_QUERY,
+            "course_title": GET_PAST_QUESTION_BY_COURSE_TITLE_QUERY,
             "lecturer_name": GET_PAST_QUESTION_BY_LECTURER_NAME_QUERY,
             "semester": GET_PAST_QUESTION_BY_SEMESTER_QUERY,
             "year": GET_PAST_QUESTION_BY_YEAR_QUERY,
@@ -119,7 +126,7 @@ class PastQuestionRepository(BaseRepository):
             return [
                 PastQuestionInDB(**past_question) for past_question in past_questions
             ]
-        return None
+        return []
 
     async def get_all_past_questions_by_filter(
         self, filter_by: PastQuestionFilter, filter_value: Union[int, str]
@@ -134,6 +141,7 @@ class PastQuestionRepository(BaseRepository):
             "past_question_id": GET_PAST_QUESTION_BY_PAST_QUESTION_ID_QUERY,
             "course_code": GET_PAST_QUESTION_BY_COURSE_CODE_QUERY,
             "course_name": GET_PAST_QUESTION_BY_COURSE_NAME_QUERY,
+            "course_title": GET_PAST_QUESTION_BY_COURSE_TITLE_QUERY,
             "lecturer_name": GET_PAST_QUESTION_BY_LECTURER_NAME_QUERY,
             "semester": GET_PAST_QUESTION_BY_SEMESTER_QUERY,
             "year": GET_PAST_QUESTION_BY_YEAR_QUERY,
@@ -151,7 +159,7 @@ class PastQuestionRepository(BaseRepository):
             return [
                 PastQuestionInDB(**past_question) for past_question in past_questions
             ]
-        return None
+        return []
 
     async def delete_past_question(self, *, past_question_id: int) -> int:
         """Delete past question data by past_question_id."""

@@ -33,7 +33,7 @@ async def create_download(
     status_code=status.HTTP_200_OK,
 )
 async def get_all_user_downloads(
-    telegram_id: str,
+    telegram_id: int,
     download_repo: DownloadRepository = Depends(get_repository(DownloadRepository)),
 ) -> list[DownloadPublic]:
     """Get all user downloads."""

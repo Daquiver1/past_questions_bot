@@ -8,6 +8,7 @@ class PastQuestionFilter(Enum):
     PAST_QUESTION_ID = "past_question_id"
     COURSE_CODE = "course_code"
     COURSE_NAME = "course_name"
+    COURSE_TITLE = "course_title"
     LECTURER_NAME = "lecturer_name"
     SEMESTER = "semester"
     YEAR = "year"
