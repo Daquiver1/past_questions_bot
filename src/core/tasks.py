@@ -12,21 +12,15 @@ from src.db.tasks import (
     connect_to_redis,
     close_redis_connection,
 )
+from src.core.config import SENTRY_DSN, SENTRY_ENVIRONMENT
+from src.services.sentry import SentryInitializer
 
 
 def create_start_app_handler(app: FastAPI) -> Callable:
-    """
-    It returns a function that connects to the database.
-
-    Args:
-      app (FastAPI): FastAPI
-
-    Returns:
-      A function that takes no arguments and returns None.
-    """
     """Connect to db."""
 
     async def start_app() -> Callable:
+        SentryInitializer(SENTRY_DSN, SENTRY_ENVIRONMENT)
         await connect_to_db(app)
         await connect_to_redis(app)
 

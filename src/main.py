@@ -3,6 +3,7 @@ import asyncio
 import logging
 import sys
 import os
+import sentry_sdk
 import dotenv
 
 from aiogram import Bot, Dispatcher, types
@@ -30,6 +31,7 @@ dotenv.load_dotenv()
 TOKEN = os.environ["TOKEN"]
 BASE_URL = os.environ["BASE_URL"]
 ADMIN_TELEGRAM_ID = os.environ["ADMIN_TELEGRAM_ID"]
+SENTRY_DSN_BOT = os.environ["SENTRY_DSN_BOT"]
 
 dp = Dispatcher()
 api_service = BackendClient(BASE_URL)
@@ -202,6 +204,11 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    sentry_sdk.init(
+        dsn=SENTRY_DSN_BOT,
+        environment="development",
+        traces_sample_rate=0.1,
+    )
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",

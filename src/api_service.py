@@ -116,11 +116,3 @@ class BackendClient:
                 "data": None,
                 "error": f"Other error occurred: {e}",
             }
-
-# Example usage
-if __name__ == "__main__":
-    client = BackendClient("https://your-backend-url.com")
-    print(client.get("endpoint"))
-    print(client.post("endpoint", json={"key": "value"}))
-    print(client.put("endpoint", data={"key": "value"}))
-    print(client.delete("endpoint"))

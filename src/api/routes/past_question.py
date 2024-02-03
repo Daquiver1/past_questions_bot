@@ -7,7 +7,7 @@ from src.api.dependencies.database import get_repository, get_redis
 from src.db.repositories.past_questions import PastQuestionRepository
 from src.models.past_questions import PastQuestionCreate, PastQuestionPublic
 from src.models.past_question_filter_enum import PastQuestionFilter
-from src.services.s3.s3 import upload_file_to_bucket
+from src.services.s3 import upload_file_to_bucket
 from src.utils.redis_serializers import (
     store_data,
     get_data,
