@@ -1,16 +1,13 @@
 """Server Setup."""
 
 # Third party imports
-import sentry_sdk
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from sentry_sdk.integrations.starlette import StarletteIntegration
-from sentry_sdk.integrations.fastapi import FastApiIntegration
 from src.api.routes.user import router as user_router
 from src.api.routes.past_question import router as past_question_router
 from src.api.routes.download import router as download_router
 from src.api.routes.help_ticket import router as help_ticket_router
-
+from src.api.routes.paystack import router as paystack_router
 from src.core import config, tasks
 
 
@@ -42,6 +39,7 @@ def get_application() -> FastAPI:
     app.include_router(
         past_question_router, prefix="/past_question", tags=["past_question"]
     )
+    app.include_router(paystack_router, prefix="/paystack", tags=["paystack"])
     app.include_router(download_router, prefix="/download", tags=["download"])
     app.include_router(help_ticket_router, prefix="/help_ticket", tags=["help_ticket"])
 
