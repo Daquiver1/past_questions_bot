@@ -1,8 +1,7 @@
 """helpers.py"""
-import traceback
 import re
 from typing import Dict, Optional, List
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, User
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime
 
 
@@ -47,17 +46,16 @@ def generic_error_message() -> str:
 
 
 def format_error_message_to_admin(
-    exception: Exception, user: User, last_message: str
+    exception: Exception, user_id: str, username: str, last_message: str
 ) -> str:
     """Format error message to admin."""
     error_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    #traceback_details = "".join(traceback.format_exception(exception))
+    # traceback_details = "".join(traceback.format_exception(exception))
 
     error_message = f"""Error occurred:
 Timestamp: {error_timestamp}
-User ID: {user.id}
-Username: @{user.username}
-Full Name: {user.full_name}
+User ID: {user_id}
+Username: @{username}
 Last Message: {last_message or 'N/A'}
 
 The type of error: {type(exception).__name__}
@@ -92,7 +90,7 @@ def create_button_layout(
 
     for i, question in enumerate(past_questions, start=1):
         button_text = str(i)
-        callback_data = f"{i};{question['id']}"
+        callback_data = f"question;{i};{question['id']};1"
         button = InlineKeyboardButton(text=button_text, callback_data=callback_data)
 
         current_row.append(button)
@@ -101,7 +99,7 @@ def create_button_layout(
             current_row = []
 
     all_button = InlineKeyboardButton(
-        text="All", callback_data=f"all;{past_questions[0]['course_title']}"
+        text="All", callback_data=f"question;all;{past_questions[0]['course_title']};{len(past_questions)}"
     )
     if not button_rows or len(button_rows[-1]) == row_limit:
         button_rows.append([all_button])
@@ -109,6 +107,20 @@ def create_button_layout(
         button_rows[-1].append(all_button)
 
     return InlineKeyboardMarkup(inline_keyboard=button_rows)
+
+
+def ask_payment_confirmation(
+    index: int, past_question_id: str, reference: str
+) -> InlineKeyboardMarkup:
+    """Create a button layout asking the user if they've paid."""
+    yes_button = InlineKeyboardButton(
+        text="Yes, I've paid",
+        callback_data=f"{index};{past_question_id};{reference}",
+    )
+
+    keyboard = [[yes_button]]
+
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
 def validate_user_input(past_question_name: str) -> Optional[str]:
