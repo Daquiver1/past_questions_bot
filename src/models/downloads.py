@@ -6,7 +6,7 @@ from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin
 class DownloadBase(CoreModel):
     """All common characteristics of downloads."""
 
-    user_id: str
+    user_telegram_id: int
     past_question_id: int
 
 

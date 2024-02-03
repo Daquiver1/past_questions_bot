@@ -96,7 +96,7 @@ async def get_all_help_tickets(
     status_code=status.HTTP_200_OK,
 )
 async def get_all_help_tickets_by_telegram_id(
-    telegram_id: str,
+    telegram_id: int,
     help_ticket_repo: HelpTicketRepository = Depends(
         get_repository(HelpTicketRepository)
     ),

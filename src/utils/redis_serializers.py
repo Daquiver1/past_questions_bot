@@ -6,6 +6,8 @@ from datetime import datetime
 from redis.asyncio import Redis
 from typing import Any, Dict
 
+from src.models.past_question_filter_enum import PastQuestionFilter
+
 
 def custom_serializer(obj: Any) -> str:
     """JSON serializer for objects not serializable by default json code"""
@@ -38,3 +40,28 @@ async def get_data(redis_client: Redis, key: str) -> Any:  # noqa
             serialized_data.decode("utf-8"), object_hook=custom_deserializer
         )
     return None
+
+
+async def invalidate_related_cache_entries(redis_client: Redis) -> None:
+    """Invalidate all cache entries related to a specific past question ID."""
+    filter_types = [
+        PastQuestionFilter.PAST_QUESTION_ID.value,
+        PastQuestionFilter.COURSE_CODE.value,
+        PastQuestionFilter.COURSE_NAME.value,
+        PastQuestionFilter.COURSE_TITLE.value,
+        PastQuestionFilter.LECTURER_NAME.value,
+        PastQuestionFilter.SEMESTER.value,
+        PastQuestionFilter.YEAR.value,
+    ]
+
+    keys_to_invalidate = []
+    for filter_type in filter_types:
+        key_pattern = f"{filter_type}_*"
+        keys = await redis_client.keys(key_pattern)
+        decoded_keys = [key.decode("utf-8") for key in keys]
+        keys_to_invalidate.extend(decoded_keys)
+
+    unique_keys_to_invalidate = list(set(keys_to_invalidate))
+
+    if unique_keys_to_invalidate:
+        await redis_client.delete(*unique_keys_to_invalidate)

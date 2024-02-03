@@ -84,7 +84,7 @@ class HelpTicketRepository(BaseRepository):
         return None
 
     async def get_all_help_tickets_by_telegram_id(
-        self, *, telegram_id: str
+        self, *, telegram_id: int
     ) -> list[HelpTicketsInDB]:
         """Get help tickets data"""
         help_tickets = await self.db.fetch_all(
@@ -93,7 +93,7 @@ class HelpTicketRepository(BaseRepository):
         )
         if help_tickets:
             return [HelpTicketsInDB(**help_ticket) for help_ticket in help_tickets]
-        return None
+        return []
 
     async def get_all_help_tickets(self) -> list[HelpTicketsInDB]:
         """Get all help tickets data"""
@@ -102,7 +102,7 @@ class HelpTicketRepository(BaseRepository):
         )
         if help_tickets:
             return [HelpTicketsInDB(**help_ticket) for help_ticket in help_tickets]
-        return None
+        return []
 
     async def update_help_ticket_status(
         self, *, help_ticket_id: int, status: HelpTicketStatus

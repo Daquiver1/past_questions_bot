@@ -1,358 +1,210 @@
-"""Main bot file."""
+"""Main file"""
+import asyncio
 import logging
-import logging.config
+import sys
 import os
-import re
-import time
-import traceback
-from typing import List, Union
-
 import dotenv
-import telegram.ext
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (
-    ApplicationBuilder,
-    CallbackQueryHandler,
-    ContextTypes,
-    MessageHandler,
-    filters,
+
+from aiogram import Bot, Dispatcher, types
+from aiogram.enums import ParseMode
+from aiogram.filters import CommandStart
+from aiogram.types import Message, URLInputFile, ErrorEvent
+from aiogram.utils.markdown import hbold
+
+from api_service import BackendClient
+from helpers import (
+    welcome_message,
+    validate_user_input,
+    invalid_past_question_message,
+    searching_past_question_message,
+    failed_to_register_account_message,
+    generic_error_message,
+    create_button_layout,
+    already_registered_message,
+    format_past_question_message,
+    create_filename_for_past_question,
+    format_error_message_to_admin,
 )
-
-import functions
-from services.sentry.sentry import SentryClass
-
-# Logging setup
-logging.config.fileConfig(
-    fname="log.ini",
-    disable_existing_loggers=False,
-)
-
-logger = logging.getLogger(__name__)
 
 dotenv.load_dotenv()
-PORT = int(os.environ.get("PORT", "8443"))
 TOKEN = os.environ["TOKEN"]
-DEVELOPER_CHAT_ID = os.environ["DEVELOPER_CHAT_ID"]
-function_class = functions.Functions()
-SentryClass()
+BASE_URL = os.environ["BASE_URL"]
+ADMIN_TELEGRAM_ID = os.environ["ADMIN_TELEGRAM_ID"]
+
+dp = Dispatcher()
+api_service = BackendClient(BASE_URL)
+my_bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Start command."""
-    await update.message.reply_text(
-        f"""
-    Hello {update.message.from_user.username}
-Welcome to Daquiver's Past Questions bot
-
-Type the name of the past question, select the one you want and it'll be sent to you.
-Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )
-Check the /about section for more info.
-
-        """
-    )
-
-
-async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Help command."""
-    await update.message.reply_text(
-        """
-    The following commands are available:
-
-/donate -> Buy me a drink.
-/start -> Welcome Message.
-/help -> This Message.
-/contact -> My contact details.
-/about -> Why did I build this?
-    """
-    )
-
-
-async def donate(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Donate command."""
-    await update.message.reply_text(
-        "Thanks for buying me coffee. Details below.\nName: Christian Abrokwa\nNumber: 0547642843"
-    )
-
-
-async def contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Contact command."""
-    await update.message.reply_text(
-        """
-        You can contact me via the following:
-Gmail: Cabrokwa11@gmail.com
-
-Telegram: @Daquiver
-
-Github: https://github.com/Daquiver1
-
-Twitter: https://www.twitter.com/daquiver1
-
-LinkedIn: https://www.linkedin.com/in/daquiver
-        """
-    )
-
-
-async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """About command."""
-    await update.message.reply_text(
-        """
-    Hey I'm Christian, Christian Abrokwa. Nice to meet you.
-
-During the day I'm a software engineer and at nights I'm a superhero. Somewhere in between, I perform my student responsibilities. \nSo why did I build this?
-
-I noticed there was a bottleneck with the current system of getting a past question. It took a student about a week to get access to a past question. So, I built and developed this system which allows University of Ghana students to download past questions under 30 seconds.
-
-It works by scraping the ug past questions site(https://balme.ug.edu.gh/past.exampapers/index.php) and returning files matching the users criteria.
-
-It can only download past questions on the ug site. So if a past question isn't found, it means the University haven't uploaded the past question.
-
-* This bot was built on January 4th, 2022.
-        """
-    )
-
-
-async def get_chat_id(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> Union[int, str]:
-    """
-    It returns the chat id of the message that triggered the bot
-
-    Args:
-      update (Update): Update
-      context (ContextTypes.DEFAULT_TYPE): ContextTypes.DEFAULT_TYPE
-
-    Returns:
-      The chat id of the user who sent the message.
-    """
-    # text message
-    if update.message is not None:
-        return update.message.chat.id
-    # callback message
-    elif update.callback_query is not None:
-        return update.callback_query.message.chat.id
-    return -1
-
-
-def validate_user_input(past_question_name: str) -> Union[str, None]:
-    """
-    It takes a string, checks if it's a valid course name and code, and returns the cleaned string if it is. A cleaned string is one which has a space in between the course name and course code. The website's search field won't work if it isn't spaced.
-
-    Args:
-      past_question_name (str): str
-
-    Returns:
-      a string or None.
-    """
-    if len(past_question_name.split()) == 1:
-        numbers_text_check = re.compile(
-            "([a-zA-Z]+)([0-9]+)"
-        )  # Check for numbers and text combined(no space)
-        result = numbers_text_check.match(past_question_name)
-        if result:
-            result = result.groups()
-        return None
-    else:
-        result = past_question_name.split()
-
-    course_name = result[0]  # Course name
-    course_code = result[-1]  # Course code
-
-    if course_name.isalpha() is False:
-        return None
-
-    if len(course_name) != 4:  # Legon course names have 4 characters.
-        return None
-
-    if course_code.isnumeric() is False:
-        return None
-
-    if len(course_code) != 3:  # Legon course codes have 3 characters.
-        return None
-
-    cleaned_user_input = course_name + " " + course_code
-    logger.info(
-        f"User input has been changed from {past_question_name} to {cleaned_user_input}"
-    )
-
-    return cleaned_user_input
-
-
-async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    It takes the user's choice and returns a past question assigned to their choice.
-
-    Args:
-      update (Update): Update
-      context (ContextTypes.DEFAULT_TYPE): ContextTypes.DEFAULT_TYPE
-
-    Returns:
-      The past question file.
-    """
-    choice = update.callback_query
-    await choice.answer()
-
-    past_question_links = function_class.get_links_of_past_question()
-    if len(past_question_links) == 0:
-        return await error_handler(
-            update, context, False, "Failed to extract past question links."
-        )
-
-    if choice.data == "-1":
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="You selected all.",
-        )
-        count = len(past_question_links)
-
-    else:
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text=f"You selected #{choice.data}",
-        )
-        count = 1
-
-    await context.bot.send_message(
-        chat_id=await get_chat_id(update, context), text="Downloading past question..."
-    )
-
+@dp.message(CommandStart())
+async def command_start_handler(message: Message) -> None:
+    """Handles messages with the `/start` command."""
     try:
-        gen_file_path = function_class.get_past_question(
-            str(await get_chat_id(update, context)), past_question_links, choice.data
-        )
-
-        if gen_file_path is None:
-            return await error_handler(
-                update, context, False, "Failed to download file and upload file."
+        registration_status = await check_or_register_user(message)
+        if registration_status == "already_registered":
+            await message.answer(
+                already_registered_message(message.from_user.full_name)
             )
-
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="Uploading past question...",
-        )
-        for _ in range(count):
-            await context.bot.sendDocument(
-                chat_id=await get_chat_id(update, context),
-                document=open(next(gen_file_path), "rb"),
+        elif registration_status == "new_registration":
+            await message.answer(
+                f"Hello, {hbold(welcome_message(message.from_user.full_name))}!"
             )
-    except Exception:
-        return await error_handler(
-            update, context, False, "Failed to download past question."
-        )
+        elif registration_status == "registration_failed":
+            await message.answer(failed_to_register_account_message())
+    except Exception as e:
+        print(f"Error in command_start_handler: {e}")
+        await message.answer(generic_error_message())
 
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """It takes a user's input, searches for the past question, displays the past questions, and then asks the user which past question they want to download.
+@dp.message()
+async def echo_handler(message: types.Message) -> None:
+    """Handler for all messages except commands."""
+    try:
+        user_input = message.text
+        await message.answer(f"You said {user_input}")
 
-    Args:
-      update (Update): Update
-      context (ContextTypes.DEFAULT_TYPE): ContextTypes.DEFAULT_TYPE
+        cleaned_input = validate_user_input(user_input)
+        if not cleaned_input:
+            await message.answer(
+                f"{hbold('Invalid past question name')}\n\n{invalid_past_question_message()}"
+            )
+            return
 
-    Returns:
-      displays a list of buttons which trigger a callback query.
-    """
-    if function_class.logged_in is False:
-        return await error_handler(update, context, False, "Failed to log in.")
-
-    options: List[List] = [[], []]
-
-    await update.message.reply_text(f"You said {update.message.text}.")
-    cleaned_user_input = validate_user_input(update.message.text)
-    if cleaned_user_input is None:
-        return await update.message.reply_text(
-            "Please enter a valid past question name (eg. dcit 103, math 122, ugrc 110)."
-        )
-    await update.message.reply_text(
-        f"Searching database for {cleaned_user_input} past questions..."
-    )
-    logger.info(
-        f"{update.message.from_user.username} is searching for {cleaned_user_input}."
-    )
-
-    if function_class.search_for_past_question(cleaned_user_input) == 1:
-        return await update.message.reply_text(
-            f"Error searching for {cleaned_user_input}. Try again."
-        )
-
-    past_question_list = function_class.get_list_of_past_question()
-    if (
-        len(past_question_list) == 0
-    ):  # Check if there are past questions available for users text.
-        return await update.message.reply_text(
-            f"Unfortunately, there are no {cleaned_user_input} past questions."
-        )
-
-    await update.message.reply_text(
-        f"We found {len(past_question_list)} {cleaned_user_input} past questions."
-    )
-    result = function_class.past_question_list_to_string(past_question_list)
-    await update.message.reply_text(result)  # display available past questions.
-
-    for past_question_index in range(len(past_question_list)):
-        if past_question_index < 5:
-            options[0].append(
-                InlineKeyboardButton(
-                    text=str(past_question_index + 1),
-                    callback_data=str(past_question_index + 1),
-                )
+        await message.answer(searching_past_question_message(cleaned_input))
+        response = await api_service.get_past_questions(cleaned_input)
+        if response["success"]:
+            if not response["data"]:
+                await message.answer(f"No {cleaned_input} past question found")
+                return
+            await present_past_questions(
+                message=message, past_questions=response["data"]
             )
         else:
-            options[1].append(
-                InlineKeyboardButton(
-                    text=str(past_question_index + 1),
-                    callback_data=str(past_question_index + 1),
-                ),
-            )
-    options[1].append(InlineKeyboardButton(text="All", callback_data=str(-1)))
+            await message.answer("Failed to get past question")
+    except TypeError as e:
+        await message.answer("Invalid type")
+        print(e)
+    except Exception as e:
+        print(e)
+        await message.answer(generic_error_message())
 
-    reply_markup = InlineKeyboardMarkup(options)
 
-    await context.bot.send_message(
-        chat_id=await get_chat_id(update, context),
-        text="Which one do you want to download?",
-        reply_markup=reply_markup,
+@dp.callback_query()
+async def handle_button(callback_query: types.CallbackQuery) -> None:
+    """Handle button click."""
+    index, past_question_id = callback_query.data.split(";")
+    await callback_query.answer()
+
+    if index == "all":
+        await callback_query.message.answer("You selected all")
+        await handle_all_questions(callback_query, past_question_id)
+    else:
+        await callback_query.message.answer(f"You selected #{index}")
+        await handle_single_question(callback_query, past_question_id)
+
+
+@dp.error()
+async def error_handler(event: ErrorEvent) -> None:
+    """Global error handler. Logs the error and sends it to the admin."""
+    await send_error_to_admin(event.exception, event.update.message)
+
+
+async def check_or_register_user(message: Message) -> str:
+    """Checks if a user is registered; if not, attempts to register them. Returns a string indicating the user's registration status ('already_registered', 'new_registration', or 'registration_failed')."""
+    response = await api_service.get_user_details(message.from_user.id)
+    if response["success"]:
+        return "already_registered"
+
+    user_details = {
+        "telegram_id": message.from_user.id,
+        "username": message.from_user.username or "",
+        "first_name": message.from_user.first_name,
+        "last_name": message.from_user.last_name or "",
+    }
+    response = await api_service.register_new_user(json=user_details)
+    if response["success"]:
+        return "new_registration"
+    else:
+        return "registration_failed"
+
+
+async def present_past_questions(message: types.Message, past_questions: list) -> None:
+    """Present past questions to user"""
+    await message.answer(
+        f"We found {len(past_questions)} {past_questions[0]['course_title']} past questions"
+    )
+
+    message_text = f"{past_questions[0]['course_title']} Questions:\n\n"
+    message_lines = [
+        format_past_question_message(index, question)
+        for index, question in enumerate(past_questions, start=1)
+    ]
+    message_text = "\n".join(message_lines)
+
+    reply_markup = create_button_layout(past_questions)
+
+    await message.answer(message_text)
+    await message.answer(
+        "Which one do you want to download?", reply_markup=reply_markup
     )
 
 
-async def error_handler(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-    *args,
-    issue: str = "None",
+async def handle_all_questions(
+    callback_query: types.CallbackQuery, past_question_id: str
 ) -> None:
-    """Log the error and send a telegram message to notify the developer."""
-    if update is not None:
-        logger.exception("Exception while handling an update.")
-        await context.bot.send_message(
-            chat_id=await get_chat_id(update, context),
-            text="Unexpected error occurred. Try again. If error persists contact @Daquiver.",
-        )
-        message = f"Traceback: {traceback.format_exc()}"
-        await context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
+    """Handle all questions"""
+    print(past_question_id)
+    response = await api_service.get_past_questions(past_question_id)
+    if response.get("success"):
+        await callback_query.message.answer("Sending all past questions...")
+        for past_question in response["data"]:
+            await send_past_question(callback_query, past_question)
+        await callback_query.message.answer("Done!")
+    else:
+        await callback_query.message.answer("Failed to get past questions.")
 
 
-def main():
-    """Start bot."""
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(telegram.ext.CommandHandler("start", start))
-    app.add_handler(telegram.ext.CommandHandler("help", help))
-    app.add_handler(telegram.ext.CommandHandler("about", about))
-    app.add_handler(telegram.ext.CommandHandler("donate", donate))
-    app.add_handler(CallbackQueryHandler(button))
-    app.add_handler(telegram.ext.CommandHandler("contact", contact))
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+async def handle_single_question(
+    callback_query: types.CallbackQuery, past_question_id: str
+) -> None:
+    """Handle single question"""
+    response = await api_service.get_past_question(past_question_id)
+    if response.get("success"):
+        await callback_query.message.answer("Sending past question...")
+        await send_past_question(callback_query, response["data"])
+    else:
+        await callback_query.message.answer("Failed to get past question.")
 
-    app.add_error_handler(error_handler)
 
-    # for polling
-    app.run_polling()
+async def send_past_question(
+    callback_query: types.CallbackQuery, past_question: dict
+) -> None:
+    """Send past question to user"""
+    document = URLInputFile(
+        past_question["past_question_url"],
+        filename=create_filename_for_past_question(past_question),
+    )
+    await callback_query.message.answer_document(document=document)
+    await api_service.create_download(callback_query.from_user.id, past_question["id"])
 
-    # app.run_webhook(
-    #     listen="0.0.0.0",
-    #     port=PORT,
-    #     url_path=TOKEN,
-    #     webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
-    # )
+
+async def send_error_to_admin(exception: Exception, message: Message) -> None:
+    """Sends an error message to the admin Telegram ID with details about the exception."""
+    error_message = format_error_message_to_admin(
+        exception, message.from_user, message.text
+    )
+    await my_bot.send_message(chat_id=ADMIN_TELEGRAM_ID, text=error_message)
+
+
+async def main() -> None:
+    """Main function"""
+    await dp.start_polling(my_bot)
 
 
 if __name__ == "__main__":
-    main()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        stream=sys.stdout,
+    )
+    asyncio.run(main())
