@@ -9,7 +9,7 @@ import dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
-from aiogram.types import Message, URLInputFile, ErrorEvent
+from aiogram.types import Message, URLInputFile, ErrorEvent, Update
 from aiogram.utils.markdown import hbold
 
 from api_service import BackendClient
@@ -25,6 +25,7 @@ from helpers import (
     format_past_question_message,
     create_filename_for_past_question,
     format_error_message_to_admin,
+    ask_payment_confirmation,
 )
 
 dotenv.load_dotenv()
@@ -91,18 +92,54 @@ async def echo_handler(message: types.Message) -> None:
         await message.answer(generic_error_message())
 
 
-@dp.callback_query()
-async def handle_button(callback_query: types.CallbackQuery) -> None:
+@dp.callback_query(lambda c: c.data and c.data.startswith("question"))
+async def handle_question_selection(callback_query: types.CallbackQuery) -> None:
     """Handle button click."""
-    index, past_question_id = callback_query.data.split(";")
+    _, index, past_question_id, length = callback_query.data.split(";")
+    await callback_query.answer()
+    payment_details = {
+        "telegram_id": callback_query.from_user.id,
+        "telegram_username": callback_query.from_user.username,
+        "amount": length,
+    }
+    await callback_query.message.answer("Creating payment link...")
+    response = await api_service.create_payment_link(json=payment_details)
+    if response["success"]:
+        await callback_query.message.answer(
+            f"Click on the link below to make payment.\n\n({response['data']['authorization_url']})"
+        )
+        reference = response["data"]["reference"]
+        reply_markup = ask_payment_confirmation(index, past_question_id, reference)
+        await callback_query.message.answer(
+            "Have you completed your payment?", reply_markup=reply_markup
+        )
+    else:
+        await callback_query.message.answer("Failed to create payment link")
+    return
+
+
+@dp.callback_query(lambda c: c.data and not c.data.startswith("question"))
+async def handle_payment_confirmation(callback_query: types.CallbackQuery) -> None:
+    """Handle the user's response to the payment confirmation."""
+    index, past_question_id, reference = callback_query.data.split(";")
     await callback_query.answer()
 
-    if index == "all":
-        await callback_query.message.answer("You selected all")
-        await handle_all_questions(callback_query, past_question_id)
+    response = await api_service.verify_payment(reference)
+    if response["success"] and response["data"]["data"]["status"] == "success":
+        await callback_query.message.answer("Payment successful")
+
+        if index == "all":
+            await callback_query.message.answer("You selected all")
+            await handle_all_questions(callback_query, past_question_id)
+        else:
+            await callback_query.message.answer(f"You selected #{index}")
+            await handle_single_question(callback_query, past_question_id)
+    elif response["success"] and response["data"]["data"]["status"] == "abandoned":
+        await callback_query.message.answer("Payment not started.")
+    elif response["success"] and response["data"]["data"]["status"] == "failed":
+        await callback_query.message.answer("Payment failed.")
     else:
-        await callback_query.message.answer(f"You selected #{index}")
-        await handle_single_question(callback_query, past_question_id)
+        await callback_query.message.answer("Failed to verify payment")
 
 
 @dp.error()
@@ -190,10 +227,22 @@ async def send_past_question(
     await api_service.create_download(callback_query.from_user.id, past_question["id"])
 
 
-async def send_error_to_admin(exception: Exception, message: Message) -> None:
+async def send_error_to_admin(exception: Exception, update: Update) -> None:
     """Sends an error message to the admin Telegram ID with details about the exception."""
+    user_id = None
+    username = "Unknown"
+    message_text = None
+    if update and update.message:
+        user_id = update.message.from_user.id
+        username = update.message.from_user.username
+        message_text = update.message.text
+    elif update and update.callback_query:
+        user_id = update.callback_query.from_user.id
+        username = update.callback_query.from_user.username
+        message_text = update.callback_query.data
+
     error_message = format_error_message_to_admin(
-        exception, message.from_user, message.text
+        exception, user_id, username, message_text
     )
     await my_bot.send_message(chat_id=ADMIN_TELEGRAM_ID, text=error_message)
 

@@ -12,6 +12,9 @@ PROJECT_NAME = "past_questions_bot"
 VERSION = "1.0"
 API_PREFIX = "/api"
 
+# Environment
+ENV = config("ENV", cast=str, default="development")
+
 # Postgres
 POSTGRES_USERNAME = config("POSTGRES_USERNAME", cast=str)
 POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=Secret)
@@ -33,12 +36,21 @@ REDIS_URL = config(
     default=f"redis://{REDIS_HOST}:{REDIS_PORT}",
 )
 
-# s3
+# S3
 S3_BUCKET_NAME = config("S3_BUCKET_NAME", cast=str)
 S3_ACCESS_KEY_ID = config("S3_ACCESS_KEY_ID", cast=str)
 S3_SECRET_ACCESS_KEY = config("S3_SECRET_ACCESS_KEY", cast=Secret)
 S3_REGION = config("S3_REGION", cast=str)
 
-# sentry
+# Sentry
 SENTRY_DSN = config("SENTRY_DSN", cast=str, default=None)
 SENTRY_ENVIRONMENT = config("SENTRY_ENVIRONMENT", cast=str, default=None)
+
+# Paystack
+PAYSTACK_BASE_URL = config("PAYSTACK_BASE_URL", cast=str)
+if ENV == "development":
+    PAYSTACK_PUBLIC_KEY = config("PAYSTACK_TEST_PUBLIC_KEY")
+    PAYSTACK_SECRET_KEY = config("PAYSTACK_TEST_SECRET_KEY")
+else:
+    PAYSTACK_PUBLIC_KEY = config("PAYSTACK_LIVE_PUBLIC_KEY")
+    PAYSTACK_SECRET_KEY = config("PAYSTACK_LIVE_SECRET_KEY")
