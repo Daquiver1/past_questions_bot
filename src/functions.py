@@ -27,14 +27,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from utils.path_separator import get_file_separator
 
-# Logging setup
-logging.config.fileConfig(
-    fname="log.ini",
-    disable_existing_loggers=False,
-)
-logger = logging.getLogger(__name__)
-file_logger = logging.getLogger("fileLogger")
-
 
 # Constants
 dotenv.load_dotenv()
@@ -85,15 +77,14 @@ class Functions:
             password_field.send_keys(PASSWORD)
             password_field.send_keys(Keys.ENTER)
 
-            logger.info("Logged in successfully, waiting for user input...")
 
             self.driver.find_element(By.ID, "memberLogout")
             self.logged_in = True
 
         except (NoSuchElementException, NoSuchAttributeException):
-            logger.critical("Failed to log in.", exc_info=True)
+            print("Failed to log in.", exc_info=True)
         except Exception:
-            logger.exception("Error occurred while logging in.")
+            print("Error occurred while logging in.")
 
     def get_past_question_path(self, path: str) -> Union[str, None]:
         """It takes a path as an argument, checks if there are any pdf files in the path, and if there are, it returns the most recent file in the path, if they aren't it returns None.
@@ -104,22 +95,22 @@ class Functions:
         Returns:
           The path of the latest file in the directory.
         """
-        logger.info("Checking path for latest file.")
+        print("Checking path for latest file.")
         path_directory = os.listdir(self.path)
         user_file_path = [
             os.path.join(path, basename)
             for basename in path_directory
             if basename.endswith(".pdf")
         ]
-        logger.info(path_directory)
+        print(path_directory)
         if len(user_file_path) == 0:
             return None
 
         user_file = max(user_file_path, key=os.path.getctime)
-        file_logger.info(
+        file_print(
             f"Downloaded file from path {user_file} has been uploaded to user."
         )
-        file_logger.info("")
+        file_print("")
 
         return user_file
 
@@ -132,25 +123,25 @@ class Functions:
         Returns:
           The return value is the status code of the function.
         """
-        logger.info(
+        print(
             f"Searching for {cleaned_pasco_name}: The current_url is {self.driver.current_url}"
         )
-        file_logger.info(f"User has requested for {cleaned_pasco_name} past question.")
+        file_print(f"User has requested for {cleaned_pasco_name} past question.")
         try:
             search_field = self.driver.find_element(By.NAME, "keywords")
             search_button = self.driver.find_element(By.NAME, "search")
             # Double Quotes give accurate queries
             search_field.send_keys(f'"{cleaned_pasco_name}"')
             search_button.click()
-            logger.info(
+            print(
                 f"After searching for {cleaned_pasco_name}: The current_url is {self.driver.current_url}"
             )
             return 0
         except (NoSuchElementException, NoSuchAttributeException):
-            logger.exception("Search field and search button not found.")
+            print("Search field and search button not found.")
             return 1
         except Exception:
-            logger.exception(f"Failed to search for {cleaned_pasco_name}")
+            print(f"Failed to search for {cleaned_pasco_name}")
             return 1
 
     def get_list_of_past_question(self) -> List[str]:
@@ -161,7 +152,7 @@ class Functions:
           A list of strings.
         """
         filtered_past_question_list: List[str] = []
-        logger.info(f"Retrieving list of past question from {self.driver.current_url}")
+        print(f"Retrieving list of past question from {self.driver.current_url}")
 
         try:
             past_question_page = requests.get(self.driver.current_url)
@@ -169,12 +160,12 @@ class Functions:
             past_question_list = past_question_content.find_all(
                 "div", class_="item biblioRecord"
             )
-            logger.info("Got list of past questions successfully.")
+            print("Got list of past questions successfully.")
         except (NoSuchElementException, NoSuchAttributeException):
-            logger.exception("Past question content field not found.")
+            print("Past question content field not found.")
             return filtered_past_question_list
         except Exception:
-            logger.exception("Failed to retrieve past questions.")
+            print("Failed to retrieve past questions.")
             return filtered_past_question_list
         else:
             if past_question_list:
@@ -193,7 +184,7 @@ class Functions:
                         + "\n"
                         + past_question_semester.get_text()
                     )
-            logger.info(
+            print(
                 "Appended key aspects of past questions to filtered list successfully."
             )
             return filtered_past_question_list
@@ -226,7 +217,7 @@ class Functions:
           A dictionary of past question links.
         """
         past_question_links: Dict[int, str] = {}
-        logger.info(f"Retrieving links of past question from {self.driver.current_url}")
+        print(f"Retrieving links of past question from {self.driver.current_url}")
 
         try:
             past_question_page = requests.get(self.driver.current_url)
@@ -234,12 +225,12 @@ class Functions:
             past_question_list = past_question_content.find_all(
                 "a", class_="titleField"
             )
-            logger.info("Retrieved past question links successfully.")
+            print("Retrieved past question links successfully.")
         except (NoSuchElementException, NoSuchAttributeException):
-            logger.exception("Past question link field not found.")
+            print("Past question link field not found.")
             return past_question_links
         except Exception:
-            logger.exception(
+            print(
                 f"Failed to extract links of past questions. {traceback.format_exc()}"
             )
             return past_question_links
@@ -249,7 +240,7 @@ class Functions:
                     "https://balme.ug.edu.gh"
                     + past_question_list[past_question_index - 1]["href"]
                 )
-            logger.info("Extracted past question links successfully.")
+            print("Extracted past question links successfully.")
 
             return past_question_links
 
@@ -270,7 +261,7 @@ class Functions:
             print("nii")
             for past_question_link in past_question_links.values():
                 self.driver.get(past_question_link)
-                logger.info(f"Moved to {past_question_link} successfully.")
+                print(f"Moved to {past_question_link} successfully.")
                 self.download_past_question()
                 yield self.get_past_question_path(self.path)
         else:
@@ -281,7 +272,7 @@ class Functions:
                     self.driver.get(
                         past_question_link
                     )  # Move to the url of users choice.
-                    logger.info(f"Moved to {past_question_link} successfully.")
+                    print(f"Moved to {past_question_link} successfully.")
 
                     self.download_past_question()
                     yield self.get_past_question_path(self.path)
@@ -290,7 +281,7 @@ class Functions:
 
     def download_past_question(self) -> bool:
         """Clicks on a button that opens a frame, then clicks on a button in the frame to download a file."""
-        logger.info(f"Downloading past question from {self.driver.current_url}")
+        print(f"Downloading past question from {self.driver.current_url}")
         try:
             file = self.driver.find_element(By.CLASS_NAME, "openPopUp")
             self.driver.execute_script(
@@ -304,20 +295,20 @@ class Functions:
 
             # wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
 
-            logger.info("Downloading file...")
-            file_logger.info(f"{self.driver.current_url} has been downloaded.")
+            print("Downloading file...")
+            file_print(f"{self.driver.current_url} has been downloaded.")
             self.driver.back()
             time.sleep(2)
             return True
         except (NoSuchElementException, NoSuchAttributeException):
-            logger.exception("Failed to find download button.")
+            print("Failed to find download button.")
             return False
         except TimeoutException:
-            logger.exception("Timeout waiting for frame to load.")
+            print("Timeout waiting for frame to load.")
             return False
 
         except Exception:
-            logger.exception("Error occurred while downloading file.")
+            print("Error occurred while downloading file.")
             return False
 
 
