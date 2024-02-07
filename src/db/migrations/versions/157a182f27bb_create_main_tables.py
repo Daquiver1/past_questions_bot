@@ -5,11 +5,12 @@ Revises:
 Create Date: 2024-01-26 06:11:04.247982
 
 """
-from typing import Optional, Sequence, Tuple, Union
-from sqlalchemy import func
-from alembic import op
-import sqlalchemy as sa
 
+from typing import Optional, Sequence, Tuple, Union
+
+import sqlalchemy as sa
+from alembic import op
+from sqlalchemy import func
 
 # revision identifiers, used by Alembic.
 revision: str = "157a182f27bb"
@@ -22,10 +23,7 @@ def timestamps(indexed: bool = False) -> Tuple[sa.Column, sa.Column]:
     """Create timestamp in DB."""
     return (
         sa.Column(
-            "created_at",
-            sa.DateTime(),
-            nullable=False,
-            server_default=func.now()
+            "created_at", sa.DateTime(), nullable=False, server_default=func.now()
         ),
         sa.Column(
             "updated_at",
@@ -113,8 +111,10 @@ def create_help_tickets_table() -> None:
             nullable=False,
         ),
         *timestamps(),
-        sa.CheckConstraint("status IN ('open', 'in_progress', 'resolved', 'closed')", name='status_check'),
-
+        sa.CheckConstraint(
+            "status IN ('open', 'in_progress', 'resolved', 'closed')",
+            name="status_check",
+        ),
     )
 
 

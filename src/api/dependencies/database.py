@@ -5,11 +5,11 @@ from typing import Callable, Type, Union
 
 # Third party imports
 from databases import Database
-from redis.asyncio import Redis
 from fastapi import Depends
+from redis.asyncio import Redis
+from starlette.requests import Request
 
 from src.db.repositories.base import BaseRepository
-from starlette.requests import Request
 
 
 def get_database(request: Request) -> Database:

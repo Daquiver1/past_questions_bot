@@ -5,8 +5,8 @@ from typing import Optional
 from databases import Database
 from redis.asyncio import Redis
 
-from src.models.help_ticket_status_enum import HelpTicketStatus
 from src.db.repositories.base import BaseRepository
+from src.models.help_ticket_status_enum import HelpTicketStatus
 from src.models.help_tickets import HelpTicketsCreate, HelpTicketsInDB
 
 ADD_HELP_TICKET_QUERY = """

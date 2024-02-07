@@ -4,14 +4,10 @@ import boto3
 from botocore.exceptions import ClientError
 from fastapi import UploadFile
 
+from src.core.config import (S3_ACCESS_KEY_ID, S3_BUCKET_NAME, S3_REGION,
+                             S3_SECRET_ACCESS_KEY)
 from src.models.past_questions import PastQuestionCreate
 from src.utils.pasco_file_name import create_object_name
-from src.core.config import (
-    S3_BUCKET_NAME,
-    S3_REGION,
-    S3_ACCESS_KEY_ID,
-    S3_SECRET_ACCESS_KEY,
-)
 
 s3_client = boto3.client(
     "s3",

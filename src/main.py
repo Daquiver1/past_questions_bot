@@ -1,32 +1,27 @@
 """Main file"""
+
 import asyncio
 import logging
-import sys
 import os
-import sentry_sdk
-import dotenv
+import sys
 
+import dotenv
+import sentry_sdk
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
-from aiogram.types import Message, URLInputFile, ErrorEvent, Update
+from aiogram.types import ErrorEvent, Message, Update, URLInputFile
 from aiogram.utils.markdown import hbold
 
 from api_service import BackendClient
-from helpers import (
-    welcome_message,
-    validate_user_input,
-    invalid_past_question_message,
-    searching_past_question_message,
-    failed_to_register_account_message,
-    generic_error_message,
-    create_button_layout,
-    already_registered_message,
-    format_past_question_message,
-    create_filename_for_past_question,
-    format_error_message_to_admin,
-    ask_payment_confirmation,
-)
+from helpers import (already_registered_message, ask_payment_confirmation,
+                     create_button_layout, create_filename_for_past_question,
+                     failed_to_register_account_message,
+                     format_error_message_to_admin,
+                     format_past_question_message, generic_error_message,
+                     invalid_past_question_message,
+                     searching_past_question_message, validate_user_input,
+                     welcome_message)
 
 dotenv.load_dotenv()
 TOKEN = os.environ["TOKEN"]

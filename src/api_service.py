@@ -1,4 +1,5 @@
 """Api module for the project."""
+
 import requests
 
 

@@ -3,11 +3,12 @@
 # Third party imports
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from src.api.routes.user import router as user_router
-from src.api.routes.past_question import router as past_question_router
+
 from src.api.routes.download import router as download_router
 from src.api.routes.help_ticket import router as help_ticket_router
+from src.api.routes.past_question import router as past_question_router
 from src.api.routes.paystack import router as paystack_router
+from src.api.routes.user import router as user_router
 from src.core import config, tasks
 
 

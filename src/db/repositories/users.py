@@ -9,7 +9,6 @@ from redis.asyncio import Redis
 from src.db.repositories.base import BaseRepository
 from src.models.users import UserCreate, UserInDB
 
-
 ADD_USER_QUERY = """
     INSERT INTO users (username, first_name, last_name, telegram_id)
     VALUES (:username, :first_name, :last_name, :telegram_id)
@@ -40,7 +39,6 @@ class UserRepository(BaseRepository):
     def __init__(self, db: Database, r_db: Redis) -> None:
         """Initialize db"""
         super().__init__(db, r_db)
-
 
     async def add_new_user(self, *, new_user: UserCreate) -> UserInDB:
         """Create new users data."""

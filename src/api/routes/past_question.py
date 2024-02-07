@@ -1,18 +1,19 @@
 """Route for accessing past questions."""
 
 from typing import Union
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+
+from fastapi import (APIRouter, Depends, File, Form, HTTPException, UploadFile,
+                     status)
 from redis.asyncio import Redis
-from src.api.dependencies.database import get_repository, get_redis
+
+from src.api.dependencies.database import get_redis, get_repository
 from src.db.repositories.past_questions import PastQuestionRepository
-from src.models.past_questions import PastQuestionCreate, PastQuestionPublic
 from src.models.past_question_filter_enum import PastQuestionFilter
+from src.models.past_questions import PastQuestionCreate, PastQuestionPublic
 from src.services.s3 import upload_file_to_bucket
-from src.utils.redis_serializers import (
-    store_data,
-    get_data,
-    invalidate_related_cache_entries,
-)
+from src.utils.redis_serializers import (get_data,
+                                         invalidate_related_cache_entries,
+                                         store_data)
 
 router = APIRouter()
 

@@ -1,4 +1,5 @@
 """Functions file."""
+
 import logging
 import logging.config
 import os
@@ -9,15 +10,12 @@ from typing import Dict, Generator, List, Union
 
 import dotenv
 import requests
-
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (
-    NoSuchAttributeException,
-    NoSuchElementException,
-    TimeoutException,
-)
+from selenium.common.exceptions import (NoSuchAttributeException,
+                                        NoSuchElementException,
+                                        TimeoutException)
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -27,7 +25,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from utils.path_separator import get_file_separator
 
-
 # Constants
 dotenv.load_dotenv()
 URL = os.getenv("URL")
@@ -35,10 +32,10 @@ USERNAME = os.getenv("USER_NAME")
 PASSWORD = os.getenv("PASSWORD")
 
 
-class Functions:
+class Scraper:
     """Functions class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes a headless chrome browser and logs in to a website."""
 
         self.logged_in = False
@@ -77,7 +74,6 @@ class Functions:
             password_field.send_keys(PASSWORD)
             password_field.send_keys(Keys.ENTER)
 
-
             self.driver.find_element(By.ID, "memberLogout")
             self.logged_in = True
 
@@ -107,9 +103,7 @@ class Functions:
             return None
 
         user_file = max(user_file_path, key=os.path.getctime)
-        file_print(
-            f"Downloaded file from path {user_file} has been uploaded to user."
-        )
+        file_print(f"Downloaded file from path {user_file} has been uploaded to user.")
         file_print("")
 
         return user_file

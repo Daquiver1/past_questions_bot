@@ -6,8 +6,8 @@ from databases import Database
 from redis.asyncio import Redis
 
 from src.db.repositories.base import BaseRepository
-from src.models.past_questions import PastQuestionCreate, PastQuestionInDB
 from src.models.past_question_filter_enum import PastQuestionFilter
+from src.models.past_questions import PastQuestionCreate, PastQuestionInDB
 
 ADD_PAST_QUESTION_QUERY = """
     INSERT INTO past_questions (course_code, course_name, course_title, lecturer_name, past_question_url, semester, year)

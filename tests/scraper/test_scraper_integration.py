@@ -1,9 +1,9 @@
 """Integration Tests."""
 
 import pytest
-from helpers import check_for_pdf, count_pdfs_in_path
 
 from functions import Functions
+from helpers import check_for_pdf, count_pdfs_in_path
 
 search_term = "Math 121"
 

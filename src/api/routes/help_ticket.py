@@ -1,11 +1,12 @@
 """Route for Help Tickets"""
 
 from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from src.models.help_ticket_status_enum import HelpTicketStatus
 
 from src.api.dependencies.database import get_repository
 from src.db.repositories.help_tickets import HelpTicketRepository
+from src.models.help_ticket_status_enum import HelpTicketStatus
 from src.models.help_tickets import HelpTicketsCreate, HelpTicketsPublic
 
 router = APIRouter()
@@ -23,9 +24,7 @@ async def create_help_ticket(
     ),
 ) -> HelpTicketsPublic:
     """Create a new help ticket."""
-    help_ticket = await help_ticket_repo.add_new_help_ticket(
-        help_ticket=help_ticket
-    )
+    help_ticket = await help_ticket_repo.add_new_help_ticket(help_ticket=help_ticket)
     if not help_ticket:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Help ticket not created"

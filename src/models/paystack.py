@@ -1,7 +1,9 @@
 """Model for paystack."""
+
 from typing import List
 
 from pydantic import validator
+
 from src.models.base import CoreModel, IDModelMixin
 
 

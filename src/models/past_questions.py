@@ -1,7 +1,10 @@
 """Past Question Model"""
-from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin
-from pydantic import validator
+
 from typing import Optional
+
+from pydantic import validator
+
+from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin
 
 
 class PastQuestionBase(CoreModel):

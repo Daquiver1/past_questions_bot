@@ -1,8 +1,10 @@
 """helpers.py"""
+
 import re
-from typing import Dict, Optional, List
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime
+from typing import Dict, List, Optional
+
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 def welcome_message(username: str) -> str:
@@ -99,7 +101,8 @@ def create_button_layout(
             current_row = []
 
     all_button = InlineKeyboardButton(
-        text="All", callback_data=f"question;all;{past_questions[0]['course_title']};{len(past_questions)}"
+        text="All",
+        callback_data=f"question;all;{past_questions[0]['course_title']};{len(past_questions)}",
     )
     if not button_rows or len(button_rows[-1]) == row_limit:
         button_rows.append([all_button])

@@ -1,10 +1,9 @@
 """Database Connect Tasks."""
 
-from redis.asyncio import Redis
-
 # Third party imports
 from databases import Database
 from fastapi import FastAPI
+from redis.asyncio import Redis
 
 from src.core.config import DATABASE_URL, REDIS_URL
 

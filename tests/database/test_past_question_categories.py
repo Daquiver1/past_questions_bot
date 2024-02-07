@@ -3,7 +3,8 @@ from typing import Coroutine
 import pytest
 from databases import Database
 
-from db.repositories.past_question_categories import PastQuestionCategoriesRepository
+from db.repositories.past_question_categories import \
+    PastQuestionCategoriesRepository
 
 pytestmark = pytest.mark.asyncio
 

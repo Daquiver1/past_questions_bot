@@ -1,4 +1,5 @@
 """Past question filter type."""
+
 from enum import Enum
 
 

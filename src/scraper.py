@@ -1,8 +1,15 @@
-"""Scraper file."""
+"""Scraper."""
 
+import logging
+import logging.config
 import os
+import re
+import time
+import traceback
+from typing import Dict, Generator, List, Union
 
 import dotenv
+import requests
 # Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -16,7 +23,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
-from src.utils.path_separator import get_file_separator
+from utils.path_separator import get_file_separator
 
 # Constants
 dotenv.load_dotenv()
@@ -26,7 +33,10 @@ PASSWORD = os.getenv("PASSWORD")
 
 
 class Scraper:
-    """Scraper class."""
+    """Functions class."""
+
+
+
 
     def __init__(self) -> None:
         """Initializes a headless chrome browser and logs in to a website."""
@@ -34,6 +44,7 @@ class Scraper:
         self.path = (
             os.getcwd() + get_file_separator() + "src" + get_file_separator() + "tmp"
         )
+        self.CURRENT_UUID = "CURRENT_UUID"
         s = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         # Open externally not with chrome's pdf viewer
@@ -42,11 +53,15 @@ class Scraper:
             "download.default_directory": self.path,
             "download.extensions_to_open": "",
         }
+        # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         options.add_experimental_option("prefs", self.PROFILE)
         options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--disable-gpu")
+
+        # self.driver = webdriver.Chrome(
+        #     executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
+        # )
         self.driver = webdriver.Chrome(service=s, options=options)
         self.driver.implicitly_wait(6)
 
@@ -65,10 +80,6 @@ class Scraper:
             self.logged_in = True
 
         except (NoSuchElementException, NoSuchAttributeException):
-            self.driver.quit()
+            print("Failed to log in.", exc_info=True)
         except Exception:
-            self.driver.quit()
-
-
-if __name__ == "__main__":
-    Scraper()
+            print("Error occurred while logging in.")
