@@ -10,4 +10,6 @@ stats_file.log
 __init__.py
 past_questions_test
 env
-litestream.yml
+past_questions_bot.db-shm
+past_questions_bot.db-wal
+.past_questions_bot.db-litestream/
