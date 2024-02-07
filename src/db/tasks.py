@@ -10,15 +10,15 @@ from src.core.config import DATABASE_URL, REDIS_URL
 
 
 async def connect_to_db(app: FastAPI) -> None:
-    """Connect to postgres db."""
-    database = Database(str(DATABASE_URL))
+    """Connect to the SQLite database."""
+    database = Database(DATABASE_URL)
     try:
-        print("Connecting to postgres database...")
+        print("Connecting to SQLite database...")
         await database.connect()
         app.state._db = database
-        print(f"Connected to postgres database {DATABASE_URL}")
+        print(f"Connected to SQLite database at {DATABASE_URL}")
     except Exception as e:
-        print("Error connecting to postgres database", e)
+        print("Error connecting to SQLite database", e)
 
 
 async def close_db_connection(app: FastAPI) -> None:

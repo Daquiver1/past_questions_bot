@@ -15,17 +15,13 @@ API_PREFIX = "/api"
 # Environment
 ENV = config("ENV", cast=str, default="development")
 
-# Postgres
-POSTGRES_USERNAME = config("POSTGRES_USERNAME", cast=str)
-POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=Secret)
-POSTGRES_SERVER = config("POSTGRES_SERVER", cast=str)
-POSTGRES_DB = config("POSTGRES_DB", cast=str)
-POSTGRES_PORT = config("POSTGRES_PORT", cast=str)
+# Database[Sqlite3]
 DATABASE_URL = config(
     "DATABASE_URL",
     cast=DatabaseURL,
-    default=f"postgresql://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}",
+    default="sqlite:///./past_questions_bot.db",
 )
+
 
 # Redis
 REDIS_HOST = config("REDIS_HOST", cast=str)

@@ -41,6 +41,7 @@ class UserRepository(BaseRepository):
         """Initialize db"""
         super().__init__(db, r_db)
 
+
     async def add_new_user(self, *, new_user: UserCreate) -> UserInDB:
         """Create new users data."""
         if await self.get_user_details(telegram_id=new_user.telegram_id):
