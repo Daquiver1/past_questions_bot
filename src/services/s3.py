@@ -29,7 +29,7 @@ def upload_file_to_bucket(
         object_name = create_object_name(past_question_file)
         s3_client.upload_fileobj(
             past_question_file.file,
-            S3_BUCKET_NAME,
+            S3_BUCKET_NAME + "/past_questions",
             object_name,
             ExtraArgs={
                 "Metadata": {**past_question.dict(exclude={"past_question_url"})},
@@ -49,7 +49,7 @@ def upload_file_to_bucket(
 
 def generate_download_url(*, key: str) -> str:
     """Generate a download url for a file in s3 bucket."""
-    return f"https://{S3_BUCKET_NAME}.s3.{S3_REGION}.amazonaws.com/{key}"
+    return f"https://{S3_BUCKET_NAME}/past_questions.s3.{S3_REGION}.amazonaws.com/{key}"
 
 
 def delete_file(*, file_path: str) -> str:
