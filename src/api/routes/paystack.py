@@ -8,8 +8,12 @@ from fastapi import APIRouter, Request, Response, status
 from fastapi.responses import JSONResponse
 
 from src.core.config import PAYSTACK_BASE_URL, PAYSTACK_SECRET_KEY
-from src.models.paystack import (CreatePayment, CreatePaymentResponse,
-                                 SuccessfulTransaction, VerifyTransaction)
+from src.models.paystack import (
+    CreatePayment,
+    CreatePaymentResponse,
+    SuccessfulTransaction,
+    VerifyTransaction,
+)
 
 router = APIRouter()
 

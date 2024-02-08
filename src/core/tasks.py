@@ -7,8 +7,12 @@ from typing import Callable
 from fastapi import FastAPI
 
 from src.core.config import SENTRY_DSN, SENTRY_ENVIRONMENT
-from src.db.tasks import (close_db_connection, close_redis_connection,
-                          connect_to_db, connect_to_redis)
+from src.db.tasks import (
+    close_db_connection,
+    close_redis_connection,
+    connect_to_db,
+    connect_to_redis,
+)
 from src.services.sentry import SentryInitializer
 
 

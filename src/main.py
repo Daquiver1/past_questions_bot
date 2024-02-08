@@ -14,14 +14,20 @@ from aiogram.types import ErrorEvent, Message, Update, URLInputFile
 from aiogram.utils.markdown import hbold
 
 from api_service import BackendClient
-from helpers import (already_registered_message, ask_payment_confirmation,
-                     create_button_layout, create_filename_for_past_question,
-                     failed_to_register_account_message,
-                     format_error_message_to_admin,
-                     format_past_question_message, generic_error_message,
-                     invalid_past_question_message,
-                     searching_past_question_message, validate_user_input,
-                     welcome_message)
+from helpers import (
+    already_registered_message,
+    ask_payment_confirmation,
+    create_button_layout,
+    create_filename_for_past_question,
+    failed_to_register_account_message,
+    format_error_message_to_admin,
+    format_past_question_message,
+    generic_error_message,
+    invalid_past_question_message,
+    searching_past_question_message,
+    validate_user_input,
+    welcome_message,
+)
 
 dotenv.load_dotenv()
 TOKEN = os.environ["TOKEN"]

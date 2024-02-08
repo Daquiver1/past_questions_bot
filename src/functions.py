@@ -1,31 +1,18 @@
-"""Functions file."""
+"""A module to scrape past questions from the balme library portal."""
 
-import logging
-import logging.config
 import os
-import re
 import time
-import traceback
-from typing import Dict, Generator, List, Union
 
 import dotenv
-import requests
-# Polling Selenium setup
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import (NoSuchAttributeException,
-                                        NoSuchElementException,
-                                        TimeoutException)
-from selenium.webdriver.chrome.service import Service
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
-from utils.path_separator import get_file_separator
-
-# Constants
 dotenv.load_dotenv()
 URL = os.getenv("URL")
 USERNAME = os.getenv("USER_NAME")
@@ -33,284 +20,226 @@ PASSWORD = os.getenv("PASSWORD")
 
 
 class Scraper:
-    """Functions class."""
+    """A class to scrape past questions from the balme library portal."""
 
-    def __init__(self) -> None:
-        """Initializes a headless chrome browser and logs in to a website."""
+    def __init__(self, year: str) -> None:
+        """Initialize the scraper."""
+        self.year = year
+        self.driver = self._setup_driver()
+        self._login()
 
-        self.logged_in = False
-        self.path = (
-            os.getcwd() + get_file_separator() + "src" + get_file_separator() + "tmp"
-        )
-        self.CURRENT_UUID = "CURRENT_UUID"
-        s = Service(ChromeDriverManager().install())
+    def _setup_driver(self) -> webdriver.Chrome:
+        """Setup the chrome driver."""
         options = webdriver.ChromeOptions()
-        # Open externally not with chrome's pdf viewer
-        self.PROFILE = {
-            "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
-            "download.default_directory": self.path,
-            "download.extensions_to_open": "",
-        }
-        # options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-        options.add_experimental_option("prefs", self.PROFILE)
-        options.add_argument("--headless=new")
+        options.add_experimental_option(
+            "prefs",
+            {
+                "plugins.plugins_list": [
+                    {"enabled": False, "name": "Chrome PDF Viewer"}
+                ],
+                "download.default_directory": os.getcwd()
+                + os.sep
+                + "src"
+                + os.sep
+                + "tmp",
+                "download.extensions_to_open": "",
+            },
+        )
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        s = webdriver.ChromeService(ChromeDriverManager().install())
+        return webdriver.Chrome(service=s, options=options)
 
-        # self.driver = webdriver.Chrome(
-        #     executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options
-        # )
-        self.driver = webdriver.Chrome(service=s, options=options)
-        self.driver.implicitly_wait(6)
-
-        # Log in
+    def _login(self) -> None:
+        """Login to the balme library portal."""
+        self.driver.get(URL)
         try:
-            self.driver.get(URL)
-
-            username_field = self.driver.find_element(By.NAME, "memberID")
+            self.driver.find_element(By.NAME, "memberID").send_keys(USERNAME)
             password_field = self.driver.find_element(By.NAME, "memberPassWord")
-
-            username_field.send_keys(USERNAME)
             password_field.send_keys(PASSWORD)
             password_field.send_keys(Keys.ENTER)
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.ID, "memberLogout"))
+            )
+            print("Successfully logged in.")
+            return True
+        except Exception as e:
+            print(f"Error during login: {e}")
+            return False
 
-            self.driver.find_element(By.ID, "memberLogout")
-            self.logged_in = True
+    def get_new_downloads(
+        self, directory: str, start_time: int, timeout: int = 30
+    ) -> list:
+        """Wait for new files to appear in the directory that were downloaded after `start_time`."""
+        sleep_interval = 1
+        elapsed_time = 0
+        new_files = []
 
-        except (NoSuchElementException, NoSuchAttributeException):
-            print("Failed to log in.", exc_info=True)
-        except Exception:
-            print("Error occurred while logging in.")
+        while elapsed_time < timeout:
+            for file in os.listdir(directory):
+                file_path = os.path.join(directory, file)
+                if os.path.getctime(
+                    file_path
+                ) > start_time.timestamp() and file.endswith(".pdf"):
+                    new_files.append(file_path)
+            if new_files:  # If you've found new files, return them
+                return new_files
+            time.sleep(sleep_interval)
+            elapsed_time += sleep_interval
 
-    def get_past_question_path(self, path: str) -> Union[str, None]:
-        """It takes a path as an argument, checks if there are any pdf files in the path, and if there are, it returns the most recent file in the path, if they aren't it returns None.
+        raise TimeoutError(
+            f"No new files appeared in {directory} after {timeout} seconds."
+        )
 
-        Args:
-          path (str): The path to the directory where the file is located.
-
-        Returns:
-          The path of the latest file in the directory.
-        """
-        print("Checking path for latest file.")
-        path_directory = os.listdir(self.path)
-        user_file_path = [
-            os.path.join(path, basename)
-            for basename in path_directory
-            if basename.endswith(".pdf")
-        ]
-        print(path_directory)
-        if len(user_file_path) == 0:
+    def get_most_recent_file(self, directory: str, extension: str) -> str:
+        """Get the path of the most recently downloaded file with a specific extension."""
+        try:
+            files = [
+                os.path.join(directory, f)
+                for f in os.listdir(directory)
+                if f.endswith(extension)
+            ]
+            latest_file = max(files, key=os.path.getmtime)
+            return latest_file
+        except ValueError:  # If the directory is empty
             return None
 
-        user_file = max(user_file_path, key=os.path.getctime)
-        file_print(f"Downloaded file from path {user_file} has been uploaded to user.")
-        file_print("")
-
-        return user_file
-
-    def search_for_past_question(self, cleaned_pasco_name: str) -> int:
-        """It searches for a past question on the website, and returns 0 if it was successful, and 1 if it wasn't.
-
-        Args:
-          cleaned_pasco_name (str): The name of the file you're searching for.
-
-        Returns:
-          The return value is the status code of the function.
-        """
-        print(
-            f"Searching for {cleaned_pasco_name}: The current_url is {self.driver.current_url}"
+    def sanitize_filename(self, filename: str) -> str:
+        """Remove or replace characters that are not allowed in Windows filenames."""
+        return (
+            filename.replace(":", "_")
+            .replace("\\", "_")
+            .replace("/", "")
+            .replace("*", "_")
+            .replace("?", "_")
+            .replace('"', "_")
+            .replace("<", "_")
+            .replace(">", "_")
+            .replace("|", "_")
+            .replace(" ", "")
         )
-        file_print(f"User has requested for {cleaned_pasco_name} past question.")
+
+    def process_downloaded_file(self, file_path: str, details: dict) -> None:
+        """Add specific metadata to the downloaded file."""
+        print(details)
+        sanitized_title = self.sanitize_filename(details["title"][:8])
+        sanitized_year = self.sanitize_filename(
+            details["year"]
+        )  # Extracts the year number
+        sanitized_semester = self.sanitize_filename(
+            details["semester"]
+        )  # Extracts the semester
+        new_filename = f"{sanitized_title}_{sanitized_year}_{sanitized_semester}.pdf"
+        new_file_path = os.path.join(os.path.dirname(file_path), new_filename)
+        os.rename(file_path, new_file_path)
+
+    def search_past_questions(self) -> None:
+        """Search for past questions."""
         try:
-            search_field = self.driver.find_element(By.NAME, "keywords")
-            search_button = self.driver.find_element(By.NAME, "search")
-            # Double Quotes give accurate queries
-            search_field.send_keys(f'"{cleaned_pasco_name}"')
-            search_button.click()
-            print(
-                f"After searching for {cleaned_pasco_name}: The current_url is {self.driver.current_url}"
+            self.driver.find_element(By.CLASS_NAME, "s-search-advances").click()
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.ID, "advance-search"))
             )
-            return 0
-        except (NoSuchElementException, NoSuchAttributeException):
-            print("Search field and search button not found.")
-            return 1
-        except Exception:
-            print(f"Failed to search for {cleaned_pasco_name}")
-            return 1
+            advanced_section = self.driver.find_element(By.ID, "advance-search")
+            advanced_section.find_element(By.NAME, "isbn").send_keys(self.year)
+            advanced_section.find_element(By.NAME, "search").click()
+            print(f"Searched for past questions for the year {self.year}.")
+        except Exception as e:
+            print(f"Error during search: {e}")
 
-    def get_list_of_past_question(self) -> List[str]:
-        """
-        It retrieves the names, year and semester of past questions displayed then adds them to a list.
-
-        Returns:
-          A list of strings.
-        """
-        filtered_past_question_list: List[str] = []
-        print(f"Retrieving list of past question from {self.driver.current_url}")
-
+    def get_past_questions_details_and_links(self) -> dict:
+        """Get the details and links of the past questions."""
+        past_questions_details = {}
         try:
-            past_question_page = requests.get(self.driver.current_url)
-            past_question_content = BeautifulSoup(past_question_page.content, "lxml")
-            past_question_list = past_question_content.find_all(
+            html_content = self.driver.page_source
+            past_question_content = BeautifulSoup(html_content, "lxml")
+
+            past_question_items = past_question_content.find_all(
                 "div", class_="item biblioRecord"
             )
-            print("Got list of past questions successfully.")
-        except (NoSuchElementException, NoSuchAttributeException):
-            print("Past question content field not found.")
-            return filtered_past_question_list
-        except Exception:
-            print("Failed to retrieve past questions.")
-            return filtered_past_question_list
-        else:
-            if past_question_list:
-                for past_question in past_question_list:
-                    past_question_title = past_question.find("a", class_="titleField")
-                    past_question_year = past_question.find(
-                        "div", class_="customField isbnField"
-                    )
-                    past_question_semester = past_question.find(
-                        "div", class_="customField collationField"
-                    )
-                    filtered_past_question_list.append(
-                        past_question_title.get_text()
-                        + "\n"
-                        + past_question_year.get_text()
-                        + "\n"
-                        + past_question_semester.get_text()
-                    )
-            print(
-                "Appended key aspects of past questions to filtered list successfully."
-            )
-            return filtered_past_question_list
 
-    def past_question_list_to_string(self, list_of_values: List[str]) -> str:
-        """It takes a list of strings, and returns a string with each item in the list on a new line, with a number in front of it.
-
-        Args:
-          list_of_values (List[str]): List[str]
-
-        Returns:
-          A string
-        """
-        updated_list = []
-        for value in range(len(list_of_values)):
-            updated_list.append(
-                f"{value+1}. " + re.sub("\n", ", ", list_of_values[value])
-            )
-            updated_list.append("")
-
-        modified_text = "\n".join(value for value in updated_list)
-
-        return modified_text
-
-    def get_links_of_past_question(self) -> Dict[int, str]:
-        """
-        It gets the links of past questions from the current page.
-
-        Returns:
-          A dictionary of past question links.
-        """
-        past_question_links: Dict[int, str] = {}
-        print(f"Retrieving links of past question from {self.driver.current_url}")
-
-        try:
-            past_question_page = requests.get(self.driver.current_url)
-            past_question_content = BeautifulSoup(past_question_page.content, "lxml")
-            past_question_list = past_question_content.find_all(
-                "a", class_="titleField"
-            )
-            print("Retrieved past question links successfully.")
-        except (NoSuchElementException, NoSuchAttributeException):
-            print("Past question link field not found.")
-            return past_question_links
-        except Exception:
-            print(
-                f"Failed to extract links of past questions. {traceback.format_exc()}"
-            )
-            return past_question_links
-        else:
-            for past_question_index in range(1, len(past_question_list) + 1):
-                past_question_links[past_question_index] = (
-                    "https://balme.ug.edu.gh"
-                    + past_question_list[past_question_index - 1]["href"]
+            for index, item in enumerate(past_question_items, start=1):
+                title_element = item.find("a", class_="titleField")
+                title = (
+                    title_element.get_text(strip=True)[:8]
+                    if title_element
+                    else "No title found"
                 )
-            print("Extracted past question links successfully.")
+                year_element = item.find("div", class_="customField isbnField")
+                year = (
+                    year_element.get_text(strip=True)[18:]
+                    if year_element
+                    else "No year found"
+                )
+                semester_element = item.find("div", class_="customField collationField")
+                semester = (
+                    semester_element.get_text(strip=True)[10:]
+                    if semester_element
+                    else "No semester found"
+                )
+                link = (
+                    "https://balme.ug.edu.gh" + title_element["href"]
+                    if title_element and title_element.has_attr("href")
+                    else "No link found"
+                )
 
-            return past_question_links
+                past_questions_details[index] = {
+                    "title": title,
+                    "year": year,
+                    "semester": semester,
+                    "link": link,
+                }
+        except Exception as e:
+            print(f"Error retrieving past questions details and links: {e}")
 
-    def get_past_question(
-        self, past_question_links: Dict[int, str], choice: int
-    ) -> Generator:
-        """It takes in a dictionary of past question links and a choice from the user, then it moves to the url of the users choice and downloads the past question.
+        return past_questions_details
 
-        Args:
-          past_question_links (Dict[int, Any]): This is a dictionary of the past questions links.
-          choice (int): The choice of the user.
+    def download_past_questions(self, past_questions_details: dict) -> None:
+        """Download the past questions and process them."""
+        download_directory = os.getcwd() + os.sep + "src" + os.sep + "tmp"
+        for _, details in past_questions_details.items():
+            self.download_and_process_question(details, download_directory)
 
-        Returns:
-          The path to the past_question_file
-        """
-        print("kwame")
-        if int(choice) == -1:
-            print("nii")
-            for past_question_link in past_question_links.values():
-                self.driver.get(past_question_link)
-                print(f"Moved to {past_question_link} successfully.")
-                self.download_past_question()
-                yield self.get_past_question_path(self.path)
+    def download_and_process_question(
+        self, details: dict, download_directory: str
+    ) -> None:
+        """Download the past questions."""
+        link = details.get("link")
+        if link:
+            try:
+                self.driver.get(link)
+                file = self.driver.find_element(By.CLASS_NAME, "openPopUp")
+                self.driver.execute_script("arguments[0].click();", file)
+                WebDriverWait(self.driver, 15).until(
+                    EC.frame_to_be_available_and_switch_to_it(
+                        (By.CLASS_NAME, "cboxIframe")
+                    )
+                )
+                time.sleep(3)
+                download_button = WebDriverWait(self.driver, 15).until(
+                    EC.presence_of_element_located((By.ID, "download"))
+                )
+                download_button.click()
+                print(f"Initiated download for {details['title']}.")
+                time.sleep(5)
+                downloaded_file_path = self.get_most_recent_file(
+                    download_directory, ".pdf"
+                )
+                if downloaded_file_path:
+                    self.process_downloaded_file(downloaded_file_path, details)
+            except TimeoutException:
+                print(f"Timeout occurred trying to download from {link}.")
+            except NoSuchElementException:
+                print(f"Download button not found for {link}.")
+            except Exception as e:
+                print(f"Error during download from {link}: {e}")
         else:
-            print("temp")
-            for index, past_question_link in past_question_links.items():
-                if int(choice) == index:
-                    print("yooo")
-                    self.driver.get(
-                        past_question_link
-                    )  # Move to the url of users choice.
-                    print(f"Moved to {past_question_link} successfully.")
-
-                    self.download_past_question()
-                    yield self.get_past_question_path(self.path)
-                    break
-                print("herh")
-
-    def download_past_question(self) -> bool:
-        """Clicks on a button that opens a frame, then clicks on a button in the frame to download a file."""
-        print(f"Downloading past question from {self.driver.current_url}")
-        try:
-            file = self.driver.find_element(By.CLASS_NAME, "openPopUp")
-            self.driver.execute_script(
-                "arguments[0].click();", file
-            )  # screen displayed is a frame, so adapts to a frame.
-            wait = WebDriverWait(self.driver, 15)
-            wait.until(
-                EC.frame_to_be_available_and_switch_to_it((By.CLASS_NAME, "cboxIframe"))
-            )
-            self.driver.find_element(By.ID, "download").click()
-
-            # wait.until(EC.element_to_be_clickable((By.ID, "download"))).click()
-
-            print("Downloading file...")
-            file_print(f"{self.driver.current_url} has been downloaded.")
-            self.driver.back()
-            time.sleep(2)
-            return True
-        except (NoSuchElementException, NoSuchAttributeException):
-            print("Failed to find download button.")
-            return False
-        except TimeoutException:
-            print("Timeout waiting for frame to load.")
-            return False
-
-        except Exception:
-            print("Error occurred while downloading file.")
-            return False
+            print(f"No download link found for past question {details['title']}.")
 
 
 if __name__ == "__main__":
-    function_class = Functions()
-    name = input("Please enter the course name : ")
-    function_class.search_for_past_question(name)
-    questions = function_class.get_list_of_past_question()
-    pasco_links = function_class.get_links_of_past_question()
-    user_choice = int(input("The number of the past question you want to download: "))
-    function_class.get_past_question("1", pasco_links, user_choice)
+    scraper = Scraper("1996")
+    scraper.search_past_questions()
+    links = scraper.get_past_questions_details_and_links()
+    scraper.download_past_questions(links)
+    time.sleep(200)
