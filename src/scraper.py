@@ -237,9 +237,9 @@ class Scraper:
 
 if __name__ == "__main__":
     scraper = Scraper("first-set")
-    random_ids = random.sample(range(1, 11001), 15)
+    ids = range(1, 1000)
 
-    for id in random_ids:
+    for id in ids:
         details = scraper.get_past_question_details(str(id))
         scraper.download_past_question(details)
 
