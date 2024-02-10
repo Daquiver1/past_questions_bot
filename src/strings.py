@@ -130,9 +130,16 @@ class Strings:
         """Failed to subscribe message."""
         return "Failed to subscribe. Please contact @daquiver immediately!"
 
-    def subscription_successful_message(self, subscription_plan: str) -> str:
+    def subscription_successful_message(
+        self, subscription_plan: str, balance: int
+    ) -> str:
         """Subscription successful message."""
-        return f"You have successfully subscribed to the {subscription_plan} subscription plan.\n Go ahead and download a past question. Eg: DCIT 104"
+        text = (
+            f"You have successfully subscribed to the {subscription_plan} subscription plan.\n"
+            f"You currently have a balance of {balance} past questions left.\n\n"
+            "Go ahead and download a past question. Eg: DCIT 104"
+        )
+        return text
 
     def payment_not_started_message(self) -> str:
         """Payment not started message."""
@@ -178,7 +185,7 @@ class Strings:
 
     def no_active_subscription_message(self) -> str:
         """No active subscription message."""
-        return "You don't have an active subscription. So initiating pay as you go model.\n Use /subscription to see available plans."
+        return "You don't have an active subscription. So initiating pay as you go model. Use /subscription to see available plans."
 
     def selected_all_message(self) -> str:
         """Selected all message."""

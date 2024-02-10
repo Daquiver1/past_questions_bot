@@ -58,7 +58,7 @@ def ask_subscription_confirmation(reference: str, plan: SubscriptionTier) -> Inl
     """Create a button layout asking the user to confirm subscription."""
     yes_button = InlineKeyboardButton(
         text="Yes, I've paid",
-        callback_data=f"sub;{reference};{plan.tier_name};{plan.amount}",
+        callback_data=f"sub;{reference};{plan.tier_name}",
     )
 
     keyboard = [[yes_button]]

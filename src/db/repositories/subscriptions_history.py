@@ -29,6 +29,11 @@ GET_SUBSCRIPTION_HISTORY_BY_SUBSCRIPTION_ID_QUERY = """
     WHERE subscription_id = :subscription_id;
     """
 
+GET_ALL_SUBSCRIPTION_HISTORY_QUERY = """
+    SELECT id, user_telegram_id, subscription_id, tier, amount, transaction_id, is_active, created_at, updated_at
+    FROM subscription_history;
+    """
+
 
 class SubscriptionHistoryRepository(BaseRepository):
     """Repository for subscriptions history."""
@@ -49,6 +54,13 @@ class SubscriptionHistoryRepository(BaseRepository):
         if subscription_history:
             return SubscriptionHistoryInDB(**subscription_history)
         return None
+
+    async def get_all_subscription_history(self) -> list[SubscriptionHistoryInDB]:
+        """Get all subscription history."""
+        subscription_history = await self.db.fetch_all(
+            query=GET_ALL_SUBSCRIPTION_HISTORY_QUERY,
+        )
+        return [SubscriptionHistoryInDB(**sub) for sub in subscription_history]
 
     async def get_subscription_history_by_user_telegram_id(
         self, *, user_telegram_id: int

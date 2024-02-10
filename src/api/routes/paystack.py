@@ -3,11 +3,13 @@
 import hashlib
 import hmac
 
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
 from src.api.dependencies.auth import get_current_user
+from src.api.dependencies.database import get_repository
 from src.core.config import PAYSTACK_SECRET_KEY
+from src.db.repositories.subscriptions import SubscriptionRepository
 from src.models.paystack import (
     CreatePayment,
     CreatePaymentResponse,
@@ -15,6 +17,7 @@ from src.models.paystack import (
     SuccessfulTransaction,
     VerifyTransaction,
 )
+from src.models.subscriptions import SubscriptionCreate
 from src.models.users import UserPublic
 from src.services.paystack import PayStack
 
@@ -99,22 +102,71 @@ async def verify_subscription(
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
 async def paystack_webhook(
-    request: Request, response: Response
-) -> SuccessfulTransaction:
+    request: Request,
+    subscription_repo: SubscriptionRepository = Depends(
+        get_repository(SubscriptionRepository)
+    ),
+) -> JSONResponse:
     """This function creates a webhook, that'll receive a response from Paystack."""
     payload = await request.body()
     signature = request.headers.get("x-paystack-signature")
 
+    # Verify signature
     computed_signature = hmac.new(
         PAYSTACK_SECRET_KEY.encode(), msg=payload, digestmod=hashlib.sha512
     ).hexdigest()
 
     if signature != computed_signature:
-        return JSONResponse(content={"message": "Invalid signature"}, status_code=404)
+        return JSONResponse(content={"message": "Invalid signature"}, status_code=400)
 
     event = await request.json()
+    transaction_data = SuccessfulTransaction(**event["data"])
 
-    print(event)
-    response = SuccessfulTransaction(**event["data"])
-    print(response)
-    return response
+    is_subscription = False
+    user_telegram_id = None
+    telegram_username = None
+    tier = None
+    balance = None
+    print(transaction_data.metadata.custom_fields)
+    for custom_field in transaction_data.metadata.custom_fields:
+        if (
+            custom_field.variable_name == "is_subscription"
+            and custom_field.value == "true"
+        ):
+            is_subscription = True
+        elif custom_field.variable_name == "Telegram ID":
+            user_telegram_id = int(custom_field.value)
+        elif custom_field.variable_name == "Telegram Username":
+            telegram_username = custom_field.value
+        elif custom_field.variable_name == "Subscription Tier":
+            tier = custom_field.value
+        elif custom_field.variable_name == "Price":
+            balance = int(custom_field.value)
+
+    print(is_subscription, user_telegram_id, telegram_username, tier, balance)
+
+    if is_subscription and all([user_telegram_id, telegram_username, tier, balance]):
+        create_subscription_data = SubscriptionCreate(
+            user_telegram_id=user_telegram_id,
+            telegram_username=telegram_username,
+            transaction_id=transaction_data.reference,
+            balance=balance,
+            tier=tier,
+        )
+        sub = await subscription_repo.upsert_new_subscription(
+            new_subscription=create_subscription_data
+        )
+        if sub:
+            return JSONResponse(
+                content={"message": "Subscription created successfully"},
+                status_code=200,
+            )
+        else:
+            return JSONResponse(
+                content={"message": "Error creating subscription"}, status_code=400
+            )
+    else:
+        return JSONResponse(
+            content={"message": "Transaction processed but not a subscription."},
+            status_code=200,
+        )

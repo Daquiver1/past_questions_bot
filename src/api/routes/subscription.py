@@ -24,7 +24,6 @@ async def create_subscription(
     current_user: UserPublic = Depends(get_current_user),
 ) -> SubscriptionPublic:
     """Create a new subscription."""
-    subscription.tier = subscription.tier.tier_name
     sub = await subscription_repo.upsert_new_subscription(new_subscription=subscription)
     if not sub:
         raise HTTPException(

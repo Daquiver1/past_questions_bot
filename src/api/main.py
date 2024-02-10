@@ -9,6 +9,7 @@ from src.api.routes.help_ticket import router as help_ticket_router
 from src.api.routes.past_question import router as past_question_router
 from src.api.routes.paystack import router as paystack_router
 from src.api.routes.subscription import router as subscription_router
+from src.api.routes.subscription_history import router as subscription_history_router
 from src.api.routes.user import router as user_router
 from src.core import config, tasks
 
@@ -44,6 +45,11 @@ def get_application() -> FastAPI:
     app.include_router(paystack_router, prefix="/paystack", tags=["paystack"])
     app.include_router(
         subscription_router, prefix="/subscription", tags=["subscription"]
+    )
+    app.include_router(
+        subscription_history_router,
+        prefix="/subscription_history",
+        tags=["subscription_history"],
     )
     app.include_router(download_router, prefix="/download", tags=["download"])
     app.include_router(help_ticket_router, prefix="/help_ticket", tags=["help_ticket"])

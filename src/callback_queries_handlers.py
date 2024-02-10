@@ -20,17 +20,14 @@ strings = Strings()
 @callback_query_handler.callback_query(lambda c: c.data and c.data.startswith("sub"))
 async def handle_subscription_confirmation(callback_query: types.CallbackQuery) -> None:
     """Handle button click."""
-    _, reference, tier_name, amount = callback_query.data.split(";")
+    _, reference, tier_name = callback_query.data.split(";")
     await callback_query.answer()
 
-    print(reference, tier_name, amount)
     response = await api_service.verify_payment(callback_query.from_user.id, reference)
 
     if response["success"] and response["data"]["data"]["status"] == "success":
         await callback_query.message.answer(strings.payment_successful_message())
-        response = await api_service.create_subscription(
-            callback_query.from_user.id, tier_name, amount, reference
-        )
+        response = await api_service.get_user_subscription(callback_query.from_user.id)
         if not response["success"] and response["status_code"] == 401:
             await callback_query.message.answer(strings.unauthorized_user_message())
             return
@@ -41,7 +38,7 @@ async def handle_subscription_confirmation(callback_query: types.CallbackQuery) 
             )
             return
         await callback_query.message.answer(
-            strings.subscription_successful_message(tier_name)
+            strings.subscription_successful_message(tier_name, response["data"]["balance"])
         )
     elif response["success"] and response["data"]["data"]["status"] == "abandoned":
         await callback_query.message.answer(strings.payment_not_started_message())
@@ -142,7 +139,9 @@ async def handle_payment_confirmation(callback_query: types.CallbackQuery) -> No
         if index == "all":
             await callback_query.message.answer(strings.selected_all_message())
             await handle_all_questions(callback_query, past_question_id)
-            await callback_query.message.answer(strings.can_create_subscription_message())
+            await callback_query.message.answer(
+                strings.can_create_subscription_message()
+            )
         else:
             await callback_query.message.answer(strings.selected_index_message(index))
             await handle_single_question(callback_query, past_question_id)

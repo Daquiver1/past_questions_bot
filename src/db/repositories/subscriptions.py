@@ -75,6 +75,7 @@ class SubscriptionRepository(BaseRepository):
         new_subscription: SubscriptionCreate,
     ) -> Optional[SubscriptionInDB]:
         """Create new subscription data."""
+        new_subscription.tier = new_subscription.tier.tier_name
         await self.db.fetch_one(
             query=UPSERT_SUBSCRIPTION_QUERY,
             values=new_subscription.dict(),
