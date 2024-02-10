@@ -4,6 +4,8 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from redis.asyncio import Redis
+from src.api.dependencies.auth import get_current_admin, get_current_user
+from src.models.users import UserPublic
 
 from src.api.dependencies.database import get_redis, get_repository
 from src.db.repositories.past_questions import PastQuestionRepository
@@ -69,6 +71,7 @@ async def get_past_question(
     past_question_repo: PastQuestionRepository = Depends(
         get_repository(PastQuestionRepository)
     ),
+    current_user: UserPublic = Depends(get_current_user),
 ) -> PastQuestionPublic:
     """Get a past question"""
     past_question = await past_question_repo.get_past_question(
@@ -85,6 +88,7 @@ async def get_past_question(
     status_code=status.HTTP_200_OK,
 )
 async def get_all_past_questions(
+    current_admin: UserPublic = Depends(get_current_admin),
     past_question_repo: PastQuestionRepository = Depends(
         get_repository(PastQuestionRepository)
     ),
@@ -104,6 +108,7 @@ async def get_all_past_questions_by_filter(
     past_question_repo: PastQuestionRepository = Depends(
         get_repository(PastQuestionRepository)
     ),
+    current_user: UserPublic = Depends(get_current_user),
     redis_client: Redis = Depends(get_redis),
 ) -> list[PastQuestionPublic]:
     """Get all past questions by filter."""

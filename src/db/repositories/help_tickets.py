@@ -55,7 +55,7 @@ class HelpTicketRepository(BaseRepository):
 
     async def add_new_help_ticket(
         self, *, help_ticket: HelpTicketsCreate
-    ) -> HelpTicketsInDB:
+    ) -> Optional[HelpTicketsInDB]:
         """Create new help tickets data."""
         new_help_ticket = help_ticket.copy(
             update={
@@ -91,18 +91,14 @@ class HelpTicketRepository(BaseRepository):
             query=GET_HELP_TICKET_BY_TELEGRAM_ID_QUERY,
             values={"telegram_id": telegram_id},
         )
-        if help_tickets:
-            return [HelpTicketsInDB(**help_ticket) for help_ticket in help_tickets]
-        return []
+        return [HelpTicketsInDB(**help_ticket) for help_ticket in help_tickets]
 
     async def get_all_help_tickets(self) -> list[HelpTicketsInDB]:
         """Get all help tickets data"""
         help_tickets = await self.db.fetch_all(
             query=GET_ALL_HELP_TICKETS_QUERY,
         )
-        if help_tickets:
-            return [HelpTicketsInDB(**help_ticket) for help_ticket in help_tickets]
-        return []
+        return [HelpTicketsInDB(**help_ticket) for help_ticket in help_tickets]
 
     async def update_help_ticket_status(
         self, *, help_ticket_id: int, status: HelpTicketStatus

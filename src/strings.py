@@ -20,16 +20,26 @@ class Strings:
         """Done message."""
         return "Done!"
 
+    def can_create_subscription_message(self) -> str:
+        """Can create subscription message."""
+        return "You can now subscribe to a subscription plan. Use /subscription to see available plans."
+
     def welcome_message(self, username: str) -> str:
-        """Welcome message."""
+        """Welcome message with subscription info."""
         text = (
-            f"Welcome {hbold(username)},\n"
-            "Welcome to QuiverTech's Past Questions bot\n\n"
-            "Type the name of the past question, select the one you want and it'll be sent to you."
-            "Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )"
-            "Check the /about section for more info."
+            f"Hello {hbold(username)},\n"
+            "Welcome to QuiverTech's Past Questions Bot!\n\n"
+            "Here's how you can get started:\n"
+            "- Type the name of the past question you're looking for (e.g., ugbs 104, dcit 103, math 122, ugrc 110).\n"
+            "- Select the one you want, and it'll be sent to you directly at a fee of 1 cedi.\n\n"
+            "Looking for more? Explore our Subscription Tiers /subscription:\n"
+            "For more details, check the /about section."
         )
         return text
+
+    def unauthorized_user_message(self) -> str:
+        """Unauthorized user message."""
+        return "You haven't registered yet. Please type the /start command to register."
 
     def invalid_past_question_message(self) -> str:
         """Invalid past question message."""
@@ -83,13 +93,13 @@ class Strings:
     def update_past_question_number(self, downloaded: int, balance: int) -> str:
         """Update past question number."""
         new_balance = balance - downloaded
-        return f"""You downloaded {downloaded} past question{'' if new_balance else's'}. You current balance is {new_balance} past questions left. You can top up with /subscribe. Tap on /subscription to view the subscription plans."""
+        return f"""You downloaded {downloaded} past question{'' if new_balance else's'}. You current balance is {new_balance} past questions left.\n You can top up with /subscribe. Tap on /subscription to view the subscription plans."""
 
     def already_registered_message(self, past_question_name: str) -> str:
         """Already registered message."""
         text = (
-            f"Hello, {past_question_name},\nYou are already  registered!"
-            "To request a past question please type the past questions course name and course code."
+            f"Hello, {past_question_name},\nYou are already  registered!\n\n"
+            "To request a past question please type the past questions course name and course code.\n"
             "Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )."
         )
         return text
@@ -122,7 +132,7 @@ class Strings:
 
     def subscription_successful_message(self, subscription_plan: str) -> str:
         """Subscription successful message."""
-        return f"You have successfully subscribed to the {subscription_plan} subscription plan. Go ahead and download a past question. Eg: DCIT 104"
+        return f"You have successfully subscribed to the {subscription_plan} subscription plan.\n Go ahead and download a past question. Eg: DCIT 104"
 
     def payment_not_started_message(self) -> str:
         """Payment not started message."""
@@ -134,7 +144,7 @@ class Strings:
 
     def payment_successful_message(self) -> str:
         """Payment successful message."""
-        return "Payment successful."
+        return "Payment successful..."
 
     def payment_verification_failed_message(self) -> str:
         """Payment verification failed message."""
@@ -165,6 +175,10 @@ class Strings:
     def subscribing_to_tier_message(self, tier: str) -> str:
         """Subscribing to tier message."""
         return f"Subscribing to {tier} plan..."
+
+    def no_active_subscription_message(self) -> str:
+        """No active subscription message."""
+        return "You don't have an active subscription. So initiating pay as you go model.\n Use /subscription to see available plans."
 
     def selected_all_message(self) -> str:
         """Selected all message."""

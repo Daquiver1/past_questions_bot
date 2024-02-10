@@ -43,6 +43,11 @@ class PayStack:
                             "variable_name": "Telegram Username",
                             "value": create_payment.telegram_username,
                         },
+                        {
+                            "display_name": "is_subscription",
+                            "variable_name": "is_subscription",
+                            "value": False,
+                        },
                     ]
                 },
             }
@@ -81,6 +86,11 @@ class PayStack:
                             "value": create_subscription_plan.telegram_username,
                         },
                         {
+                            "display_name": "is_subscription",
+                            "variable_name": "is_subscription",
+                            "value": True,
+                        },
+                        {
                             "display_name": "Subscription Tier",
                             "variable_name": "Subscription Tier",
                             "value": create_subscription_plan.tier.tier_name,
@@ -94,7 +104,7 @@ class PayStack:
                             "display_name": "Price",
                             "variable_name": "Price",
                             "value": create_subscription_plan.tier.amount,
-                        }
+                        },
                     ]
                 },
             }
@@ -115,4 +125,3 @@ class PayStack:
             return response
         except Exception as e:
             print(e)
-        

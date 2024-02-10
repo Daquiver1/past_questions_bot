@@ -1,7 +1,6 @@
 """DB repo for Users."""
 
 # Standard library imports
-from datetime import datetime
 from typing import Optional
 
 from databases import Database

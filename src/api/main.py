@@ -34,8 +34,8 @@ def get_application() -> FastAPI:
         return "Visit ip_addrESs:8000/docs or localhost8000/docs to view documentation."
 
     @app.get("/sentry-debug")
-    async def trigger_error():
-        division_by_zero = 1 / 0
+    async def trigger_error() -> float:
+        return 1 / 0
 
     app.include_router(user_router, prefix="/user", tags=["user"])
     app.include_router(

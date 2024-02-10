@@ -15,7 +15,7 @@ UPSERT_SUBSCRIPTION_QUERY = """
     VALUES (:user_telegram_id, :tier, :balance, :transaction_id, :is_active, :updated_at)
     ON CONFLICT(user_telegram_id) DO UPDATE SET
         tier = excluded.tier,
-        balance = excluded.balance,
+        balance = subscriptions.balance + excluded.balance,  -- Add the incoming balance to the existing balance
         transaction_id = excluded.transaction_id,
         is_active = excluded.is_active,
         updated_at = excluded.updated_at;
@@ -69,7 +69,7 @@ class SubscriptionRepository(BaseRepository):
         super().__init__(db, r_db)
         self.subscription_history_repo = SubscriptionHistoryRepository(db, r_db)
 
-    async def add_new_subscription(
+    async def upsert_new_subscription(
         self,
         *,
         new_subscription: SubscriptionCreate,

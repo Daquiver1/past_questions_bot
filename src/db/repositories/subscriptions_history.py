@@ -1,6 +1,6 @@
 """Repository for subscriptions history."""
 
-from typing import List
+from typing import List, Optional
 
 from databases import Database
 from redis.asyncio import Redis
@@ -39,7 +39,7 @@ class SubscriptionHistoryRepository(BaseRepository):
 
     async def add_subscription_history(
         self, *, subscription_history_create: SubscriptionHistoryCreate
-    ) -> SubscriptionHistoryInDB:
+    ) -> Optional[SubscriptionHistoryInDB]:
         """Add subscription history to the database."""
         subscription_history_create.tier = subscription_history_create.tier.tier_name
         subscription_history = await self.db.fetch_one(

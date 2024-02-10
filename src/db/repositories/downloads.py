@@ -1,5 +1,6 @@
 """DB repo for downloads."""
 
+from typing import Optional
 from databases import Database
 from redis.asyncio import Redis
 
@@ -49,7 +50,9 @@ class DownloadRepository(BaseRepository):
         """Initialize db"""
         super().__init__(db, r_db)
 
-    async def add_new_download(self, *, new_download: DownloadCreate) -> DownloadInDB:
+    async def add_new_download(
+        self, *, new_download: DownloadCreate
+    ) -> Optional[DownloadInDB]:
         """Create new downloads data."""
         download = await self.db.fetch_one(
             query=ADD_DOWNLOAD_QUERY,
@@ -65,9 +68,7 @@ class DownloadRepository(BaseRepository):
             query=GET_DOWNLOAD_BY_TELEGRAM_ID_QUERY,
             values={"user_telegram_id": telegram_id},
         )
-        if downloads:
-            return [DownloadInDB(**download) for download in downloads]
-        return []
+        return [DownloadInDB(**download) for download in downloads]
 
     async def get_all_past_question_downloads(
         self, past_question_id: int
@@ -78,7 +79,6 @@ class DownloadRepository(BaseRepository):
             values={"past_question_id": past_question_id},
         )
         return [DownloadInDB(**download) for download in downloads]
-        
 
     async def delete_download(self, *, id: str) -> str:
         """Delete downloads data"""
@@ -92,6 +92,4 @@ class DownloadRepository(BaseRepository):
         downloads = await self.db.fetch_all(
             query=GET_ALL_DOWNLOADS_QUERY,
         )
-        if downloads:
-            return [DownloadInDB(**download) for download in downloads]
-        return []
+        return [DownloadInDB(**download) for download in downloads]

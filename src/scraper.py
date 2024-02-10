@@ -10,7 +10,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as EC  # noqa
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -190,7 +190,7 @@ class Scraper:
 
     def get_past_question_details(self, id: str) -> None:
         """Get past questions details."""
-        BASE_URL = (
+        BASE_URL = (  # noqa
             f"https://balme.ug.edu.gh/past.exampapers/index.php?p=show_detail&id={id}"
         )
         self.driver.get(BASE_URL)
