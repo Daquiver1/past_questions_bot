@@ -9,10 +9,9 @@ from redis.asyncio import Redis
 from src.db.repositories.base import BaseRepository
 from src.models.users import UserCreate, UserInDB
 
-
 ADD_USER_QUERY = """
-    INSERT INTO users (username, first_name, last_name, telegram_id)
-    VALUES (:username, :first_name, :last_name, :telegram_id)
+    INSERT INTO users (username, first_name, last_name, telegram_id, updated_at)
+    VALUES (:username, :first_name, :last_name, :telegram_id, :updated_at)
     RETURNING username, first_name, last_name, telegram_id, created_At, updated_At;
 """
 

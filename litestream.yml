@@ -1,0 +1,7 @@
+dbs:
+  - path: past_questions_bot.db
+    replicas:
+      - url: s3://${S3_BUCKET_NAME}/db
+        region: ${S3_REGION}
+        access-key-id: ${S3_ACCESS_KEY_ID}
+        secret-access-key: ${S3_SECRET_ACCESS_KEY}

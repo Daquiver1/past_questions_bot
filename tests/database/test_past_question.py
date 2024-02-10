@@ -4,7 +4,8 @@ import pytest
 from databases import Database
 
 from db.repositories.past_question import PastQuestionRepository
-from db.repositories.past_question_categories import PastQuestionCategoriesRepository
+from db.repositories.past_question_categories import \
+    PastQuestionCategoriesRepository
 from models.past_questions import PastQuestionCreate
 
 pytestmark = pytest.mark.asyncio

@@ -1,5 +1,7 @@
 """Get bot name."""
+
 import os
+
 from fastapi import UploadFile
 
 from src.utils.uuid import generate_n_digit_uuid

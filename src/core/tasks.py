@@ -6,13 +6,13 @@ from typing import Callable
 # Third party imports is right
 from fastapi import FastAPI
 
+from src.core.config import SENTRY_DSN, SENTRY_ENVIRONMENT
 from src.db.tasks import (
     close_db_connection,
+    close_redis_connection,
     connect_to_db,
     connect_to_redis,
-    close_redis_connection,
 )
-from src.core.config import SENTRY_DSN, SENTRY_ENVIRONMENT
 from src.services.sentry import SentryInitializer
 
 

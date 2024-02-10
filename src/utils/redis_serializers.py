@@ -1,10 +1,12 @@
 """Serializer & Deserializer for Redis"""
+
 import json
 import re
-from dateutil.parser import parse
 from datetime import datetime
-from redis.asyncio import Redis
 from typing import Any, Dict
+
+from dateutil.parser import parse
+from redis.asyncio import Redis
 
 from src.models.past_question_filter_enum import PastQuestionFilter
 

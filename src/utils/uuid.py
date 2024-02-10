@@ -1,4 +1,5 @@
 """Generate uuid"""
+
 import uuid
 
 

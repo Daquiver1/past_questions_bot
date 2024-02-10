@@ -5,11 +5,12 @@ Revises:
 Create Date: 2024-01-26 06:11:04.247982
 
 """
+
 from typing import Optional, Sequence, Tuple, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
+from sqlalchemy import func
 
 # revision identifiers, used by Alembic.
 revision: str = "157a182f27bb"
@@ -18,38 +19,16 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
-def create_updated_at_trigger() -> None:
-    """Update timestamp trigger."""
-    op.execute(
-        """
-        CREATE OR REPLACE FUNCTION update_updated_at_column()
-            RETURNS TRIGGER AS
-        $$
-        BEGIN
-            NEW.updated_at = now();
-            RETURN NEW;
-        END;
-        $$ language 'plpgsql';
-        """
-    )
-
-
 def timestamps(indexed: bool = False) -> Tuple[sa.Column, sa.Column]:
     """Create timestamp in DB."""
     return (
         sa.Column(
-            "created_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.func.now(),
-            nullable=False,
-            index=indexed,
+            "created_at", sa.DateTime(), nullable=False, server_default=func.now()
         ),
         sa.Column(
             "updated_at",
-            sa.TIMESTAMP(timezone=True),
-            server_default=sa.func.now(),
+            sa.DateTime(),
             nullable=False,
-            index=indexed,
         ),
     )
 
@@ -71,15 +50,6 @@ def create_users_table() -> None:
         sa.Column("last_name", sa.String()),
         *timestamps(),
     )
-    op.execute(
-        """
-        CREATE TRIGGER update_user_time
-            BEFORE UPDATE
-            ON users
-            FOR EACH ROW
-        EXECUTE PROCEDURE update_updated_at_column()
-        """
-    )
 
 
 def create_past_questions_table() -> None:
@@ -96,14 +66,64 @@ def create_past_questions_table() -> None:
         sa.Column("year", sa.String(), index=True, nullable=False),
         *timestamps(),
     )
-    op.execute(
-        """
-        CREATE TRIGGER update_past_questions_time
-            BEFORE UPDATE
-            ON past_questions
-            FOR EACH ROW
-        EXECUTE PROCEDURE update_updated_at_column()
-        """
+
+
+def create_subscriptions_table() -> None:
+    """Create subscriptions table."""
+    op.create_table(
+        "subscriptions",
+        sa.Column("id", sa.Integer(), primary_key=True, index=True, nullable=False),
+        sa.Column(
+            "user_telegram_id",
+            sa.Integer(),
+            sa.ForeignKey("users.telegram_id", ondelete="CASCADE"),
+            nullable=False,
+            unique=True,
+        ),
+        sa.Column("transaction_id", sa.String, nullable=False),
+        sa.Column("tier", sa.String(), nullable=False),
+        sa.Column("is_active", sa.Boolean(), nullable=False, index=True, default=True),
+        sa.Column(
+            "balance", sa.Numeric(precision=10, scale=2), nullable=False, default=0
+        ),
+        *timestamps(),
+        sa.CheckConstraint(
+            "tier IN ('Basic', 'Standard', 'Premium')",
+            name="tier check",
+        ),
+    )
+
+
+def create_subscription_history_table() -> None:
+    """Create subscription history table."""
+    op.create_table(
+        "subscription_history",
+        sa.Column("id", sa.Integer(), primary_key=True, index=True, nullable=False),
+        sa.Column(
+            "subscription_id",
+            sa.Integer(),
+            sa.ForeignKey("subscriptions.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        ),
+        sa.Column(
+            "user_telegram_id",
+            sa.Integer(),
+            sa.ForeignKey("users.telegram_id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        ),
+        sa.Column("transaction_id", sa.String, nullable=False),
+        sa.Column("tier", sa.String(), nullable=False),
+        sa.Column("is_active", sa.Boolean(), nullable=False, index=True, default=True),
+        sa.Column(
+            "amount", sa.Numeric(precision=10, scale=2), nullable=False, default=0
+        ),
+        *timestamps(),
+        sa.CheckConstraint(
+            "tier IN ('Basic', 'Standard', 'Premium')",
+            name="tier check",
+        ),
     )
 
 
@@ -114,37 +134,20 @@ def create_downloads_table() -> None:
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
         sa.Column(
             "user_telegram_id",
-            sa.String(),
-            sa.ForeignKey("users.telegram_id"),
+            sa.Integer(),
+            sa.ForeignKey("users.telegram_id", ondelete="CASCADE"),
             nullable=False,
             index=True,
         ),
         sa.Column(
             "past_question_id",
             sa.Integer(),
-            sa.ForeignKey("past_questions.id"),
+            sa.ForeignKey("past_questions.id", ondelete="CASCADE"),
             nullable=False,
             index=True,
         ),
         *timestamps(),
     )
-    op.execute(
-        """
-        CREATE TRIGGER update_downloads_time
-            BEFORE UPDATE
-            ON downloads
-            FOR EACH ROW
-        EXECUTE PROCEDURE update_updated_at_column()
-        """
-    )
-
-
-def create_help_ticket_status_enum() -> None:
-    """Create enum type for status."""
-    status_enum = sa.Enum(
-        "open", "in_progress", "resolved", "closed", name="help_ticket_status_enum"
-    )
-    status_enum.create(op.get_bind(), checkfirst=True)
 
 
 def create_help_tickets_table() -> None:
@@ -155,7 +158,7 @@ def create_help_tickets_table() -> None:
         sa.Column(
             "user_telegram_id",
             sa.Integer(),
-            sa.ForeignKey("users.telegram_id"),
+            sa.ForeignKey("users.telegram_id", ondelete="CASCADE"),
             nullable=False,
             index=True,
         ),
@@ -163,37 +166,24 @@ def create_help_tickets_table() -> None:
         sa.Column("message", sa.String(), nullable=False),
         sa.Column(
             "status",
-            sa.Enum(
-                "open",
-                "in_progress",
-                "resolved",
-                "closed",
-                name="help_ticket_status_enum",
-                metadata=sa.MetaData(),
-                create_type=False,
-            ),
+            sa.String(),
             nullable=False,
         ),
         *timestamps(),
-    )
-    op.execute(
-        """
-        CREATE TRIGGER update_help_tickets_time
-            BEFORE UPDATE
-            ON help_tickets
-            FOR EACH ROW
-        EXECUTE PROCEDURE update_updated_at_column()
-        """
+        sa.CheckConstraint(
+            "status IN ('open', 'in_progress', 'resolved', 'closed')",
+            name="status_check",
+        ),
     )
 
 
 def upgrade() -> None:
     """Upgrade DB."""
-    create_updated_at_trigger()
     create_users_table()
     create_past_questions_table()
     create_downloads_table()
-    create_help_ticket_status_enum()
+    create_subscriptions_table()
+    create_subscription_history_table()
     create_help_tickets_table()
 
 
@@ -202,7 +192,6 @@ def downgrade() -> None:
     op.drop_table("downloads")
     op.drop_table("help_tickets")
     op.drop_table("past_questions")
+    op.drop_table("subscription_history")
+    op.drop_table("subscriptions")
     op.drop_table("users")
-
-    op.execute("DROP TYPE help_ticket_status_enum")
-    op.execute("DROP FUNCTION update_updated_at_column")

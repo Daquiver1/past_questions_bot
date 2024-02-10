@@ -1,4 +1,5 @@
 """Enum for the status of a help ticket."""
+
 from enum import Enum
 
 

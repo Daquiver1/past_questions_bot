@@ -92,3 +92,10 @@ if youEnjoyed:
     starThisRepository()
 
 ```
+
+
+To use untun(ngrok alternative)
+```python
+untun tunnel http://localhost:8008=
+```
+```

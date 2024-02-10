@@ -6,12 +6,12 @@ from databases import Database
 from redis.asyncio import Redis
 
 from src.db.repositories.base import BaseRepository
-from src.models.past_questions import PastQuestionCreate, PastQuestionInDB
 from src.models.past_question_filter_enum import PastQuestionFilter
+from src.models.past_questions import PastQuestionCreate, PastQuestionInDB
 
 ADD_PAST_QUESTION_QUERY = """
-    INSERT INTO past_questions (course_code, course_name, course_title, lecturer_name, past_question_url, semester, year)
-    VALUES (:course_code, :course_name, :course_title, :lecturer_name, :past_question_url, :semester, :year)
+    INSERT INTO past_questions (course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, updated_at)
+    VALUES (:course_code, :course_name, :course_title, :lecturer_name, :past_question_url, :semester, :year, :updated_at)
     RETURNING id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_At, updated_At;
 """
 
@@ -78,7 +78,7 @@ class PastQuestionRepository(BaseRepository):
 
     async def add_new_past_question(
         self, *, new_past_question: PastQuestionCreate
-    ) -> PastQuestionInDB:
+    ) -> Optional[PastQuestionInDB]:
         """Create new past question data."""
         past_question = await self.db.fetch_one(
             query=ADD_PAST_QUESTION_QUERY,
@@ -122,11 +122,7 @@ class PastQuestionRepository(BaseRepository):
     async def get_all_past_questions(self) -> list[PastQuestionInDB]:
         """Get all past questions data."""
         past_questions = await self.db.fetch_all(query=GET_ALL_PAST_QUESTIONS_QUERY)
-        if past_questions:
-            return [
-                PastQuestionInDB(**past_question) for past_question in past_questions
-            ]
-        return []
+        return [PastQuestionInDB(**past_question) for past_question in past_questions]
 
     async def get_all_past_questions_by_filter(
         self, filter_by: PastQuestionFilter, filter_value: Union[int, str]
@@ -155,11 +151,7 @@ class PastQuestionRepository(BaseRepository):
             query=query,
             values={filter_by.value: filter_value},
         )
-        if past_questions:
-            return [
-                PastQuestionInDB(**past_question) for past_question in past_questions
-            ]
-        return []
+        return [PastQuestionInDB(**past_question) for past_question in past_questions]
 
     async def delete_past_question(self, *, past_question_id: int) -> int:
         """Delete past question data by past_question_id."""

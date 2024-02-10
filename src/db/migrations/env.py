@@ -1,13 +1,11 @@
 """Alembic environment file."""
-from logging.config import fileConfig
+
 import pathlib
 import sys
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from logging.config import fileConfig
 
 from alembic import context
-
+from sqlalchemy import engine_from_config, pool
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[3]))
 from src.core.config import DATABASE_URL

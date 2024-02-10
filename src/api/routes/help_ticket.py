@@ -1,11 +1,14 @@
 """Route for Help Tickets"""
 
 from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from src.models.help_ticket_status_enum import HelpTicketStatus
+from src.api.dependencies.auth import get_current_admin, get_current_user
+from src.models.users import UserPublic
 
 from src.api.dependencies.database import get_repository
 from src.db.repositories.help_tickets import HelpTicketRepository
+from src.models.help_ticket_status_enum import HelpTicketStatus
 from src.models.help_tickets import HelpTicketsCreate, HelpTicketsPublic
 
 router = APIRouter()
@@ -21,11 +24,10 @@ async def create_help_ticket(
     help_ticket_repo: HelpTicketRepository = Depends(
         get_repository(HelpTicketRepository)
     ),
+    current_user: UserPublic = Depends(get_current_user),
 ) -> HelpTicketsPublic:
     """Create a new help ticket."""
-    help_ticket = await help_ticket_repo.add_new_help_ticket(
-        help_ticket=help_ticket
-    )
+    help_ticket = await help_ticket_repo.add_new_help_ticket(help_ticket=help_ticket)
     if not help_ticket:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Help ticket not created"
@@ -44,6 +46,7 @@ async def update_help_ticket_status(
     help_ticket_repo: HelpTicketRepository = Depends(
         get_repository(HelpTicketRepository)
     ),
+    current_user: UserPublic = Depends(get_current_user),
 ) -> HelpTicketsPublic:
     """Update help ticket status."""
     help_ticket = await help_ticket_repo.update_help_ticket_status(
@@ -66,6 +69,7 @@ async def get_help_ticket(
     help_ticket_repo: HelpTicketRepository = Depends(
         get_repository(HelpTicketRepository)
     ),
+    current_user: UserPublic = Depends(get_current_user),
 ) -> HelpTicketsPublic:
     """Get a help ticket."""
     help_ticket = await help_ticket_repo.get_help_ticket_by_help_ticket_id(
@@ -85,6 +89,7 @@ async def get_all_help_tickets(
     help_ticket_repo: HelpTicketRepository = Depends(
         get_repository(HelpTicketRepository)
     ),
+    current_admin: UserPublic = Depends(get_current_admin),
 ) -> list[HelpTicketsPublic]:
     """Get all help tickets."""
     return await help_ticket_repo.get_all_help_tickets()
@@ -100,6 +105,7 @@ async def get_all_help_tickets_by_telegram_id(
     help_ticket_repo: HelpTicketRepository = Depends(
         get_repository(HelpTicketRepository)
     ),
+    current_admin: UserPublic = Depends(get_current_admin),
 ) -> list[HelpTicketsPublic]:
     """Get all help tickets by telegram id."""
     return await help_ticket_repo.get_all_help_tickets_by_telegram_id(

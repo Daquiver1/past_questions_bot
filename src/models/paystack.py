@@ -1,8 +1,11 @@
 """Model for paystack."""
-from typing import List
+
+from typing import List, Union
 
 from pydantic import validator
+
 from src.models.base import CoreModel, IDModelMixin
+from src.models.subscriptions import SubscriptionTier
 
 
 class CustomField(CoreModel):
@@ -35,6 +38,33 @@ class CreatePayment(CoreModel):
     amount: float
 
 
+class CreateSubscriptionPlan(CoreModel):
+    """A model for creating a subscription plan."""
+
+    telegram_id: int
+    telegram_username: str
+    tier: Union[SubscriptionTier, str]
+
+    @validator("tier", pre=True, allow_reuse=True)
+    def convert_tier_to_enum(cls, value: str) -> SubscriptionTier:
+        """Convert the tier to a SubscriptionTier enum."""
+        if isinstance(value, str):
+            try:
+                return SubscriptionTier[value.upper()]
+            except KeyError:
+                raise ValueError(  # noqa
+                    f"Invalid subscription tier: {value}. Choose from Basic, Standard, or Premium."
+                )
+        return value
+
+    @validator("tier")
+    def ensure_tier_is_enum(cls, value: str) -> SubscriptionTier:
+        """Ensure the tier is a SubscriptionTier enum."""
+        if not isinstance(value, SubscriptionTier):
+            raise TypeError("tier must be a SubscriptionTier enum.")
+        return value
+
+
 class VerifyTransaction(CoreModel):
     """A model for verifying the transaction."""
 
@@ -54,6 +84,6 @@ class SuccessfulTransaction(CoreModel, IDModelMixin):
     metadata: Metadata
 
     @validator("amount", pre=True, allow_reuse=True)
-    def divide_amount_by_100(cls, v) -> float:
+    def divide_amount_by_100(cls, v: int) -> float:
         """Divide the amount by 100."""
         return v / 100
