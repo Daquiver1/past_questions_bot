@@ -3,19 +3,24 @@
 import hashlib
 import hmac
 
-import requests
-from fastapi import APIRouter, Request, Response, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
-from src.core.config import PAYSTACK_BASE_URL, PAYSTACK_SECRET_KEY
+from src.core.config import PAYSTACK_SECRET_KEY
 from src.models.paystack import (
     CreatePayment,
     CreatePaymentResponse,
+    CreateSubscriptionPlan,
     SuccessfulTransaction,
     VerifyTransaction,
 )
+from src.services.paystack import PayStack
 
 router = APIRouter()
+paystack = PayStack()
+BASIC_PLAN = 5
+STANDARD_PLAN = 10
+PREMIUM_PLAN = 15
 
 
 @router.post(
@@ -28,33 +33,7 @@ async def create_payment(
 ) -> CreatePaymentResponse:
     """This function creates a mobile money payment transaction using the Paystack API with the specified email and amount."""
     try:
-        url = f"{PAYSTACK_BASE_URL}transaction/initialize"
-        headers = {
-            "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
-            "Content-Type": "application/json",
-        }
-
-        data = {
-            "amount": create_payment.amount * 100,
-            "email": "quivertech1@gmail.com",
-            "currency": "GHS",
-            "channels": ["mobile_money"],
-            "metadata": {
-                "custom_fields": [
-                    {
-                        "display_name": "Telegram ID",
-                        "variable_name": "Telegram ID",
-                        "value": create_payment.telegram_id,
-                    },
-                    {
-                        "display_name": "Telegram Username",
-                        "variable_name": "Telegram Username",
-                        "value": create_payment.telegram_username,
-                    },
-                ]
-            },
-        }
-        response = requests.post(url, headers=headers, json=data)
+        response = await paystack.create_payment(create_payment)
         if response.status_code == 200 and response.json()["status"] is True:
             print(response.json())
             return response.json()["data"]
@@ -71,12 +50,38 @@ async def create_payment(
 async def verify_transaction(reference: str) -> VerifyTransaction:
     """This function verifies a paystack transaction. It returns the status of the transaction."""
     try:
-        url = f"{PAYSTACK_BASE_URL}transaction/verify/{reference}"
-        headers = {
-            "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
-            "Content-Type": "application/json",
-        }
-        response = requests.get(url, headers=headers)
+        response = await paystack.verify_transaction(reference)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return response.json()
+    except Exception as e:
+        print(e)
+
+
+@router.post("/create_subscription", status_code=status.HTTP_201_CREATED)
+async def create_subscribe_plan(
+    create_subscription_plan: CreateSubscriptionPlan,
+) -> CreatePaymentResponse:
+    """Endpoint for the Basic tier subscription."""
+    try:
+        response = await paystack.create_subscription_plan(create_subscription_plan)
+        if response:
+            if response.status_code == 200 and response.json()["status"] is True:
+                return response.json()["data"]
+            else:
+                return response.json()
+        else:
+            return response
+    except Exception as e:
+        print(e)
+
+
+@router.get("/verify_subscription/{reference}")
+async def verify_subscription(reference: str) -> VerifyTransaction:
+    """This function verifies a paystack transaction. It returns the status of the transaction."""
+    try:
+        response = await paystack.verify_transaction(reference)
         if response.status_code == 200:
             return response.json()
         else:
@@ -107,50 +112,3 @@ async def paystack_webhook(request: Request, response: Response) -> JSONResponse
     return JSONResponse(
         content={"message": "Transaction was successful."}, status_code=200
     )
-
-
-@router.post("/create_plan")
-async def create_plan(name: str, amount: float) -> dict:
-    """This function creates a monthly paystack subscription plan."""
-    try:
-        url = f"{PAYSTACK_BASE_URL}plan"
-        headers = {
-            "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
-            "Content-Type": "application/json",
-        }
-        data = {
-            "amount": amount * 100,
-            "interval": "monthly",
-            "name": name,
-        }
-        response = requests.post(url, headers=headers, json=data)
-        if response.status_code == 201:
-            return response.json()["data"]
-        else:
-            return response.json()["message"]
-    except Exception as e:
-        print(e)
-
-
-@router.post("/subscribe_plan")
-async def subscribe_plan(email: str, subscription_plan: str, amount: float) -> dict:
-    """This functions subscribes to a paystack plan."""
-    try:
-        url = f"{PAYSTACK_BASE_URL}transaction/initialize"
-        headers = {
-            "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
-            "Content-Type": "application/json",
-        }
-        data = {
-            "amount": amount * 100,
-            "email": email,
-            "channels": ["card"],
-            "plan": subscription_plan,
-        }
-        response = requests.post(url, headers=headers, json=data)
-        if response.status_code == 200:
-            return response.json()["data"]
-        else:
-            return response.json()["message"]
-    except Exception as e:
-        print(e)

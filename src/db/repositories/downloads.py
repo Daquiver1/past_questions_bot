@@ -7,8 +7,8 @@ from src.db.repositories.base import BaseRepository
 from src.models.downloads import DownloadCreate, DownloadInDB
 
 ADD_DOWNLOAD_QUERY = """
-    INSERT INTO downloads (user_telegram_id, past_question_id)
-    VALUES (:user_telegram_id, :past_question_id)
+    INSERT INTO downloads (user_telegram_id, past_question_id, updated_at)
+    VALUES (:user_telegram_id, :past_question_id, :updated_at)
     RETURNING id, user_telegram_id, past_question_id, created_At, updated_At;
 """
 
@@ -77,9 +77,8 @@ class DownloadRepository(BaseRepository):
             query=GET_DOWNLOAD_BY_PAST_QUESTION_ID_QUERY,
             values={"past_question_id": past_question_id},
         )
-        if downloads:
-            return [DownloadInDB(**download) for download in downloads]
-        return []
+        return [DownloadInDB(**download) for download in downloads]
+        
 
     async def delete_download(self, *, id: str) -> str:
         """Delete downloads data"""

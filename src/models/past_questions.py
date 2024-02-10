@@ -4,7 +4,12 @@ from typing import Optional
 
 from pydantic import validator
 
-from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin
+from src.models.base import (
+    CoreModel,
+    DateTimeModelMixin,
+    IDModelMixin,
+    UpdatedAtModelMixin,
+)
 
 
 class PastQuestionBase(CoreModel):
@@ -46,13 +51,15 @@ class PastQuestionBase(CoreModel):
         raise ValueError("course_title cannot be generated")
 
 
-class PastQuestionCreate(PastQuestionBase):
+class PastQuestionCreate(PastQuestionBase, UpdatedAtModelMixin):
     """Creating a new past question."""
 
     pass
 
 
-class PastQuestionInDB(IDModelMixin, DateTimeModelMixin, PastQuestionBase):
+class PastQuestionInDB(
+    IDModelMixin, DateTimeModelMixin, UpdatedAtModelMixin, PastQuestionBase
+):
     """Past Question coming from DB."""
 
     pass

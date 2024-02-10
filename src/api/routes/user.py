@@ -1,7 +1,5 @@
 """Route for Users"""
 
-# Third party imports
-
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status

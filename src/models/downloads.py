@@ -1,6 +1,11 @@
 """Downloads Model"""
 
-from src.models.base import CoreModel, DateTimeModelMixin, IDModelMixin
+from src.models.base import (
+    CoreModel,
+    DateTimeModelMixin,
+    IDModelMixin,
+    UpdatedAtModelMixin,
+)
 
 
 class DownloadBase(CoreModel):
@@ -10,13 +15,15 @@ class DownloadBase(CoreModel):
     past_question_id: int
 
 
-class DownloadCreate(DownloadBase):
+class DownloadCreate(DownloadBase, UpdatedAtModelMixin):
     """Creating a new downloads."""
 
     pass
 
 
-class DownloadInDB(DownloadCreate, IDModelMixin, DateTimeModelMixin):
+class DownloadInDB(
+    DownloadCreate, IDModelMixin, UpdatedAtModelMixin, DateTimeModelMixin
+):
     """Downloads coming from DB."""
 
     pass

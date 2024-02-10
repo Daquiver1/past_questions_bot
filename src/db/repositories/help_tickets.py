@@ -10,8 +10,8 @@ from src.models.help_ticket_status_enum import HelpTicketStatus
 from src.models.help_tickets import HelpTicketsCreate, HelpTicketsInDB
 
 ADD_HELP_TICKET_QUERY = """
-    INSERT INTO help_tickets (telegram_id, subject, message, status)
-    VALUES (:telegram_id, :subject, :message, :status)
+    INSERT INTO help_tickets (telegram_id, subject, message, status, updated_at)
+    VALUES (:telegram_id, :subject, :message, :status, :updated_at)
     RETURNING id, telegram_id, subject, message, status, created_At, updated_At;
     """
 

@@ -41,7 +41,7 @@ async def get_all_user_downloads(
 
 
 @router.get(
-    "/pasco/{telegram_id}",
+    "/pasco/{past_question_id}",
     response_model=list[DownloadPublic],
     status_code=status.HTTP_200_OK,
 )
@@ -53,3 +53,11 @@ async def get_all_past_questions_downloads(
     return await download_repo.get_all_past_question_downloads(
         past_question_id=past_question_id
     )
+
+
+@router.get("", response_model=list[DownloadPublic], status_code=status.HTTP_200_OK)
+async def get_all_downloads(
+    download_repo: DownloadRepository = Depends(get_repository(DownloadRepository)),
+) -> list[DownloadPublic]:
+    """Get all downloads."""
+    return await download_repo.get_all_downloads()

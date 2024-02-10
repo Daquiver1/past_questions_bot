@@ -1,13 +1,11 @@
 """A module to scrape past questions from the balme library portal."""
 
 import os
-import random
 import re
 import time
 
 import dotenv
 from bs4 import BeautifulSoup
-from matplotlib.pylab import det
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
@@ -101,6 +99,7 @@ class Scraper:
         return "No Semester Found"
 
     def extract_year_text(self, year_text: str) -> str:
+        """Extract the year from the year text."""
         if year_text:
             if "/" in year_text:
                 return year_text.split("/")[-1].strip()
@@ -152,7 +151,9 @@ class Scraper:
 
     def download_past_question(self, past_questions_details: dict) -> None:
         """Download the past questions and process them."""
-        download_directory = os.getcwd() + os.sep + "past_questions" + os.sep + self.folder_name
+        download_directory = (
+            os.getcwd() + os.sep + "past_questions" + os.sep + self.folder_name
+        )
         self.download_and_process_question(past_questions_details, download_directory)
 
     def download_and_process_question(
@@ -236,12 +237,13 @@ class Scraper:
 
 
 if __name__ == "__main__":
-    scraper = Scraper("first-set")
-    ids = range(1, 1000)
+    scraper = Scraper("twelve-set")
+    ids = range(11000, 11737)
 
     for id in ids:
         details = scraper.get_past_question_details(str(id))
         scraper.download_past_question(details)
 
-    # scraper.get_past_question_details(2304)
+    # stat 334, arab 304, math 425 in 9ks
+    # geog  403, adlt 202, adlt 048 in 11ks
     print("Done")

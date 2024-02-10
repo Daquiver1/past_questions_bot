@@ -68,6 +68,65 @@ def create_past_questions_table() -> None:
     )
 
 
+def create_subscriptions_table() -> None:
+    """Create subscriptions table."""
+    op.create_table(
+        "subscriptions",
+        sa.Column("id", sa.Integer(), primary_key=True, index=True, nullable=False),
+        sa.Column(
+            "user_telegram_id",
+            sa.Integer(),
+            sa.ForeignKey("users.telegram_id", ondelete="CASCADE"),
+            nullable=False,
+            unique=True,
+        ),
+        sa.Column("transaction_id", sa.String, nullable=False),
+        sa.Column("tier", sa.String(), nullable=False),
+        sa.Column("is_active", sa.Boolean(), nullable=False, index=True, default=True),
+        sa.Column(
+            "balance", sa.Numeric(precision=10, scale=2), nullable=False, default=0
+        ),
+        *timestamps(),
+        sa.CheckConstraint(
+            "tier IN ('Basic', 'Standard', 'Premium')",
+            name="tier check",
+        ),
+    )
+
+
+def create_subscription_history_table() -> None:
+    """Create subscription history table."""
+    op.create_table(
+        "subscription_history",
+        sa.Column("id", sa.Integer(), primary_key=True, index=True, nullable=False),
+        sa.Column(
+            "subscription_id",
+            sa.Integer(),
+            sa.ForeignKey("subscriptions.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        ),
+        sa.Column(
+            "user_telegram_id",
+            sa.Integer(),
+            sa.ForeignKey("users.telegram_id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        ),
+        sa.Column("transaction_id", sa.String, nullable=False),
+        sa.Column("tier", sa.String(), nullable=False),
+        sa.Column("is_active", sa.Boolean(), nullable=False, index=True, default=True),
+        sa.Column(
+            "amount", sa.Numeric(precision=10, scale=2), nullable=False, default=0
+        ),
+        *timestamps(),
+        sa.CheckConstraint(
+            "tier IN ('Basic', 'Standard', 'Premium')",
+            name="tier check",
+        ),
+    )
+
+
 def create_downloads_table() -> None:
     """Create downloads table."""
     op.create_table(
@@ -75,15 +134,15 @@ def create_downloads_table() -> None:
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
         sa.Column(
             "user_telegram_id",
-            sa.String(),
-            sa.ForeignKey("users.telegram_id"),
+            sa.Integer(),
+            sa.ForeignKey("users.telegram_id", ondelete="CASCADE"),
             nullable=False,
             index=True,
         ),
         sa.Column(
             "past_question_id",
             sa.Integer(),
-            sa.ForeignKey("past_questions.id"),
+            sa.ForeignKey("past_questions.id", ondelete="CASCADE"),
             nullable=False,
             index=True,
         ),
@@ -99,7 +158,7 @@ def create_help_tickets_table() -> None:
         sa.Column(
             "user_telegram_id",
             sa.Integer(),
-            sa.ForeignKey("users.telegram_id"),
+            sa.ForeignKey("users.telegram_id", ondelete="CASCADE"),
             nullable=False,
             index=True,
         ),
@@ -123,6 +182,8 @@ def upgrade() -> None:
     create_users_table()
     create_past_questions_table()
     create_downloads_table()
+    create_subscriptions_table()
+    create_subscription_history_table()
     create_help_tickets_table()
 
 
@@ -131,4 +192,6 @@ def downgrade() -> None:
     op.drop_table("downloads")
     op.drop_table("help_tickets")
     op.drop_table("past_questions")
+    op.drop_table("subscription_history")
+    op.drop_table("subscriptions")
     op.drop_table("users")

@@ -29,14 +29,16 @@ def upload_file_to_bucket(
         object_name = create_object_name(past_question_file)
         s3_client.upload_fileobj(
             past_question_file.file,
-            S3_BUCKET_NAME + "/past_questions",
-            object_name,
+            S3_BUCKET_NAME,
+            "past_questions/" + object_name,
             ExtraArgs={
-                "Metadata": {**past_question.dict(exclude={"past_question_url"})},
+                "Metadata": {
+                    **past_question.dict(exclude={"past_question_url", "updated_at"})
+                },
             },
         )
         file_url = (
-            f"https://{S3_BUCKET_NAME}.s3.{S3_REGION}.amazonaws.com/{object_name}"
+            f"https://{S3_BUCKET_NAME}.s3.{S3_REGION}.amazonaws.com/past_questions/{object_name}"
         )
         return file_url
     except ClientError as e:

@@ -1,5 +1,5 @@
 # Define the application build stage
-FROM python:3.11-slim-buster as app-build
+FROM python:3.11.8-slim-bookworm as app-build
 
 # Set work directory and environment variables
 WORKDIR /past_questions_bot
@@ -8,7 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # Install system dependencies
 RUN apt-get update \
-  && apt-get -y install netcat gcc postgresql \
+  && apt-get -y install netcat-openbsd gcc \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install project dependencies

@@ -9,25 +9,22 @@ import dotenv
 import sentry_sdk
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart
+from aiogram.filters import Command, CommandStart
 from aiogram.types import ErrorEvent, Message, Update, URLInputFile
 from aiogram.utils.markdown import hbold
 
 from api_service import BackendClient
+from filters import TextMatchFilter
 from helpers import (
-    already_registered_message,
     ask_payment_confirmation,
+    ask_subscription_confirmation,
     create_button_layout,
     create_filename_for_past_question,
-    failed_to_register_account_message,
-    format_error_message_to_admin,
     format_past_question_message,
-    generic_error_message,
-    invalid_past_question_message,
-    searching_past_question_message,
     validate_user_input,
-    welcome_message,
 )
+from model import SubscriptionTier
+from strings import Strings
 
 dotenv.load_dotenv()
 TOKEN = os.environ["TOKEN"]
@@ -38,6 +35,7 @@ SENTRY_DSN_BOT = os.environ["SENTRY_DSN_BOT"]
 dp = Dispatcher()
 api_service = BackendClient(BASE_URL)
 my_bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
+strings = Strings()
 
 
 @dp.message(CommandStart())
@@ -47,17 +45,71 @@ async def command_start_handler(message: Message) -> None:
         registration_status = await check_or_register_user(message)
         if registration_status == "already_registered":
             await message.answer(
-                already_registered_message(message.from_user.full_name)
+                strings.already_registered_message(message.from_user.full_name)
             )
         elif registration_status == "new_registration":
             await message.answer(
-                f"Hello, {hbold(welcome_message(message.from_user.full_name))}!"
+                f"Hello, {hbold(strings.welcome_message(message.from_user.full_name))}!"
             )
         elif registration_status == "registration_failed":
-            await message.answer(failed_to_register_account_message())
+            await message.answer(strings.failed_to_register_account_message())
     except Exception as e:
         print(f"Error in command_start_handler: {e}")
-        await message.answer(generic_error_message())
+        await message.answer(strings.generic_error_message())
+
+
+@dp.message(Command("subscription"))
+async def command_subscription_handler(message: Message) -> None:
+    """Handles messages with the `/subscription` command."""
+    try:
+        await message.answer(strings.subscription_info_message())
+    except Exception as e:
+        print(f"Error in command_subscription_handler: {e}")
+        await message.answer(strings.generic_error_message())
+
+
+@dp.message(Command("subscribe"))
+async def command_subscribe_handler(message: types.Message) -> None:
+    """Handles messages with the `/subscribe` command, allowing subscription to different tiers."""
+    try:
+        args = message.text.split()
+        print(args)
+        tier_arg = args[1] if len(args) > 1 else None
+
+        if not tier_arg or tier_arg == "":
+            await message.answer(strings.specify_subscription_tier_message())
+            return
+        tier = SubscriptionTier.from_arg(tier_arg)
+        if not tier:
+            await message.answer(strings.invalid_subscription_tier_message(tier_arg))
+            return
+        await message.answer(strings.subscribing_to_tier_message(tier.tier_name))
+        response = await api_service.create_subscription_link(
+            message.from_user.id, message.from_user.username, tier
+        )
+        if response["success"]:
+            await message.answer(
+                strings.make_payment_message(
+                    response["data"]["authorization_url"], tier.tier_name
+                )
+            )
+            reference = response["data"]["reference"]
+            reply_markup = ask_subscription_confirmation(reference, tier)
+            await message.answer(
+                strings.completed_payment_question_message, reply_markup=reply_markup
+            )
+        else:
+            await message.answer(strings.create_payment_failed_message())
+    except Exception as e:
+        print(f"Error in command_subscribe_handler: {e}")
+        await message.answer(strings.generic_error_message())
+
+
+@dp.message(TextMatchFilter("Daquiver"))
+@dp.message(TextMatchFilter("Christian"))
+async def handle_daquiver_message(message: types.Message) -> None:
+    """Handles messages with the word "Daquiver"."""
+    await message.answer(strings.daquiver_easter_egg_message())
 
 
 @dp.message()
@@ -65,32 +117,64 @@ async def echo_handler(message: types.Message) -> None:
     """Handler for all messages except commands."""
     try:
         user_input = message.text
-        await message.answer(f"You said {user_input}")
+        await message.answer(strings.echo_message(user_input))
 
         cleaned_input = validate_user_input(user_input)
         if not cleaned_input:
-            await message.answer(
-                f"{hbold('Invalid past question name')}\n\n{invalid_past_question_message()}"
-            )
+            await message.answer(strings.invalid_past_question_message())
             return
 
-        await message.answer(searching_past_question_message(cleaned_input))
+        await message.answer(strings.searching_past_question_message(cleaned_input))
         response = await api_service.get_past_questions(cleaned_input)
         if response["success"]:
             if not response["data"]:
-                await message.answer(f"No {cleaned_input} past question found")
+                await message.answer(
+                    strings.no_past_question_found_message(cleaned_input)
+                )
                 return
             await present_past_questions(
                 message=message, past_questions=response["data"]
             )
         else:
-            await message.answer("Failed to get past question")
+            await message.answer(
+                strings.failed_to_get_past_question_message(cleaned_input)
+            )
     except TypeError as e:
-        await message.answer("Invalid type")
+        print(e)
+        await message.answer(strings.invalid_type_message())
         print(e)
     except Exception as e:
         print(e)
-        await message.answer(generic_error_message())
+        await message.answer(strings.generic_error_message())
+
+
+@dp.callback_query(lambda c: c.data and c.data.startswith("sub"))
+async def handle_subscription_confirmation(callback_query: types.CallbackQuery) -> None:
+    """Handle button click."""
+    _, reference, tier_name, amount = callback_query.data.split(";")
+    await callback_query.answer()
+
+    response = await api_service.verify_payment(reference)
+    if response["success"] and response["data"]["data"]["status"] == "success":
+        await callback_query.message.answer(strings.payment_successful_message())
+        response = await api_service.create_subscription(
+            callback_query.from_user.id, tier_name, amount, reference
+        )
+        if not response["success"]:
+            await callback_query.message.answer(strings.failed_to_subscribe())
+            # await send message to admin
+            return
+        await callback_query.message.answer(
+            strings.subscription_successful_message(tier_name)
+        )
+    elif response["success"] and response["data"]["data"]["status"] == "abandoned":
+        await callback_query.message.answer(strings.payment_not_started_message())
+    elif response["success"] and response["data"]["data"]["status"] == "failed":
+        await callback_query.message.answer(strings.payment_failed_message())
+    else:
+        await callback_query.message.answer(
+            strings.payment_verification_failed_message()
+        )
 
 
 @dp.callback_query(lambda c: c.data and c.data.startswith("question"))
@@ -98,24 +182,58 @@ async def handle_question_selection(callback_query: types.CallbackQuery) -> None
     """Handle button click."""
     _, index, past_question_id, length = callback_query.data.split(";")
     await callback_query.answer()
+
+    response = await api_service.get_user_subscription(callback_query.from_user.id)
+    if response and response["success"]:
+        print(response["data"])
+        balance, is_active = response["data"]["balance"], response["data"]["is_active"]
+        balance, length = int(balance), int(length)
+        if index == "all":
+            if balance >= length and is_active:
+                await callback_query.message.answer(strings.selected_all_message())
+                await handle_all_questions(callback_query, past_question_id)
+                await api_service.update_subscription_balance(
+                    callback_query.from_user.id, int(balance) - int(length)
+                )
+                await callback_query.message.answer(
+                    strings.update_past_question_number(length, balance)
+                )
+                return
+
+            else:
+                await callback_query.message.answer(
+                    strings.not_enough_balance_message(balance, length)
+                )
+                return
+        elif balance > 0 and is_active:
+            await callback_query.message.answer(strings.selected_index_message(index))
+            await handle_single_question(callback_query, past_question_id)
+            await api_service.update_subscription_balance(
+                callback_query.from_user.id, balance - 1
+            )
+            await callback_query.message.answer(
+                strings.update_past_question_number(1, balance)
+            )
+            return
+
     payment_details = {
         "telegram_id": callback_query.from_user.id,
         "telegram_username": callback_query.from_user.username,
         "amount": length,
     }
-    await callback_query.message.answer("Creating payment link...")
+    await callback_query.message.answer(strings.creating_payment_link())
     response = await api_service.create_payment_link(json=payment_details)
     if response["success"]:
         await callback_query.message.answer(
-            f"Click on the link below to make payment.\n\n({response['data']['authorization_url']})"
+            strings.make_payment_message(response["data"]["authorization_url"])
         )
         reference = response["data"]["reference"]
         reply_markup = ask_payment_confirmation(index, past_question_id, reference)
         await callback_query.message.answer(
-            "Have you completed your payment?", reply_markup=reply_markup
+            strings.completed_payment_question_message(), reply_markup=reply_markup
         )
     else:
-        await callback_query.message.answer("Failed to create payment link")
+        await callback_query.message.answer(strings.create_payment_failed_message())
     return
 
 
@@ -127,26 +245,29 @@ async def handle_payment_confirmation(callback_query: types.CallbackQuery) -> No
 
     response = await api_service.verify_payment(reference)
     if response["success"] and response["data"]["data"]["status"] == "success":
-        await callback_query.message.answer("Payment successful")
+        await callback_query.message.answer(strings.payment_successful_message())
 
         if index == "all":
-            await callback_query.message.answer("You selected all")
+            await callback_query.message.answer(strings.selected_all_message())
             await handle_all_questions(callback_query, past_question_id)
         else:
-            await callback_query.message.answer(f"You selected #{index}")
+            await callback_query.message.answer(strings.selected_index_message(index))
             await handle_single_question(callback_query, past_question_id)
     elif response["success"] and response["data"]["data"]["status"] == "abandoned":
-        await callback_query.message.answer("Payment not started.")
+        await callback_query.message.answer(strings.payment_not_started_message())
     elif response["success"] and response["data"]["data"]["status"] == "failed":
-        await callback_query.message.answer("Payment failed.")
+        await callback_query.message.answer(strings.payment_failed_message())
     else:
-        await callback_query.message.answer("Failed to verify payment")
+        await callback_query.message.answer(
+            strings.payment_verification_failed_message()
+        )
 
 
 @dp.error()
 async def error_handler(event: ErrorEvent) -> None:
     """Global error handler. Logs the error and sends it to the admin."""
-    await send_error_to_admin(event.exception, event.update.message)
+    await send_error_to_user(event.exception, event.update)
+    await send_error_to_admin(event.exception, event.update)
 
 
 async def check_or_register_user(message: Message) -> str:
@@ -171,10 +292,14 @@ async def check_or_register_user(message: Message) -> str:
 async def present_past_questions(message: types.Message, past_questions: list) -> None:
     """Present past questions to user"""
     await message.answer(
-        f"We found {len(past_questions)} {past_questions[0]['course_title']} past questions"
+        strings.found_past_question_message(
+            len(past_questions), past_questions[0]["course_title"]
+        )
     )
 
-    message_text = f"{past_questions[0]['course_title']} Questions:\n\n"
+    message_text = strings.past_questions_title_message(
+        past_questions[0]["course_title"]
+    )
     message_lines = [
         format_past_question_message(index, question)
         for index, question in enumerate(past_questions, start=1)
@@ -185,7 +310,7 @@ async def present_past_questions(message: types.Message, past_questions: list) -
 
     await message.answer(message_text)
     await message.answer(
-        "Which one do you want to download?", reply_markup=reply_markup
+        strings.past_question_to_download_message, reply_markup=reply_markup
     )
 
 
@@ -193,15 +318,18 @@ async def handle_all_questions(
     callback_query: types.CallbackQuery, past_question_id: str
 ) -> None:
     """Handle all questions"""
-    print(past_question_id)
     response = await api_service.get_past_questions(past_question_id)
     if response.get("success"):
-        await callback_query.message.answer("Sending all past questions...")
+        await callback_query.message.answer(
+            strings.sending_all_past_questions_message()
+        )
         for past_question in response["data"]:
             await send_past_question(callback_query, past_question)
-        await callback_query.message.answer("Done!")
+        await callback_query.message.answer(strings.done_message())
     else:
-        await callback_query.message.answer("Failed to get past questions.")
+        await callback_query.message.answer(
+            strings.failed_to_get_past_question_message()
+        )
 
 
 async def handle_single_question(
@@ -210,10 +338,14 @@ async def handle_single_question(
     """Handle single question"""
     response = await api_service.get_past_question(past_question_id)
     if response.get("success"):
-        await callback_query.message.answer("Sending past question...")
+        await callback_query.message.answer(strings.sending_past_question_message())
         await send_past_question(callback_query, response["data"])
+        await callback_query.message.answer(strings.done_message())
+
     else:
-        await callback_query.message.answer("Failed to get past question.")
+        await callback_query.message.answer(
+            strings.failed_to_get_past_question_message()
+        )
 
 
 async def send_past_question(
@@ -226,6 +358,19 @@ async def send_past_question(
     )
     await callback_query.message.answer_document(document=document)
     await api_service.create_download(callback_query.from_user.id, past_question["id"])
+
+
+async def send_error_to_user(exception: Exception, update: Update) -> None:
+    """Sends an error message to the user with details about the exception."""
+    user_id = None
+    if update and update.message:
+        user_id = update.message.from_user.id
+    elif update and update.callback_query:
+        user_id = update.callback_query.from_user.id
+
+    await my_bot.send_message(
+        chat_id=user_id, text=strings.error_message_to_user_message()
+    )
 
 
 async def send_error_to_admin(exception: Exception, update: Update) -> None:
@@ -242,7 +387,7 @@ async def send_error_to_admin(exception: Exception, update: Update) -> None:
         username = update.callback_query.from_user.username
         message_text = update.callback_query.data
 
-    error_message = format_error_message_to_admin(
+    error_message = strings.format_error_message_to_admin(
         exception, user_id, username, message_text
     )
     await my_bot.send_message(chat_id=ADMIN_TELEGRAM_ID, text=error_message)
@@ -257,7 +402,7 @@ if __name__ == "__main__":
     sentry_sdk.init(
         dsn=SENTRY_DSN_BOT,
         environment="development",
-        traces_sample_rate=0.1,
+        traces_sample_rate=0.0001,
     )
     logging.basicConfig(
         level=logging.INFO,

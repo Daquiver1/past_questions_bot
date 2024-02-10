@@ -10,8 +10,8 @@ from src.models.past_question_filter_enum import PastQuestionFilter
 from src.models.past_questions import PastQuestionCreate, PastQuestionInDB
 
 ADD_PAST_QUESTION_QUERY = """
-    INSERT INTO past_questions (course_code, course_name, course_title, lecturer_name, past_question_url, semester, year)
-    VALUES (:course_code, :course_name, :course_title, :lecturer_name, :past_question_url, :semester, :year)
+    INSERT INTO past_questions (course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, updated_at)
+    VALUES (:course_code, :course_name, :course_title, :lecturer_name, :past_question_url, :semester, :year, :updated_at)
     RETURNING id, course_code, course_name, course_title, lecturer_name, past_question_url, semester, year, created_At, updated_At;
 """
 
