@@ -37,14 +37,14 @@ async def send_error_to_admin(exception: Exception, update: Update) -> None:
     user_id = None
     username = "Unknown"
     message_text = None
-    if update and update.message:
-        user_id = update.message.from_user.id
-        username = update.message.from_user.username
-        message_text = update.message.text
-    elif update and update.callback_query:
+    if update and update.callback_query:
         user_id = update.callback_query.from_user.id
         username = update.callback_query.from_user.username
         message_text = update.callback_query.data
+    elif update and update.message:
+        user_id = update.message.from_user.id
+        username = update.message.from_user.username
+        message_text = update.message.text
 
     error_message = strings.format_error_message_to_admin(
         exception, user_id, username, message_text

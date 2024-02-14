@@ -80,16 +80,16 @@ class DownloadRepository(BaseRepository):
         )
         return [DownloadInDB(**download) for download in downloads]
 
-    async def delete_download(self, *, id: str) -> str:
-        """Delete downloads data"""
-        return await self.db.fetch_one(
-            query=DELETE_DOWNLOAD_BY_DOWNLOAD_ID_QUERY,
-            values={"id": id},
-        )
-
     async def get_all_downloads(self) -> list[DownloadInDB]:
         """Get all downloads data"""
         downloads = await self.db.fetch_all(
             query=GET_ALL_DOWNLOADS_QUERY,
         )
         return [DownloadInDB(**download) for download in downloads]
+
+    async def delete_download(self, *, id: str) -> str:
+        """Delete downloads data"""
+        return await self.db.execute(
+            query=DELETE_DOWNLOAD_BY_DOWNLOAD_ID_QUERY,
+            values={"id": id},
+        )

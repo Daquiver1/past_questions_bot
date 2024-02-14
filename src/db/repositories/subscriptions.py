@@ -57,7 +57,7 @@ UPDATE_SUBSCRIPTION_BALANCE_QUERY = """
 DELETE_SUBSCRIPTION_BY_USER_TELEGRAM_ID_QUERY = """
     DELETE FROM subscriptions
     WHERE user_telegram_id = :user_telegram_id
-    RETURNING id, user_telegram_id, tier, balance, is_active, transaction_id,created_at, updated_at;
+    RETURNING id;
     """
 
 
@@ -172,12 +172,10 @@ class SubscriptionRepository(BaseRepository):
 
     async def delete_subscription_by_user_telegram_id(
         self, user_telegram_id: int
-    ) -> Optional[SubscriptionInDB]:
+    ) -> int:
         """Delete subscription data"""
-        subscription = await self.db.fetch_one(
+        return await self.db.execute(
             query=DELETE_SUBSCRIPTION_BY_USER_TELEGRAM_ID_QUERY,
             values={"user_telegram_id": user_telegram_id},
         )
-        if subscription:
-            return SubscriptionInDB(**subscription)
-        return None
+        

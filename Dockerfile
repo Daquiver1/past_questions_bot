@@ -12,8 +12,8 @@ RUN apt-get update \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install project dependencies
-COPY requirements.txt /past_questions_bot/
-RUN pip install --upgrade -r requirements.txt
+COPY requirements.txt requirements-dev.txt /past_questions_bot/
+RUN pip install --upgrade -r requirements.txt -r requirements-dev.txt
 
 # Copy project
 COPY . /past_questions_bot

@@ -62,10 +62,10 @@ class PastQuestionInDB(
 ):
     """Past Question coming from DB."""
 
-    pass
+    hash_key: str
 
 
 class PastQuestionPublic(IDModelMixin, PastQuestionBase):
     """Past Question Public."""
 
-    pass
+    hash_key: str
