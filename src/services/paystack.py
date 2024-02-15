@@ -1,6 +1,6 @@
 """Paystack service module."""
 
-import requests
+import httpx
 
 from src.core.config import PAYSTACK_BASE_URL, PAYSTACK_SECRET_KEY
 from src.models.paystack import CreatePayment, CreateSubscriptionPlan
@@ -17,7 +17,7 @@ class PayStack:
     async def create_payment(
         self,
         create_payment: CreatePayment,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """This function creates a mobile money payment transaction using the Paystack API with the specified email and amount."""
         try:
             url = f"{self.base_url}transaction/initialize"
@@ -51,15 +51,16 @@ class PayStack:
                     ]
                 },
             }
-            response = requests.post(url, headers=headers, json=data)
-            return response
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, headers=headers, json=data)
+                return response
         except Exception as e:
             print(e)
 
     async def create_subscription_plan(
         self,
         create_subscription_plan: CreateSubscriptionPlan,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """This function creates a subscription plan using the Paystack API with the specified email and amount."""
         try:
             url = f"{self.base_url}transaction/initialize"
@@ -108,12 +109,14 @@ class PayStack:
                     ]
                 },
             }
-            response = requests.post(url, headers=headers, json=data)
-            return response
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, headers=headers, json=data)
+                return response
+
         except Exception as e:
             print(e)
 
-    async def verify_transaction(self, reference: str) -> requests.Response:
+    async def verify_transaction(self, reference: str) -> httpx.Response:
         """This function verifies a paystack transaction. It returns the status of the transaction."""
         try:
             url = f"{self.base_url}transaction/verify/{reference}"
@@ -121,7 +124,8 @@ class PayStack:
                 "Authorization": f"Bearer {self.secret_key}",
                 "Content-Type": "application/json",
             }
-            response = requests.get(url, headers=headers)
-            return response
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, headers=headers)
+                return response
         except Exception as e:
             print(e)

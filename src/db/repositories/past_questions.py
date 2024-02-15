@@ -117,7 +117,6 @@ class PastQuestionRepository(BaseRepository):
             "year": GET_PAST_QUESTION_BY_YEAR_QUERY,
         }
         query = query_mapping.get(filter_by.value)
-        print(filter_by, filter_value, query)
 
         if not query:
             print("invalid filter")

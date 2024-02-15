@@ -1,6 +1,8 @@
 """Route for Subscriptions"""
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from src.db.repositories.subscriptions_history import SubscriptionHistoryRepository
+from src.models.subscriptions_history import SubscriptionHistoryCreate
 
 from src.api.dependencies.auth import get_current_admin, get_current_user
 from src.api.dependencies.database import get_repository
@@ -21,15 +23,29 @@ async def create_subscription(
     subscription_repo: SubscriptionRepository = Depends(
         get_repository(SubscriptionRepository)
     ),
+    subscription_history_repo: SubscriptionHistoryRepository = Depends(
+        get_repository(SubscriptionHistoryRepository)
+    ),
     current_user: UserPublic = Depends(get_current_user),
 ) -> SubscriptionPublic:
     """Create a new subscription."""
-    sub = await subscription_repo.upsert_new_subscription(new_subscription=subscription)
-    if not sub:
+    subscription = await subscription_repo.upsert_new_subscription(new_subscription=subscription)
+    if not subscription:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Subscription not created."
         )
-    return sub
+    subscription_history_create = SubscriptionHistoryCreate(
+        subscription_id=subscription.id,
+        user_telegram_id=subscription.user_telegram_id,
+        tier=subscription.tier,
+        amount=subscription.balance,
+        transaction_id=subscription.transaction_id,
+        is_active=subscription.is_active,
+    )
+    await subscription_history_repo.add_subscription_history(
+        subscription_history_create=subscription_history_create
+    )
+    return subscription
 
 
 @router.get("/telegram", response_model=SubscriptionPublic)

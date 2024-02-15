@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from databases import Database
 from redis.asyncio import Redis
+from src.db.repositories.subscriptions import SubscriptionRepository
 
 from src.db.repositories.base import BaseRepository
 from src.models.subscriptions_history import (
@@ -41,11 +42,16 @@ class SubscriptionHistoryRepository(BaseRepository):
     def __init__(self, db: Database, redis: Redis) -> None:
         """Initialize the repository."""
         super().__init__(db, redis)
+        self.subscription_repo = SubscriptionRepository(db, redis)
 
     async def add_subscription_history(
         self, *, subscription_history_create: SubscriptionHistoryCreate
     ) -> Optional[SubscriptionHistoryInDB]:
         """Add subscription history to the database."""
+        if not await self.subscription_repo.get_subscription_by_user_telegram_id(
+            user_telegram_id=subscription_history_create.user_telegram_id
+        ):
+            return None
         subscription_history_create.tier = subscription_history_create.tier.tier_name
         subscription_history = await self.db.fetch_one(
             query=ADD_SUBSCRIPTION_HISTORY_QUERY,
@@ -53,6 +59,7 @@ class SubscriptionHistoryRepository(BaseRepository):
         )
         if subscription_history:
             return SubscriptionHistoryInDB(**subscription_history)
+        print("no subscription history.")
         return None
 
     async def get_all_subscription_history(self) -> list[SubscriptionHistoryInDB]:
@@ -62,7 +69,7 @@ class SubscriptionHistoryRepository(BaseRepository):
         )
         return [SubscriptionHistoryInDB(**sub) for sub in subscription_history]
 
-    async def get_subscription_history_by_user_telegram_id(
+    async def get_all_subscription_history_by_user_telegram_id(
         self, *, user_telegram_id: int
     ) -> List[SubscriptionHistoryInDB]:
         """Get subscription history by user telegram id."""
@@ -72,11 +79,11 @@ class SubscriptionHistoryRepository(BaseRepository):
         )
         return [SubscriptionHistoryInDB(**sub) for sub in subscription_history]
 
-    async def get_subscription_history_by_subscription_id(
+    async def get_all_subscription_history_by_subscription_id(
         self, *, subscription_id: int
     ) -> List[SubscriptionHistoryInDB]:
         """Get subscription history by subscription id."""
-        subscription_history = await self.db.fetch_one(
+        subscription_history = await self.db.fetch_all(
             query=GET_SUBSCRIPTION_HISTORY_BY_SUBSCRIPTION_ID_QUERY,
             values={"subscription_id": subscription_id},
         )

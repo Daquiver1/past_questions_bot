@@ -6,9 +6,8 @@ from databases import Database
 from redis.asyncio import Redis
 
 from src.db.repositories.base import BaseRepository
-from src.db.repositories.subscriptions_history import SubscriptionHistoryRepository
+from src.db.repositories.users import UserRepository
 from src.models.subscriptions import SubscriptionCreate, SubscriptionInDB
-from src.models.subscriptions_history import SubscriptionHistoryCreate
 
 UPSERT_SUBSCRIPTION_QUERY = """
     INSERT INTO subscriptions (user_telegram_id, tier, balance, transaction_id, is_active, updated_at)
@@ -67,7 +66,7 @@ class SubscriptionRepository(BaseRepository):
     def __init__(self, db: Database, r_db: Redis) -> None:
         """Initialize db"""
         super().__init__(db, r_db)
-        self.subscription_history_repo = SubscriptionHistoryRepository(db, r_db)
+        self.user_repo = UserRepository(db, r_db)
 
     async def upsert_new_subscription(
         self,
@@ -75,6 +74,8 @@ class SubscriptionRepository(BaseRepository):
         new_subscription: SubscriptionCreate,
     ) -> Optional[SubscriptionInDB]:
         """Create new subscription data."""
+        if not await self.user_repo.get_user_details(new_subscription.user_telegram_id):
+            return None
         new_subscription.tier = new_subscription.tier.tier_name
         await self.db.fetch_one(
             query=UPSERT_SUBSCRIPTION_QUERY,
@@ -84,17 +85,6 @@ class SubscriptionRepository(BaseRepository):
             new_subscription.user_telegram_id
         )
         if subscription:
-            subscription_history_create = SubscriptionHistoryCreate(
-                subscription_id=subscription.id,
-                user_telegram_id=subscription.user_telegram_id,
-                tier=subscription.tier,
-                amount=subscription.balance,
-                transaction_id=subscription.transaction_id,
-                is_active=subscription.is_active,
-            )
-            await self.subscription_history_repo.add_subscription_history(
-                subscription_history_create=subscription_history_create
-            )
             return subscription
         return None
 
@@ -122,15 +112,13 @@ class SubscriptionRepository(BaseRepository):
             return SubscriptionInDB(**subscription)
         return None
 
-    async def get_subscription_by_tier(self, tier: str) -> Optional[SubscriptionInDB]:
+    async def get_all_subscriptions_by_tier(self, tier: str) -> list[SubscriptionInDB]:
         """Get subscription data"""
-        subscription = await self.db.fetch_one(
+        subscriptions = await self.db.fetch_all(
             query=GET_SUBSCRIPTION_BY_TIER_QUERY,
             values={"tier": tier},
         )
-        if subscription:
-            return SubscriptionInDB(**subscription)
-        return None
+        return [SubscriptionInDB(**subscription) for subscription in subscriptions]
 
     async def get_all_subscriptions(self) -> list[SubscriptionInDB]:
         """Get all subscriptions data"""
@@ -147,16 +135,18 @@ class SubscriptionRepository(BaseRepository):
     async def update_subscription_balance(
         self, user_telegram_id: int, new_balance: int
     ) -> Optional[SubscriptionInDB]:
-        """Update subscription balance"""
+        """Update subscription balance by deducting when a past question has been downloaded."""
         if new_balance < 0:
-            raise ValueError("Balance cannot be less than 0")
+            raise ValueError("Deducted value should not be less than 0")
         is_active = True
         subscription = await self.get_subscription_by_user_telegram_id(user_telegram_id)
         if not subscription:
             return None
 
         if subscription.balance - new_balance < 0:
-            raise ValueError("New balance cannot be greater than old balance.")
+            raise ValueError(
+                "Value being deducted should not be greater than current balance."
+            )
         if subscription.balance - new_balance == 0:
             is_active = False
 
@@ -168,7 +158,7 @@ class SubscriptionRepository(BaseRepository):
                 "is_active": is_active,
             },
         )
-        return subscription
+        return await self.get_subscription_by_user_telegram_id(user_telegram_id)
 
     async def delete_subscription_by_user_telegram_id(
         self, user_telegram_id: int
@@ -178,4 +168,3 @@ class SubscriptionRepository(BaseRepository):
             query=DELETE_SUBSCRIPTION_BY_USER_TELEGRAM_ID_QUERY,
             values={"user_telegram_id": user_telegram_id},
         )
-        

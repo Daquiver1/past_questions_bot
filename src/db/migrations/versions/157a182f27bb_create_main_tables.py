@@ -114,7 +114,7 @@ def create_subscription_history_table() -> None:
             nullable=False,
             index=True,
         ),
-        sa.Column("transaction_id", sa.String, nullable=False),
+        sa.Column("transaction_id", sa.String, unique=True, nullable=False),
         sa.Column("tier", sa.String(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, index=True, default=True),
         sa.Column(
