@@ -1,9 +1,10 @@
+
 """Past questions repository tests."""
 
 import pytest
 from databases import Database
 from httpx import AsyncClient
-from redis import Redis
+from redis.asyncio import Redis
 
 from src.models.past_question_filter_enum import PastQuestionFilter
 from src.db.repositories.past_questions import PastQuestionRepository
@@ -83,7 +84,6 @@ class TestPastQuestionRepo:
         past_question = await past_question_repo.get_past_question(
             filter_by=filter_by, filter_value=filter_value
         )
-        print(past_question)
         assert isinstance(past_question, PastQuestionInDB)
         assert past_question.id == past_question_in_db.id
         assert past_question.hash_key == past_question_in_db.hash_key
