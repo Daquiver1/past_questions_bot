@@ -1,9 +1,11 @@
 """File contains all the handlers for the bot commands and messages."""
 
 import time
+
 from aiogram import Router, types
 from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
+from click import command
 
 from api_service import BackendClient
 from config import BASE_URL
@@ -75,12 +77,49 @@ async def command_subscribe_handler(message: types.Message) -> None:
             await message.answer(
                 strings.completed_payment_question_message(), reply_markup=reply_markup
             )
-        elif not response["success"] and response["status_code"] == 401:
+        elif response["status_code"] == 401:
             await message.answer(strings.unauthorized_user_message())
         else:
             await message.answer(strings.create_payment_failed_message())
     except Exception as e:
         print(f"Error in command_subscribe_handler: {e}")
+        await message.answer(strings.generic_error_message())
+
+
+@command_handler_router.message(Command("view", ignore_case=True))
+async def command_view_subscription_handler(message: Message) -> None:
+    """Handles messages with the `/view_subscription` command."""
+    try:
+        response = await api_service.get_user_subscription(message.from_user.id)
+        print(response)
+        if response["success"]:
+            subscription = response["data"]
+            if subscription and subscription["is_active"]:
+                await message.answer(
+                    strings.current_subscription_message(
+                        subscription["tier"][0], subscription["balance"]
+                    )
+                )
+            elif subscription and not subscription["is_active"]:
+                await message.answer(strings.no_active_subscription_message())
+        elif response["status_code"] == 404:
+            await message.answer(strings.no_active_subscription_message())
+        elif response["status_code"] == 401:
+            await message.answer(strings.unauthorized_user_message())
+        else:
+            await message.answer(strings.generic_error_message())
+    except Exception as e:
+        print(f"Error in command_view_subscription_handler: {e}")
+        await message.answer(strings.generic_error_message())
+
+
+@command_handler_router.message(Command("help", ignore_case=True))
+async def command_help_handler(message: Message) -> None:
+    """Handles messages with the `/help` command."""
+    try:
+        await message.answer(strings.help_message())
+    except Exception as e:
+        print(f"Error in command_help_handler: {e}")
         await message.answer(strings.generic_error_message())
 
 

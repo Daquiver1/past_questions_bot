@@ -50,7 +50,7 @@ async def create_new_past_question(
         past_question_url="",
     )
     await invalidate_related_cache_entries(redis_client)
-    url = upload_file_to_bucket(past_question_file=file, past_question=past_question)
+    url = await upload_file_to_bucket(past_question_file=file, past_question=past_question)
     past_question.past_question_url = url
     past_question = await past_question_repo.add_new_past_question(
         new_past_question=past_question
@@ -76,7 +76,7 @@ async def get_past_question(
 ) -> PastQuestionPublic:
     """Get a past question"""
     past_question = await past_question_repo.get_past_question(
-        filter_by="past_question_id", filter_value=past_question_id
+        filter_by=PastQuestionFilter.PAST_QUESTION_ID, filter_value=past_question_id
     )
     if not past_question:
         raise HTTPException(status_code=404, detail="Past question not found")
