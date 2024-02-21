@@ -1,32 +1,57 @@
+"""Conftest for s3 tests."""
+
+import io
+import sys
+from pathlib import Path
+from typing import Generator
+
 import pytest
+from fastapi import UploadFile
+from moto import mock_aws as mock_s3
 
-from models.past_questions import PastQuestionCreate
-from services.s3.s3 import delete_folder
-
-
-@pytest.fixture(scope="module")
-def setup_s3(mock_category: str):
-    yield
-    delete_folder(folder_name=mock_category)  # type: ignore
+ROOT_DIR = Path(__file__).parent.parent.parent
+sys.path.append(str(ROOT_DIR))
+from src.core.config import S3_BUCKET_NAME
+from src.models.past_questions import PastQuestionCreate
 
 
 @pytest.fixture
-def mock_tempfile() -> str:
-    return "tests/s3/mock_file.txt"
-
-
-@pytest.fixture(scope="module")
-def mock_category() -> str:
-    return "mock_category"
+def aws_credentials() -> dict[str, str]:
+    """Mocked AWS Credentials for moto."""
+    return {
+        "aws_access_key_id": "testing",
+        "aws_secret_access_key": "testing",
+        "region_name": "us-east-1",
+    }
 
 
 @pytest.fixture
-def mock_file() -> PastQuestionCreate:
+def new_past_question() -> PastQuestionCreate:
+    """Return a PastQuestionCreate instance."""
     return PastQuestionCreate(
-        course_code="mock_code",
-        course_name="mock_name",
-        lecturer="mock_lecturer",
-        past_question_url="mock_url",
-        semester="mock_semester",
-        year="mock_year",
+        course_code="104",
+        course_name="Test",
+        course_title="Test 104",
+        lecturer_name="Test Test",
+        past_question_url="http://example.com",
+        semester="First",
+        year="2022",
     )
+
+
+@pytest.fixture
+def s3_setup(aws_credentials: dict[str, str]) -> Generator[None, None, None]:
+    """Setup s3 bucket for testing."""
+    with mock_s3():
+        import boto3
+
+        s3 = boto3.client("s3", **aws_credentials)
+        s3.create_bucket(Bucket=S3_BUCKET_NAME)
+        yield
+
+
+@pytest.fixture
+def test_file() -> UploadFile:
+    """Return a test file."""
+    test_file_content = b"Test file content"
+    return UploadFile(filename="test.txt", file=io.BytesIO(test_file_content))

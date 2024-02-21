@@ -11,5 +11,6 @@ class PastQuestionFilter(Enum):
     COURSE_NAME = "course_name"
     COURSE_TITLE = "course_title"
     LECTURER_NAME = "lecturer_name"
+    HASH_KEY = "hash_key"
     SEMESTER = "semester"
     YEAR = "year"

@@ -1,60 +1,39 @@
-import validators
+"""Test cases for the s3 functions."""
 
-from models.past_questions import PastQuestionCreate
-from services.s3.s3 import delete_file, generate_download_url, upload_file
+from typing import Generator
 
+import pytest
+from fastapi import UploadFile
 
-def test_upload_file(
-    setup_s3,
-    mock_tempfile: str,
-    mock_category: str,
-    mock_file: PastQuestionCreate,
-) -> None:
-    result = upload_file(
-        file_path=mock_tempfile,
-        course_category=mock_category,
-        past_question=mock_file,
-    )
-    assert result is not None
-    assert result.endswith(".pdf")
-    assert mock_category in result
-    assert str(mock_file.course_code) in result
+from src.models.past_questions import PastQuestionCreate
+from src.services.s3 import generate_download_url, upload_file_to_bucket
 
 
-def test_generate_download_url(
-    setup_s3,
-    mock_tempfile: str,
-    mock_category: str,
-    mock_file: PastQuestionCreate,
-) -> None:
-    created_past_question_name = upload_file(
-        file_path=mock_tempfile,
-        course_category=mock_category,
-        past_question=mock_file,
-    )
+class TestS3Functions:
+    """Test s3 functions."""
 
-    result = generate_download_url(key=created_past_question_name)
+    @pytest.mark.asyncio
+    async def test_upload_file_to_bucket(
+        self,
+        s3_setup: Generator,
+        test_file: UploadFile,
+        new_past_question: PastQuestionCreate,
+    ) -> None:
+        """Test uploading a file to the s3 bucket."""
+        file_url = await upload_file_to_bucket(
+            past_question_file=test_file, past_question=new_past_question
+        )
 
-    assert result is not None
-    assert is_valid_url(result)
-    assert result.endswith(".pdf")
+        assert file_url.startswith("https://")
+        assert "test" in file_url
+        assert file_url.endswith(".pdf")
 
+    def test_generate_download_url(
+        self,
+    ) -> None:
+        """Test generating a download url."""
+        file_url = generate_download_url(key="Test.pdf")
 
-def test_delete_file(
-    setup_s3,
-    mock_tempfile: str,
-    mock_category: str,
-    mock_file: PastQuestionCreate,
-) -> None:
-    created_past_question_path = upload_file(
-        file_path=mock_tempfile,
-        course_category=mock_category,
-        past_question=mock_file,
-    )
-    result = delete_file(file_path=created_past_question_path)
-
-    assert result == created_past_question_path
-
-
-def is_valid_url(url: str) -> bool:
-    return validators.url(url)  # type: ignore
+        assert file_url is not None
+        assert file_url.startswith("https://")
+        assert file_url.endswith("Test.pdf")

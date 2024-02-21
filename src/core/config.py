@@ -18,11 +18,18 @@ ENV = config("ENV", cast=str, default="development")
 # Telegram
 ADMIN_TELEGRAM_ID = config("ADMIN_TELEGRAM_ID", cast=int)
 # Database[Sqlite3]
-DATABASE_URL = config(
-    "DATABASE_URL",
-    cast=DatabaseURL,
-    default="sqlite:///./past_questions_bot.db",
-)
+if ENV == "development":
+    DATABASE_URL = config(
+        "DATABASE_URL",
+        cast=DatabaseURL,
+        default="sqlite:///./past_questions_bot.db",
+    )
+else:
+    DATABASE_URL = config(
+        "TEST_DATABASE_URL",
+        cast=DatabaseURL,
+        default="sqlite:///./past_questions_bot_test.db",
+    )
 
 
 # Redis

@@ -1,7 +1,6 @@
 """Route for downloads"""
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from telegram import User
 
 from src.api.dependencies.auth import get_current_admin, get_current_user
 from src.models.users import UserPublic
@@ -20,7 +19,7 @@ router = APIRouter()
 async def create_download(
     download: DownloadCreate,
     download_repo: DownloadRepository = Depends(get_repository(DownloadRepository)),
-    current_user: User = Depends(get_current_user),
+    current_user: UserPublic = Depends(get_current_user),
 ) -> DownloadPublic:
     """Create a new download."""
     download = await download_repo.add_new_download(new_download=download)

@@ -24,6 +24,7 @@ router = APIRouter()
 @router.post(
     "",
     response_model=PastQuestionPublic,
+    name="past_questions:create-past-question",
     status_code=status.HTTP_201_CREATED,
 )
 async def create_new_past_question(
@@ -121,7 +122,7 @@ async def get_all_past_questions_by_filter(
         filter_by=filter_by, filter_value=filter_value
     )
     if questions:
-        questions_data = [question.dict() for question in questions]
+        questions_data = [question.model_dump() for question in questions]
         await store_data(redis_client=redis_client, key=key, data=questions_data)
 
     return questions

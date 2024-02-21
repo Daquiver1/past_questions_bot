@@ -57,6 +57,7 @@ def create_past_questions_table() -> None:
     op.create_table(
         "past_questions",
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
+        sa.Column("hash_key", sa.String(), index=True, nullable=False, unique=True),
         sa.Column("course_code", sa.String(), index=True, nullable=False),
         sa.Column("course_name", sa.String(), index=True, nullable=False),
         sa.Column("course_title", sa.String(), index=True, nullable=False),
@@ -113,7 +114,7 @@ def create_subscription_history_table() -> None:
             nullable=False,
             index=True,
         ),
-        sa.Column("transaction_id", sa.String, nullable=False),
+        sa.Column("transaction_id", sa.String, unique=True, nullable=False),
         sa.Column("tier", sa.String(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, index=True, default=True),
         sa.Column(

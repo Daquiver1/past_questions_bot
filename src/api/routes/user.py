@@ -13,6 +13,7 @@ router = APIRouter()
 @router.post(
     "",
     response_model=UserPublic,
+    name="users:register-new-user",
     status_code=status.HTTP_201_CREATED,
 )
 async def create_new_user(
@@ -23,13 +24,14 @@ async def create_new_user(
     user = await user_repo.add_new_user(new_user=user)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="User not created"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="User already created"
         )
     return user
 
 
 @router.get(
     "/telegram",
+    name="users:get-user-details",
     response_model=UserPublic,
     status_code=status.HTTP_200_OK,
 )
@@ -44,9 +46,9 @@ async def get_user_details(
 
 @router.get(
     "",
+    name="users:get-all-users",
     response_model=list[UserPublic],
     status_code=status.HTTP_200_OK,
-
 )
 async def get_all_users(
     user_repo: UserRepository = Depends(get_repository(UserRepository)),
@@ -58,17 +60,14 @@ async def get_all_users(
 
 @router.delete(
     "/telegram",
+    name="users:delete-user",
     response_model=int,
     status_code=status.HTTP_200_OK,
 )
 async def delete_user(
     user_repo: UserRepository = Depends(get_repository(UserRepository)),
-    current_user: UserPublic = Depends(get_current_user),
     current_admin: UserPublic = Depends(get_current_admin),
+    current_user: UserPublic = Depends(get_current_user),
 ) -> int:
     """Delete user."""
-    telegram_id = await user_repo.delete_user(telegram_id=current_user.telegram_id)
-
-    if not telegram_id:
-        raise HTTPException(status_code=404, detail="User not found")
-    return telegram_id
+    return await user_repo.delete_user(telegram_id=current_user.telegram_id)

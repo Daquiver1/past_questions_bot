@@ -2,7 +2,7 @@
 
 from typing import List, Union
 
-from pydantic import validator
+from pydantic import field_validator
 
 from src.models.base import CoreModel, IDModelMixin
 from src.models.subscriptions import SubscriptionTier
@@ -45,7 +45,9 @@ class CreateSubscriptionPlan(CoreModel):
     telegram_username: str
     tier: Union[SubscriptionTier, str]
 
-    @validator("tier", pre=True, allow_reuse=True)
+    @field_validator(
+        "tier",
+    )
     def convert_tier_to_enum(cls, value: str) -> SubscriptionTier:
         """Convert the tier to a SubscriptionTier enum."""
         if isinstance(value, str):
@@ -57,7 +59,7 @@ class CreateSubscriptionPlan(CoreModel):
                 )
         return value
 
-    @validator("tier")
+    @field_validator("tier")
     def ensure_tier_is_enum(cls, value: str) -> SubscriptionTier:
         """Ensure the tier is a SubscriptionTier enum."""
         if not isinstance(value, SubscriptionTier):
@@ -83,7 +85,9 @@ class SuccessfulTransaction(CoreModel, IDModelMixin):
     created_at: str
     metadata: Metadata
 
-    @validator("amount", pre=True, allow_reuse=True)
+    @field_validator(
+        "amount",
+    )
     def divide_amount_by_100(cls, v: int) -> float:
         """Divide the amount by 100."""
         return v / 100

@@ -65,7 +65,7 @@ class HelpTicketRepository(BaseRepository):
 
         help_ticket = await self.db.fetch_one(
             query=ADD_HELP_TICKET_QUERY,
-            values=new_help_ticket.dict(),
+            values=new_help_ticket.model_dump(),
         )
         if help_ticket:
             return HelpTicketsInDB(**help_ticket)
@@ -114,7 +114,7 @@ class HelpTicketRepository(BaseRepository):
 
     async def delete_help_ticket(self, *, help_ticket_id: int) -> int:
         """Delete help tickets data"""
-        return await self.db.fetch_one(
+        return await self.db.execute(
             query=DELETE_HELP_TICKET_BY_HELP_TICKET_ID_QUERY,
             values={"help_ticket_id": help_ticket_id},
         )

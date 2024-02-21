@@ -21,11 +21,11 @@ async def connect_to_db(app: FastAPI) -> None:
 
 
 async def close_db_connection(app: FastAPI) -> None:
-    """Close to postgres db."""
+    """Close to sqlite db."""
     try:
         await app.state._db.disconnect()
     except Exception as e:
-        print("Error disconnecting from postgres", e)
+        print("Error disconnecting from sqlite", e)
 
 
 async def connect_to_redis(app: FastAPI) -> None:
@@ -44,7 +44,7 @@ async def connect_to_redis(app: FastAPI) -> None:
 async def close_redis_connection(app: FastAPI) -> None:
     """Connect to redis."""
     try:
-        await app.state._redis.close()
+        await app.state._redis.aclose()
         print("Disconnected from redis.asyncio database")
     except Exception as e:
         print("--- DB DISCONNECT ERROR ---")

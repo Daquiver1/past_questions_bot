@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional
 
 # Third party imports
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 class CoreModel(BaseModel):
@@ -37,7 +37,7 @@ class UpdatedAtModelMixin(BaseModel):
 
     updated_at: Optional[datetime] = datetime.now()
 
-    @validator("updated_at", pre=True)
+    @field_validator("updated_at")
     def default_datetime(cls, value: datetime) -> datetime:
         """Validate both created_at and update_at data."""
         return datetime.now()

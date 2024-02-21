@@ -20,7 +20,10 @@ def create_start_app_handler(app: FastAPI) -> Callable:
     """Connect to db."""
 
     async def start_app() -> Callable:
-        SentryInitializer(SENTRY_DSN, SENTRY_ENVIRONMENT)
+        """Connect to db."""
+        print("intiating db connection...")
+
+        #SentryInitializer(SENTRY_DSN, SENTRY_ENVIRONMENT)
         await connect_to_db(app)
         await connect_to_redis(app)
 
