@@ -96,6 +96,6 @@ if youEnjoyed:
 
 To use untun(ngrok alternative)
 ```python
-untun tunnel http://localhost:8008=
+untun tunnel http://localhost:8008
 ```
 ```

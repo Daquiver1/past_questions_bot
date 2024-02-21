@@ -3,6 +3,7 @@
 from typing import Optional, Union
 
 from databases import Database
+from fastapi import HTTPException
 from redis.asyncio import Redis
 
 from src.db.repositories.base import BaseRepository
@@ -90,7 +91,10 @@ class PastQuestionRepository(BaseRepository):
         if await self.get_all_past_questions_by_filter(
             PastQuestionFilter.HASH_KEY, hash_key
         ):
-            return None
+            raise HTTPException(
+                status_code=400,
+                detail="A past question with the same details already exists",
+            )
 
         updated_past_question = new_past_question.model_dump()
         updated_past_question["hash_key"] = hash_key

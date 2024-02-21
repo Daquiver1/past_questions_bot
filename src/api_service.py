@@ -1,6 +1,6 @@
 """Api module for the project."""
 
-import requests
+import httpx
 
 from model import SubscriptionTier
 
@@ -23,11 +23,11 @@ class BackendClient:
             "last_name": last_name,
         }
         try:
-            response = requests.post(f"{self.base_url}/user", json=json)
+            response = httpx.post(f"{self.base_url}/user", json=json)
             response.raise_for_status()
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -46,12 +46,12 @@ class BackendClient:
         """Send a GET request to get the users details."""
         headers = {"X-Telegram-ID": str(telegram_id)}
         try:
-            response = requests.get(f"{self.base_url}/user/telegram", headers=headers)
+            response = httpx.get(f"{self.base_url}/user/telegram", headers=headers)
             response.raise_for_status()
 
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -78,13 +78,13 @@ class BackendClient:
         }
 
         try:
-            response = requests.post(
+            response = httpx.post(
                 f"{self.base_url}/paystack/create_payment", json=json, headers=headers
             )
             response.raise_for_status()
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -110,7 +110,7 @@ class BackendClient:
             "tier": tier.tier_name,
         }
         try:
-            response = requests.post(
+            response = httpx.post(
                 f"{self.base_url}/paystack/create_subscription",
                 json=json,
                 headers=headers,
@@ -118,7 +118,7 @@ class BackendClient:
             response.raise_for_status()
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -145,13 +145,13 @@ class BackendClient:
             "transaction_id": reference,
         }
         try:
-            response = requests.post(
+            response = httpx.post(
                 f"{self.base_url}/subscription", json=json, headers=headers
             )
             response.raise_for_status()
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -170,13 +170,13 @@ class BackendClient:
         """Send a GET request to get the subscription."""
         headers = {"X-Telegram-ID": str(telegram_id)}
         try:
-            response = requests.get(
+            response = httpx.get(
                 f"{self.base_url}/subscription/telegram", headers=headers
             )
             response.raise_for_status()
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -195,13 +195,13 @@ class BackendClient:
         """Send a GET request to get the active subscriptions."""
         headers = {"X-Telegram-ID": str(telegram_id)}
         try:
-            response = requests.get(
+            response = httpx.get(
                 f"{self.base_url}/subscription/active", headers=headers
             )
             response.raise_for_status()
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -220,11 +220,11 @@ class BackendClient:
         """Send a GET request to get all subscriptions."""
         headers = {"X-Telegram-ID": str(telegram_id)}
         try:
-            response = requests.get(f"{self.base_url}/subscription", headers=headers)
+            response = httpx.get(f"{self.base_url}/subscription", headers=headers)
             response.raise_for_status()
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -244,13 +244,13 @@ class BackendClient:
         headers = {"X-Telegram-ID": str(telegram_id)}
         json = {"user_telegram_id": telegram_id, "balance": balance}
         try:
-            response = requests.patch(
+            response = httpx.patch(
                 f"{self.base_url}/subscription/{balance}", json=json, headers=headers
             )
             response.raise_for_status()
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -269,7 +269,7 @@ class BackendClient:
         """Send a GET request to verify a payment."""
         headers = {"X-Telegram-ID": str(telegram_id)}
         try:
-            response = requests.get(
+            response = httpx.get(
                 f"{self.base_url}/paystack/verify_transaction/{reference}",
                 headers=headers,
             )
@@ -277,7 +277,7 @@ class BackendClient:
 
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -296,7 +296,7 @@ class BackendClient:
         """Send a GET request to get the past questions."""
         headers = {"X-Telegram-ID": str(telegram_id)}
         try:
-            response = requests.get(
+            response = httpx.get(
                 f"{self.base_url}/past_question/filter_by/course_title/{name}",
                 headers=headers,
             )
@@ -304,7 +304,7 @@ class BackendClient:
 
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -323,14 +323,14 @@ class BackendClient:
         """Send a GET request to get the past question."""
         try:
             headers = {"X-Telegram-ID": str(telegram_id)}
-            response = requests.get(
+            response = httpx.get(
                 f"{self.base_url}/past_question/{past_question_id}", headers=headers
             )
             response.raise_for_status()
 
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,
@@ -354,13 +354,13 @@ class BackendClient:
         }
 
         try:
-            response = requests.post(
+            response = httpx.post(
                 f"{self.base_url}/download", json=json, headers=headers
             )
             response.raise_for_status()
             data = response.json()
             return {"success": True, "data": data}
-        except requests.HTTPError as http_err:
+        except httpx.HTTPError as http_err:
             return {
                 "success": False,
                 "data": None,

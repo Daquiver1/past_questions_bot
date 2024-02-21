@@ -33,7 +33,7 @@ class Strings:
             "- Type the name of the past question you're looking for (e.g., ugbs 104, dcit 103, math 122, ugrc 110).\n"
             "- Select the one you want, and it'll be sent to you directly at a fee of 1 cedi.\n\n"
             "Looking for more? Explore our Subscription Tiers /subscription:\n"
-            "For more details, check the /about section."
+            "For more details, check the /help section."
         )
         return text
 
@@ -90,6 +90,30 @@ class Strings:
             "Invalid type. Please type the past questions course name and course code."
         )
 
+    def help_message(self) -> str:
+        """Help message."""
+        text = (
+            f"{hbold('Help')}\n\n"
+            f"{hbold('Commands')}\n"
+            "The following commands are available:\n\n"
+            "/start -> Register.\n"
+            "/subscription -> View subscription plans.\n"
+            "/subscribe -> Subscribe to a plan.\n"
+            "/view -> View your subscriptions\n"
+            "/help -> This Message.\n\n"
+            f"{hbold('How to use this bot.')}\n"
+            "To request a past question please type the past questions course name and course code.\n"
+            "Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 ).\n"
+            "A past question costs 1 cedi and there are tiers you can subscribe to via the /subscription command\n"
+            "You can also opt for a Pay As You Go model, where you pay 1 Cedi per past question.\n\n"
+            "Thank you for using QuiverTech's Past Questions Bot. Have a nice day!"
+        )
+        return text
+
+    def no_active_subscription_message(self) -> str:
+        """No active subscription message."""
+        return "You don't have an active subscription. Please subscribe to a plan via /subscription."
+
     def update_past_question_number(self, downloaded: int, balance: int) -> str:
         """Update past question number."""
         new_balance = balance - downloaded
@@ -100,7 +124,17 @@ class Strings:
         text = (
             f"Hello, {past_question_name},\nYou are already  registered!\n\n"
             "To request a past question please type the past questions course name and course code.\n"
-            "Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 )."
+            "Use this format ( ugbs 104, dcit 103, math 122, ugrc 110 ).\n"
+            "For more information, use /help."
+        )
+        return text
+
+    def current_subscription_message(self, subscription_plan: str, balance: int) -> str:
+        """Current subscription message."""
+        text = (
+            f"{hbold('Current Subscription')}\n"
+            f"Subscription Plan: {subscription_plan}\n"
+            f"Balance: {balance} past questions left."
         )
         return text
 
