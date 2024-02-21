@@ -55,7 +55,7 @@ class SubscriptionHistoryRepository(BaseRepository):
         subscription_history_create.tier = subscription_history_create.tier.tier_name
         subscription_history = await self.db.fetch_one(
             query=ADD_SUBSCRIPTION_HISTORY_QUERY,
-            values=subscription_history_create.dict(),
+            values=subscription_history_create.model_dump(),
         )
         if subscription_history:
             return SubscriptionHistoryInDB(**subscription_history)

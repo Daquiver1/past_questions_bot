@@ -2,7 +2,8 @@
 
 from typing import Optional
 
-from pydantic import validator
+from pydantic import field_validator
+from pydantic_core.core_schema import ValidationInfo
 
 from src.models.base import (
     CoreModel,
@@ -23,7 +24,7 @@ class PastQuestionBase(CoreModel):
     year: str
     past_question_url: Optional[str]
 
-    @validator("course_name")
+    @field_validator("course_name")
     def validate_course_name(cls, v: str) -> str:
         """Validate course name."""
         v = v.strip()
@@ -31,7 +32,7 @@ class PastQuestionBase(CoreModel):
             raise ValueError("course_name must be 4 characters")
         return v.lower()
 
-    @validator("course_code")
+    @field_validator("course_code")
     def validate_course_code(cls, v: str) -> str:
         """Validate course code."""
         v = v.strip()
@@ -39,11 +40,13 @@ class PastQuestionBase(CoreModel):
             raise ValueError("course_code must be 3 characters")
         return v.lower()
 
-    @validator("course_title", pre=True, always=True)
-    def set_course_title(cls, v: Optional[str], values: dict, **kwargs: any) -> str:
+    @field_validator("course_title")
+    def set_course_title(
+        cls, v: Optional[str], info: ValidationInfo, **kwargs: any
+    ) -> str:
         """Set course title."""
-        course_name = values.get("course_name")
-        course_code = values.get("course_code")
+        course_name = info.data["course_name"]
+        course_code = info.data["course_code"]
         if course_name and course_code:
             return f"{course_name} {course_code}"
         elif v:

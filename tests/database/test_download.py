@@ -28,7 +28,6 @@ class TestDownloadRepo:
         new_download: DownloadCreate,
     ) -> None:
         """Test creating a new download."""
-        db, r_db = await db, await r_db
         download_repo = DownloadRepository(db, r_db)
         await UserRepository(db, r_db).add_new_user(new_user=new_user)
         await PastQuestionRepository(db, r_db).add_new_past_question(
@@ -49,7 +48,9 @@ class TestDownloadRepo:
         assert invalid_user_download is None
 
         # Test creating a download with invalid past question
-        invalid_past_question_download = new_download.model_copy(update={"past_question_id": 0})
+        invalid_past_question_download = new_download.model_copy(
+            update={"past_question_id": 0}
+        )
         invalid_past_question_download = await download_repo.add_new_download(
             new_download=invalid_past_question_download
         )
@@ -63,7 +64,6 @@ class TestDownloadRepo:
         new_download: DownloadCreate,
     ) -> None:
         """Test getting all user downloads."""
-        db, r_db = await db, await r_db
         download_repo = DownloadRepository(db, r_db)
         user_downloads = await download_repo.get_all_user_downloads(
             telegram_id=new_download.user_telegram_id
@@ -79,7 +79,6 @@ class TestDownloadRepo:
         new_download: DownloadCreate,
     ) -> None:
         """Test getting all past question downloads."""
-        db, r_db = await db, await r_db
         download_repo = DownloadRepository(db, r_db)
         past_question_downloads = await download_repo.get_all_past_question_downloads(
             past_question_id=new_download.past_question_id
@@ -97,7 +96,6 @@ class TestDownloadRepo:
         new_download: DownloadCreate,
     ) -> None:
         """Test getting all downloads."""
-        db, r_db = await db, await r_db
         download_repo = DownloadRepository(db, r_db)
         all_downloads = await download_repo.get_all_downloads()
         assert len(all_downloads) == 1
@@ -111,7 +109,6 @@ class TestDownloadRepo:
         r_db: Redis,
     ) -> None:
         """Test deleting a download."""
-        db, r_db = await db, await r_db
         download_repo = DownloadRepository(db, r_db)
         await download_repo.delete_download(
             id=1,

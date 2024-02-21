@@ -65,7 +65,7 @@ class HelpTicketRepository(BaseRepository):
 
         help_ticket = await self.db.fetch_one(
             query=ADD_HELP_TICKET_QUERY,
-            values=new_help_ticket.dict(),
+            values=new_help_ticket.model_dump(),
         )
         if help_ticket:
             return HelpTicketsInDB(**help_ticket)

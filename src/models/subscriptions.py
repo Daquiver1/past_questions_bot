@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Union
 
-from pydantic import validator
+from pydantic import field_validator
 
 from src.models.base import (
     CoreModel,
@@ -36,7 +36,7 @@ class SubscriptionBase(CoreModel):
     transaction_id: str
     is_active: bool = True
 
-    @validator("tier", pre=True, allow_reuse=True)
+    @field_validator("tier")
     def convert_tier_to_enum(cls, value: str) -> SubscriptionTier:
         """Convert the tier to a SubscriptionTier enum."""
         if isinstance(value, str):
@@ -48,7 +48,7 @@ class SubscriptionBase(CoreModel):
                 )
         return value
 
-    @validator("tier")
+    @field_validator("tier")
     def ensure_tier_is_enum(cls, value: str) -> SubscriptionTier:
         """Ensure the tier is a SubscriptionTier enum."""
         if not isinstance(value, SubscriptionTier):

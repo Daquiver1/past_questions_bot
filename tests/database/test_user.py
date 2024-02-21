@@ -17,8 +17,7 @@ class TestUserRepo:
     async def test_create_new_user(
         self, client: AsyncClient, db: Database, r_db: Redis, new_user: UserCreate
     ) -> None:
-        """Test creating a new user."""
-        db, r_db = await db, await r_db
+        """Test creating a new user."""     
         user_repo = UserRepository(db, r_db)
         created_user = await user_repo.add_new_user(new_user=new_user)
         assert isinstance(created_user, UserInDB)
@@ -30,8 +29,7 @@ class TestUserRepo:
     async def test_get_all_users(
         self, client: AsyncClient, db: Database, r_db: Redis
     ) -> None:
-        """Test retrieving all users."""
-        db, r_db = await db, await r_db
+        """Test retrieving all users."""    
         user_repo = UserRepository(db, r_db)
         all_users = await user_repo.get_all_users()
         assert len(all_users) == 1
@@ -40,8 +38,7 @@ class TestUserRepo:
     async def test_get_user_details(
         self, client: AsyncClient, db: Database, r_db: Redis, new_user: UserCreate
     ) -> None:
-        """Test retrieving user details."""
-        db, r_db = await db, await r_db
+        """Test retrieving user details."""      
         user_repo = UserRepository(db, r_db)
         user = await user_repo.get_user_details(telegram_id=new_user.telegram_id)
         assert isinstance(user, UserInDB)
@@ -53,8 +50,7 @@ class TestUserRepo:
     async def test_delete_user(
         self, client: AsyncClient, db: Database, r_db: Redis, new_user: UserCreate
     ) -> None:
-        """Test deleting a user."""
-        db, r_db = await db, await r_db
+        """Test deleting a user."""      
         user_repo = UserRepository(db, r_db)
         user_delete = await user_repo.delete_user(telegram_id=new_user.telegram_id)
         assert isinstance(user_delete, int)

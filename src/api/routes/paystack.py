@@ -3,7 +3,7 @@
 import hashlib
 import hmac
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import JSONResponse
 
 from src.api.dependencies.auth import get_current_user

@@ -26,7 +26,6 @@ class TestSubscriptionsRepo:
         new_subscription_two: SubscriptionCreate,
     ) -> None:
         """Test creating a new subscription."""
-        db, r_db = await db, await r_db
         await UserRepository(db, r_db).add_new_user(new_user=new_user)
         subscription_repo = SubscriptionRepository(db, r_db)
         created_subscription = await subscription_repo.upsert_new_subscription(
@@ -64,7 +63,6 @@ class TestSubscriptionsRepo:
         self, client: AsyncClient, db: Database, r_db: Redis
     ) -> None:
         """Test retrieving all subscriptions."""
-        db, r_db = await db, await r_db
         subscription_repo = SubscriptionRepository(db, r_db)
         all_subscriptions = await subscription_repo.get_all_subscriptions()
         assert len(all_subscriptions) == 1
@@ -82,7 +80,6 @@ class TestSubscriptionsRepo:
         new_subscription_two: SubscriptionCreate,
     ) -> None:
         """Test retrieving subscription by user telegram id."""
-        db, r_db = await db, await r_db
         subscription_repo = SubscriptionRepository(db, r_db)
         subscription = await subscription_repo.get_subscription_by_user_telegram_id(
             user_telegram_id=new_subscription.user_telegram_id
@@ -104,7 +101,6 @@ class TestSubscriptionsRepo:
         new_subscription_two: SubscriptionCreate,
     ) -> None:
         """Test retrieving subscription by transaction id."""
-        db, r_db = await db, await r_db
         subscription_repo = SubscriptionRepository(db, r_db)
         subscription = await subscription_repo.get_subscription_by_transaction_id(
             transaction_id=new_subscription_two.transaction_id
@@ -125,7 +121,6 @@ class TestSubscriptionsRepo:
         new_subscription_two: SubscriptionCreate,
     ) -> None:
         """Test retrieving all subscriptions by tier."""
-        db, r_db = await db, await r_db
         subscription_repo = SubscriptionRepository(db, r_db)
         all_subscriptions = await subscription_repo.get_all_subscriptions_by_tier(
             tier=new_subscription_two.tier.tier_name
@@ -143,7 +138,6 @@ class TestSubscriptionsRepo:
         r_db: Redis,
     ) -> None:
         """Test retrieving all active subscriptions."""
-        db, r_db = await db, await r_db
         subscription_repo = SubscriptionRepository(db, r_db)
         all_subscriptions = await subscription_repo.get_all_active_subscriptions()
         assert len(all_subscriptions) == 1
@@ -162,7 +156,6 @@ class TestSubscriptionsRepo:
     ) -> None:
         """Test updating subscription balance."""
         total_balance = new_subscription.balance + new_subscription_two.balance
-        db, r_db = await db, await r_db
         subscription_repo = SubscriptionRepository(db, r_db)
         updated_subscription = await subscription_repo.update_subscription_balance(
             user_telegram_id=new_subscription.user_telegram_id,
@@ -203,7 +196,6 @@ class TestSubscriptionsRepo:
         new_subscription: SubscriptionCreate,
     ) -> None:
         """Test deleting a subscription."""
-        db, r_db = await db, await r_db
         subscription_repo = SubscriptionRepository(db, r_db)
         # deleting with a wrong telegram id.
         await subscription_repo.delete_subscription_by_user_telegram_id(

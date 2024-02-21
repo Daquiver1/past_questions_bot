@@ -79,7 +79,7 @@ class SubscriptionRepository(BaseRepository):
         new_subscription.tier = new_subscription.tier.tier_name
         await self.db.fetch_one(
             query=UPSERT_SUBSCRIPTION_QUERY,
-            values=new_subscription.dict(),
+            values=new_subscription.model_dump(),
         )
         subscription = await self.get_subscription_by_user_telegram_id(
             new_subscription.user_telegram_id

@@ -71,7 +71,7 @@ class DownloadRepository(BaseRepository):
             return None
         download = await self.db.fetch_one(
             query=ADD_DOWNLOAD_QUERY,
-            values=new_download.dict(),
+            values=new_download.model_dump(),
         )
         if download:
             return DownloadInDB(**download)

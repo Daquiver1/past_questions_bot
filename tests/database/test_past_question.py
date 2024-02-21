@@ -1,4 +1,3 @@
-
 """Past questions repository tests."""
 
 import pytest
@@ -6,8 +5,8 @@ from databases import Database
 from httpx import AsyncClient
 from redis.asyncio import Redis
 
-from src.models.past_question_filter_enum import PastQuestionFilter
 from src.db.repositories.past_questions import PastQuestionRepository
+from src.models.past_question_filter_enum import PastQuestionFilter
 from src.models.past_questions import PastQuestionCreate, PastQuestionInDB
 
 pytestmark = pytest.mark.asyncio
@@ -25,7 +24,6 @@ class TestPastQuestionRepo:
         past_question_in_db: PastQuestionInDB,
     ) -> None:
         """Test creating a new past question."""
-        db, r_db = await db, await r_db
         past_question_repo = PastQuestionRepository(db, r_db)
         created_past_question = await past_question_repo.add_new_past_question(
             new_past_question=new_past_question
@@ -44,7 +42,6 @@ class TestPastQuestionRepo:
         self, client: AsyncClient, db: Database, r_db: Redis
     ) -> None:
         """Test retrieving all past questions."""
-        db, r_db = await db, await r_db
         past_question_repo = PastQuestionRepository(db, r_db)
         all_past_questions = await past_question_repo.get_all_past_questions()
         assert len(all_past_questions) == 1
@@ -79,7 +76,6 @@ class TestPastQuestionRepo:
         filter_value: str,
     ) -> None:
         """Test retrieving past question details."""
-        db, r_db = await db, await r_db
         past_question_repo = PastQuestionRepository(db, r_db)
         past_question = await past_question_repo.get_past_question(
             filter_by=filter_by, filter_value=filter_value
@@ -117,7 +113,6 @@ class TestPastQuestionRepo:
         filter_value: str,
     ) -> None:
         """Test retrieving past question details."""
-        db, r_db = await db, await r_db
         past_question_repo = PastQuestionRepository(db, r_db)
         past_questions = await past_question_repo.get_all_past_questions_by_filter(
             filter_by=filter_by, filter_value=filter_value
@@ -137,7 +132,6 @@ class TestPastQuestionRepo:
         past_question_in_db: PastQuestionInDB,
     ) -> None:
         """Test deleting a past question."""
-        db, r_db = await db, await r_db
         past_question_repo = PastQuestionRepository(db, r_db)
         past_question_delete = await past_question_repo.delete_past_question(
             past_question_id=past_question_in_db.id

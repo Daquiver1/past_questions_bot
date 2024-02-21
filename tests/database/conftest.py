@@ -1,4 +1,4 @@
-"""Database fixtures for testing user."""
+"""Database fixtures for testing."""
 
 import sys
 import warnings
@@ -37,7 +37,7 @@ def apply_migrations() -> Generator[None, None, None]:
     alembic.command.downgrade(config, "base")  # type: ignore
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def app(apply_migrations: None) -> FastAPI:
     """Handle db migrations."""
     from src.api.main import get_application
@@ -45,25 +45,22 @@ def app(apply_migrations: None) -> FastAPI:
     return get_application()
 
 
-@pytest.fixture
-async def db(app: FastAPI) -> Database:
+@pytest.fixture(scope="class")
+def db(app: FastAPI) -> Database:
     """Sqlite db object."""
-    await app.router.startup()
     return app.state._db
 
 
-@pytest.fixture
-async def r_db(app: FastAPI) -> Redis:
+@pytest.fixture(scope="class")
+def r_db(app: FastAPI) -> Redis:
     """Redis database object."""
-    await app.router.startup()
     return app.state._redis
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 async def client(app: FastAPI) -> AsyncGenerator:
     """Make request for test."""
-    # TODO: Fix issue with lifespan not executing startup and shutdown
-    async with LifespanManager(app, startup_timeout=20):
+    async with LifespanManager(app):
         async with AsyncClient(
             app=app,
             base_url="http://testserver",
@@ -72,7 +69,7 @@ async def client(app: FastAPI) -> AsyncGenerator:
             yield client
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def new_user() -> UserCreate:
     """Return a UserCreate instance."""
     return UserCreate(
@@ -83,7 +80,7 @@ def new_user() -> UserCreate:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def new_past_question() -> PastQuestionCreate:
     """Return a PastQuestionCreate instance."""
     return PastQuestionCreate(
@@ -97,7 +94,7 @@ def new_past_question() -> PastQuestionCreate:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def past_question_in_db(new_past_question: PastQuestionCreate) -> PastQuestionInDB:
     """Return a PastQuestionInDB instance."""
     return PastQuestionInDB(
@@ -115,7 +112,7 @@ def past_question_in_db(new_past_question: PastQuestionCreate) -> PastQuestionIn
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def new_subscription() -> SubscriptionCreate:
     """Return a SubscriptionCreate instance."""
     return SubscriptionCreate(
@@ -126,7 +123,7 @@ def new_subscription() -> SubscriptionCreate:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def new_subscription_two() -> SubscriptionCreate:
     """Return a SubscriptionCreate instance."""
     return SubscriptionCreate(
@@ -137,7 +134,7 @@ def new_subscription_two() -> SubscriptionCreate:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def new_subscription_history() -> SubscriptionHistoryCreate:
     """Return a SubscriptionCreateHistory instance."""
     return SubscriptionHistoryCreate(
@@ -149,7 +146,7 @@ def new_subscription_history() -> SubscriptionHistoryCreate:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def new_download() -> DownloadCreate:
     """Return a DownloadCreate instance."""
     return DownloadCreate(

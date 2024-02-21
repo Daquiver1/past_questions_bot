@@ -44,7 +44,7 @@ async def connect_to_redis(app: FastAPI) -> None:
 async def close_redis_connection(app: FastAPI) -> None:
     """Connect to redis."""
     try:
-        await app.state._redis.close()
+        await app.state._redis.aclose()
         print("Disconnected from redis.asyncio database")
     except Exception as e:
         print("--- DB DISCONNECT ERROR ---")
