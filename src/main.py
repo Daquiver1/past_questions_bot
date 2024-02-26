@@ -17,7 +17,7 @@ logging.config.fileConfig(
 logger = logging.getLogger(__name__)
 
 dotenv.load_dotenv()
-PORT = int(os.environ.get("PORT", "8443"))
+PORT = int(os.environ.get("PORT", 8443))
 TOKEN = os.environ["TOKEN"]
 
 
@@ -39,14 +39,14 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT, handle_message))
 
     # for polling
-    app.run_polling()
+    #app.run_polling()
 
-    # app.run_webhook(
-    #     listen="0.0.0.0",
-    #     port=PORT,
-    #     url_path=TOKEN,
-    #     webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
-    # )
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TOKEN,
+        webhook_url="https://past-questions-bot.herokuapp.com/" + TOKEN,
+    )
 
 
 if __name__ == "__main__":
